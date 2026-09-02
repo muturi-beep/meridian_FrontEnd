@@ -167,7 +167,7 @@
     .hamburger {
       display: none;
       flex-direction: column;
-      gap: 4px;
+      gap: 5px;
       background: transparent;
       border: none;
       cursor: pointer;
@@ -176,11 +176,21 @@
       flex-shrink: 0;
     }
     .hamburger span {
-      width: 22px;
-      height: 2px;
+      width: 25px;
+      height: 2.5px;
       background: var(--t1);
       border-radius: 2px;
-      transition: 0.2s;
+      transition: 0.3s ease;
+      display: block;
+    }
+    .hamburger.active span:nth-child(1) {
+      transform: rotate(45deg) translate(5px, 5px);
+    }
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+    }
+    .hamburger.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(5px, -5px);
     }
     .menu-overlay {
       display: none;
@@ -199,21 +209,25 @@
       .nav-links {
         display: none;
         flex-direction: column;
-        position: absolute;
-        top: 72px;
-        right: 16px;
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 280px;
+        height: 100vh;
         background: var(--ink-2);
-        padding: 16px 20px;
-        border-radius: var(--radius);
-        border: 1px solid var(--border);
-        gap: 12px;
-        min-width: 160px;
+        padding: 80px 30px 30px;
+        border-left: 1px solid var(--border);
+        gap: 16px;
         z-index: 99;
         align-items: flex-start;
         box-shadow: var(--shadow);
+        overflow-y: auto;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
       }
       .nav-links.open {
         display: flex;
+        transform: translateX(0);
       }
       .hamburger {
         display: flex;
@@ -222,21 +236,26 @@
         display: block;
       }
       .nav-links a:not(.nav-btn) {
-        color: var(--t2);
+        color: var(--t1);
         border-bottom: none;
         padding-bottom: 0;
+        font-size: 16px;
+        width: 100%;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
       }
       .nav-links a:not(.nav-btn):hover {
         color: var(--copper-l);
       }
       .nav-links a:not(.nav-btn).active {
         color: var(--copper-l);
-        border-bottom-color: transparent;
+        border-bottom-color: var(--copper);
       }
       .nav-btn {
         width: 100%;
         text-align: center;
-        padding: 8px 16px;
+        padding: 12px 16px;
+        margin-top: 10px;
       }
     }
 
@@ -1153,21 +1172,25 @@
       .nav-links {
         display: none;
         flex-direction: column;
-        position: absolute;
-        top: 72px;
-        right: 16px;
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 280px;
+        height: 100vh;
         background: var(--ink-2);
-        padding: 16px 20px;
-        border-radius: var(--radius);
-        border: 1px solid var(--border);
-        gap: 12px;
-        min-width: 160px;
+        padding: 80px 30px 30px;
+        border-left: 1px solid var(--border);
+        gap: 16px;
         z-index: 99;
         align-items: flex-start;
         box-shadow: var(--shadow);
+        overflow-y: auto;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
       }
       .nav-links.open {
         display: flex;
+        transform: translateX(0);
       }
       .hamburger {
         display: flex;
@@ -1675,17 +1698,33 @@
     function toggleMenu() {
       navLinks.classList.toggle('open');
       overlay.classList.toggle('open');
+      hamburger.classList.toggle('active');
+      
+      // Prevent body scroll when menu is open
+      if (navLinks.classList.contains('open')) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
     }
 
     function closeMenu() {
       navLinks.classList.remove('open');
       overlay.classList.remove('open');
+      hamburger.classList.remove('active');
+      document.body.style.overflow = '';
     }
 
-    hamburger.addEventListener('click', toggleMenu);
+    // Toggle menu on hamburger click
+    hamburger.addEventListener('click', function(e) {
+      e.stopPropagation();
+      toggleMenu();
+    });
+
+    // Close menu when clicking overlay
     overlay.addEventListener('click', closeMenu);
 
-    // ── Active link update (ONLY on click) ──
+    // ── Active link update and close menu on link click ──
     const navItems = document.querySelectorAll('.nav-links a:not(.nav-btn)');
 
     function updateActiveLink(clickedLink) {
@@ -1695,11 +1734,14 @@
       }
     }
 
+    // Handle nav link clicks - close menu on mobile and update active
     document.querySelectorAll('.nav-links a').forEach(link => {
       link.addEventListener('click', function(e) {
+        // Close mobile menu
         if (window.innerWidth <= 768) {
           closeMenu();
         }
+        // Update active state (skip for nav-btn)
         if (!this.classList.contains('nav-btn')) {
           updateActiveLink(this);
         }
@@ -1709,6 +1751,13 @@
     // ── Initial active state: Home ──
     const homeLink = document.querySelector('.nav-links a[href="#home"]');
     if (homeLink) homeLink.classList.add('active');
+
+    // ── Close menu on window resize (if open and screen becomes large) ──
+    window.addEventListener('resize', function() {
+      if (window.innerWidth > 768 && navLinks.classList.contains('open')) {
+        closeMenu();
+      }
+    });
 
     // ── Scroll to Top Button ──
     const scrollBtn = document.getElementById('scrollTopBtn');
@@ -1777,7 +1826,6 @@
           img.alt = `Property image ${index + 1}`;
           img.loading = 'lazy';
           img.onerror = function() {
-            // hide broken image and show fallback emoji
             this.style.display = 'none';
             const fallback = document.createElement('span');
             fallback.className = 'fallback-icon';
