@@ -1,21 +1,21 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/api/:path*",            "destination": "/api/index.js" },
-    { "source": "/auth/:path*",           "destination": "/api/index.js" },
-    { "source": "/organizations/:path*",  "destination": "/api/index.js" },
-    { "source": "/organization",          "destination": "/api/index.js" },
-    { "source": "/profile",               "destination": "/api/index.js" },
-    { "source": "/products",              "destination": "/api/index.js" },
-    { "source": "/products/:path*",       "destination": "/api/index.js" },
-    { "source": "/maintenance",           "destination": "/api/index.js" },
-    { "source": "/maintenance/:path*",    "destination": "/api/index.js" },
-    { "source": "/payments",              "destination": "/api/index.js" },
-    { "source": "/payments/:path*",       "destination": "/api/index.js" },
-    { "source": "/tenants",               "destination": "/api/index.js" },
-    { "source": "/tenants/:path*",        "destination": "/api/index.js" },
-    { "source": "/dashboard",             "destination": "/api/index.js" },
-    { "source": "/health",                "destination": "/api/index.js" },
-    { "source": "/debug/routes",          "destination": "/api/index.js" }
+    { "source": "/api/(.*)", "destination": "/api/index.js" },
+    { "source": "/auth/(.*)", "destination": "/api/index.js" },
+    { "source": "/products", "destination": "/api/index.js" },
+    { "source": "/products/(.*)", "destination": "/api/index.js" },
+    { "source": "/maintenance", "destination": "/api/index.js" },
+    { "source": "/maintenance/(.*)", "destination": "/api/index.js" },
+    { "source": "/payments", "destination": "/api/index.js" },
+    { "source": "/payments/(.*)", "destination": "/api/index.js" },
+    { "source": "/tenants", "destination": "/api/index.js" },
+    { "source": "/tenants/(.*)", "destination": "/api/index.js" },
+    { "source": "/organizations/(.*)", "destination": "/api/index.js" },
+    { "source": "/organization", "destination": "/api/index.js" },
+    { "source": "/profile", "destination": "/api/index.js" },
+    { "source": "/dashboard", "destination": "/api/index.js" },
+    { "source": "/health", "destination": "/api/index.js" },
+    { "source": "/debug/routes", "destination": "/api/index.js" }
   ]
 }

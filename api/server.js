@@ -950,18 +950,12 @@ app.use((req, res, next) => {
 ══════════════════════════════════════════════════════ */
 module.exports = app;
 
-/* ══════════════════════════════════════════════════════
-   LOCAL DEV ONLY
-══════════════════════════════════════════════════════ */
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
   connectDB()
     .then(() => {
       console.log('✅ Connected to MongoDB');
-      app.listen(PORT, () => {
-        console.log(`✅ Server running on http://localhost:${PORT}`);
-        console.log(`   Debug: http://localhost:${PORT}/debug/routes`);
-      });
+      app.listen(PORT, () => console.log(`✅ Server running on http://localhost:${PORT}`));
     })
     .catch(err => console.error('❌ MongoDB error:', err.message));
 }
