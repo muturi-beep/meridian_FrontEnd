@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     /* ═══════════════════════════════════════════
-       TOKENS
+       TOKENS (unchanged)
        ═══════════════════════════════════════════ */
     :root {
       --ink: #0c0f18;
@@ -479,7 +479,7 @@
     }
 
     /* ═══════════════════════════════════════════
-       DARK SECTION: FEATURES (Why Meridian)
+       DARK SECTION: Why Us (Why Meridian)
        ═══════════════════════════════════════════ */
     .section-dark {
       background: var(--ink-2);
@@ -539,9 +539,6 @@
       margin-bottom: 32px;
     }
 
-    /* ═══════════════════════════════════════════
-       FEATURES GRID
-       ═══════════════════════════════════════════ */
     .features-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -558,9 +555,6 @@
       margin-bottom: 4px;
     }
 
-    /* ═══════════════════════════════════════════
-       PACKAGES GRID (inside light section)
-       ═══════════════════════════════════════════ */
     .packages-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -812,7 +806,6 @@
       border-color: var(--copper);
     }
 
-    /* ── Modern Curvy Contact Form ── */
     .contact-form {
       background: var(--ink-3);
       border: 1px solid var(--border);
@@ -939,7 +932,6 @@
       display: block;
     }
 
-    /* ── Contact Info ── */
     .contact-grid {
       display: grid;
       grid-template-columns: 1fr 1.5fr;
@@ -999,7 +991,7 @@
     }
 
     /* ═══════════════════════════════════════════
-       FOOTER (light) — contact column removed
+       FOOTER
        ═══════════════════════════════════════════ */
     .footer {
       background: var(--light-bg);
@@ -1093,9 +1085,6 @@
       color: var(--copper);
     }
 
-    /* ═══════════════════════════════════════════
-       SCROLL TO TOP BUTTON
-       ═══════════════════════════════════════════ */
     .scroll-top {
       position: fixed;
       bottom: 30px;
@@ -1136,39 +1125,18 @@
        RESPONSIVE
        ═══════════════════════════════════════════ */
     @media (max-width: 1024px) {
-      .hero {
-        grid-template-columns: 1fr;
-        text-align: center;
-      }
-      .hero-content p {
-        margin-left: auto;
-        margin-right: auto;
-      }
-      .hero-btns {
-        justify-content: center;
-      }
-      .hero-carousel {
-        max-width: 480px;
-      }
-      .features-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      .packages-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      .contact-grid {
-        grid-template-columns: 1fr;
-        gap: 28px;
-      }
-      .footer-grid {
-        grid-template-columns: 1fr 1fr;
-      }
+      .hero { grid-template-columns: 1fr; text-align: center; }
+      .hero-content p { margin-left: auto; margin-right: auto; }
+      .hero-btns { justify-content: center; }
+      .hero-carousel { max-width: 480px; }
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .packages-grid { grid-template-columns: repeat(2, 1fr); }
+      .contact-grid { grid-template-columns: 1fr; gap: 28px; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
     }
 
     @media (max-width: 768px) {
-      .header .container {
-        flex-wrap: wrap;
-      }
+      .header .container { flex-wrap: wrap; }
       .nav-links {
         display: none;
         flex-direction: column;
@@ -1188,37 +1156,15 @@
         transform: translateX(100%);
         transition: transform 0.3s ease;
       }
-      .nav-links.open {
-        display: flex;
-        transform: translateX(0);
-      }
-      .hamburger {
-        display: flex;
-      }
-      .menu-overlay.open {
-        display: block;
-      }
-      .hero-content h1 {
-        font-size: 32px;
-      }
-      .hero-content p {
-        font-size: 15px;
-      }
-      .hero-carousel {
-        max-width: 100%;
-        aspect-ratio: 4/3;
-      }
-      .carousel-btn {
-        width: 30px;
-        height: 30px;
-        font-size: 13px;
-      }
-      .carousel-btn.prev {
-        left: 6px;
-      }
-      .carousel-btn.next {
-        right: 6px;
-      }
+      .nav-links.open { display: flex; transform: translateX(0); }
+      .hamburger { display: flex; }
+      .menu-overlay.open { display: block; }
+      .hero-content h1 { font-size: 32px; }
+      .hero-content p { font-size: 15px; }
+      .hero-carousel { max-width: 100%; aspect-ratio: 4/3; }
+      .carousel-btn { width: 30px; height: 30px; font-size: 13px; }
+      .carousel-btn.prev { left: 6px; }
+      .carousel-btn.next { right: 6px; }
       .hero-search {
         border-radius: var(--radius);
         padding: 12px 14px;
@@ -1226,146 +1172,48 @@
         align-items: stretch;
         gap: 10px;
       }
-      .hero-search input,
-      .hero-search select,
-      .hero-search .btn-primary {
-        width: 100%;
-      }
-      .features-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
-      }
-      .packages-grid {
-        grid-template-columns: 1fr;
-        gap: 18px;
-        max-width: 420px;
-        margin: 0 auto;
-      }
-      .hero-section {
-        padding: 40px 0 20px;
-      }
-      .section-light,
-      .section-dark,
-      .section-contact-dark {
-        padding: 36px 0;
-      }
-      .section-light .section-title,
-      .section-dark .section-title,
-      .section-contact-dark .section-title {
-        font-size: 26px;
-      }
-      .contact-form .form-row {
-        grid-template-columns: 1fr;
-      }
-      .contact-form {
-        padding: 24px 18px;
-        border-radius: 18px;
-      }
-      .footer-grid {
-        grid-template-columns: 1fr;
-        gap: 24px;
-        text-align: center;
-      }
-      .footer-brand p {
-        max-width: 100%;
-      }
-      .footer-bottom {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-      }
-      .scroll-top {
-        bottom: 20px;
-        right: 20px;
-        width: 42px;
-        height: 42px;
-        font-size: 18px;
-      }
+      .hero-search input, .hero-search select, .hero-search .btn-primary { width: 100%; }
+      .features-grid { grid-template-columns: 1fr; gap: 16px; }
+      .packages-grid { grid-template-columns: 1fr; gap: 18px; max-width: 420px; margin: 0 auto; }
+      .hero-section { padding: 40px 0 20px; }
+      .section-light, .section-dark, .section-contact-dark { padding: 36px 0; }
+      .section-light .section-title, .section-dark .section-title, .section-contact-dark .section-title { font-size: 26px; }
+      .contact-form .form-row { grid-template-columns: 1fr; }
+      .contact-form { padding: 24px 18px; border-radius: 18px; }
+      .footer-grid { grid-template-columns: 1fr; gap: 24px; text-align: center; }
+      .footer-brand p { max-width: 100%; }
+      .footer-bottom { flex-direction: column; align-items: center; text-align: center; }
+      .scroll-top { bottom: 20px; right: 20px; width: 42px; height: 42px; font-size: 18px; }
     }
 
     @media (max-width: 480px) {
-      .container {
-        padding: 0 14px;
-      }
-      .hero-content h1 {
-        font-size: 26px;
-      }
-      .hero-content p {
-        font-size: 14px;
-      }
-      .btn-primary,
-      .btn-secondary {
-        padding: 9px 18px;
-        font-size: 12px;
-        width: 100%;
-        justify-content: center;
-      }
-      .hero-btns {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .hero-carousel {
-        aspect-ratio: 4/3;
-      }
-      .logo-text {
-        font-size: 16px;
-      }
-      .logo-icon {
-        width: 32px;
-        height: 32px;
-      }
-      .logo-icon svg {
-        width: 16px;
-        height: 16px;
-      }
-      .package-card {
-        padding: 20px 14px;
-      }
-      .package-card h3 {
-        font-size: 18px;
-      }
-      .package-card .price {
-        font-size: 22px;
-      }
-      .package-card ul li {
-        font-size: 11px;
-      }
-      .feature .icon {
-        font-size: 28px;
-      }
-      .feature h4 {
-        font-size: 15px;
-      }
-      .contact-form {
-        padding: 18px 14px;
-        border-radius: 14px;
-      }
-      .contact-info h3 {
-        font-size: 20px;
-      }
-      .footer-grid {
-        grid-template-columns: 1fr;
-        text-align: center;
-      }
-      .footer-brand p {
-        max-width: 100%;
-      }
-      .social-icons {
-        justify-content: center;
-      }
-      .scroll-top {
-        bottom: 16px;
-        right: 16px;
-        width: 38px;
-        height: 38px;
-        font-size: 16px;
-      }
+      .container { padding: 0 14px; }
+      .hero-content h1 { font-size: 26px; }
+      .hero-content p { font-size: 14px; }
+      .btn-primary, .btn-secondary { padding: 9px 18px; font-size: 12px; width: 100%; justify-content: center; }
+      .hero-btns { flex-direction: column; align-items: stretch; }
+      .hero-carousel { aspect-ratio: 4/3; }
+      .logo-text { font-size: 16px; }
+      .logo-icon { width: 32px; height: 32px; }
+      .logo-icon svg { width: 16px; height: 16px; }
+      .package-card { padding: 20px 14px; }
+      .package-card h3 { font-size: 18px; }
+      .package-card .price { font-size: 22px; }
+      .package-card ul li { font-size: 11px; }
+      .feature .icon { font-size: 28px; }
+      .feature h4 { font-size: 15px; }
+      .contact-form { padding: 18px 14px; border-radius: 14px; }
+      .contact-info h3 { font-size: 20px; }
+      .footer-grid { grid-template-columns: 1fr; text-align: center; }
+      .footer-brand p { max-width: 100%; }
+      .social-icons { justify-content: center; }
+      .scroll-top { bottom: 16px; right: 16px; width: 38px; height: 38px; font-size: 16px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ═══ HEADER (dark, full width) ═══ -->
+  <!-- ═══ HEADER ═══ -->
   <header class="header">
     <div class="container">
       <div class="logo">
@@ -1379,7 +1227,7 @@
       </div>
       <nav class="nav-links" id="navLinks">
         <a href="#home" class="active">Home</a>
-        <a href="#features">Features</a>
+        <a href="#features">Why Us</a>
         <a href="#packages">Packages</a>
         <a href="#contact" class="nav-btn">Contact</a>
       </nav>
@@ -1388,11 +1236,9 @@
       </button>
     </div>
   </header>
-
-  <!-- Mobile menu overlay -->
   <div class="menu-overlay" id="menuOverlay"></div>
 
-  <!-- ═══ HERO (full‑width light background with search) ═══ -->
+  <!-- ═══ HERO ═══ -->
   <section class="hero-section" id="home">
     <div class="container">
       <div class="hero">
@@ -1400,81 +1246,50 @@
           <h1>Smarter Property Management.<br /><span>Better Living.</span></h1>
           <p>Discover premium residential and commercial properties across Nairobi. Meridian Properties connects you with the finest spaces to live, work, and invest.</p>
           <div class="hero-btns">
-            <a href="index.html" class="btn-primary">Sign In</a>
-            <button class="btn-secondary">List Your Property</button>
+            <a href="auth.html" class="btn-primary">Sign In</a>
+            <a href="#contact" class="btn-secondary">Contact Us</a>
           </div>
         </div>
         <div class="hero-image">
           <div class="hero-carousel" id="heroCarousel">
-            <div class="slides" id="carouselSlides">
-              <!-- Slides will be inserted by JavaScript -->
-            </div>
+            <div class="slides" id="carouselSlides"></div>
             <button class="carousel-btn prev" id="carouselPrev" aria-label="Previous slide">‹</button>
             <button class="carousel-btn next" id="carouselNext" aria-label="Next slide">›</button>
             <div class="carousel-dots" id="carouselDots"></div>
           </div>
         </div>
       </div>
-
-      <!-- Search Bar (inside hero section) -->
       <div class="hero-search">
         <input type="text" placeholder="Search properties, location, or keyword..." />
-        <select>
-          <option>All Types</option>
-          <option>Apartment</option>
-          <option>House</option>
-          <option>Commercial</option>
-        </select>
-        <select>
-          <option>All Areas</option>
-          <option>Nairobi CBD</option>
-          <option>Westlands</option>
-          <option>Karen</option>
-          <option>Parklands</option>
-        </select>
+        <select><option>All Types</option><option>Apartment</option><option>House</option><option>Commercial</option></select>
+        <select><option>All Areas</option><option>Nairobi CBD</option><option>Westlands</option><option>Karen</option><option>Parklands</option></select>
         <button class="btn-primary">Search</button>
       </div>
     </div>
   </section>
 
-  <!-- ═══ DARK SECTION: FEATURES (Why Meridian) ═══ -->
+  <!-- ═══ FEATURES ═══ -->
   <section class="section-dark" id="features">
     <div class="container">
       <h2 class="section-title">Why Meridian Properties</h2>
       <p class="section-sub">Built for property managers, investors, and tenants</p>
       <div class="features-grid">
-        <div class="feature">
-          <div class="icon">📊</div>
-          <h4>Smart Analytics</h4>
-          <p>Real‑time portfolio performance, occupancy trends, and financial insights.</p>
-        </div>
-        <div class="feature">
-          <div class="icon">🔒</div>
-          <h4>Secure Payments</h4>
-          <p>Automated rent collection, invoicing, and payment tracking.</p>
-        </div>
-        <div class="feature">
-          <div class="icon">🔧</div>
-          <h4>Maintenance Management</h4>
-          <p>Submit and track repair requests with real‑time updates.</p>
-        </div>
-        <div class="feature">
-          <div class="icon">🏢</div>
-          <h4>Tenant Portal</h4>
-          <p>Tenants can view their lease, pay rent, and request services online.</p>
-        </div>
+        <div class="feature"><div class="icon">📊</div><h4>Smart Analytics</h4><p>Real‑time portfolio performance, occupancy trends, and financial insights.</p></div>
+        <div class="feature"><div class="icon">🔒</div><h4>Secure Payments</h4><p>Automated rent collection, invoicing, and payment tracking.</p></div>
+        <div class="feature"><div class="icon">🔧</div><h4>Maintenance Management</h4><p>Submit and track repair requests with real‑time updates.</p></div>
+        <div class="feature"><div class="icon">🏢</div><h4>Tenant Portal</h4><p>Tenants can view their lease, pay rent, and request services online.</p></div>
       </div>
     </div>
   </section>
 
-  <!-- ═══ LIGHT SECTION: PACKAGES ═══ -->
+  <!-- ═══ PACKAGES ═══ -->
   <section class="section-light" id="packages">
     <div class="container">
       <h2 class="section-title">Choose Your Package</h2>
       <p class="section-sub">Designed for landlords, agents, and property managers. Select the plan that fits your portfolio.</p>
 
       <div class="packages-grid">
-        <!-- FREE PACKAGE (7 days) — links to index.html -->
+        <!-- STARTER FREE → auth.html?package=free -->
         <div class="package-card free">
           <span class="trial-badge">✨ Free Package</span>
           <span class="duration-badge">⏳ Valid for 7 Days</span>
@@ -1488,10 +1303,10 @@
             <li>Email support</li>
             <li><strong>Expires after 7 days</strong></li>
           </ul>
-          <a href="index.html" class="btn-free">Claim Free Package →</a>
+          <a href="auth.html?package=free" class="btn-free">Claim Free Package →</a>
         </div>
 
-        <!-- Basic Plan — links to index.html -->
+        <!-- BASIC → auth.html?package=basic -->
         <div class="package-card">
           <h3>Basic</h3>
           <div class="price">KES 2,500 <span>/mo</span></div>
@@ -1502,10 +1317,10 @@
             <li>Maintenance request tracking</li>
             <li>Email support</li>
           </ul>
-          <a href="index.html" class="btn-link">Choose Plan</a>
+          <a href="auth.html?package=basic" class="btn-link">Choose Plan</a>
         </div>
 
-        <!-- Professional Plan (Popular) — links to index.html -->
+        <!-- PROFESSIONAL → auth.html?package=professional -->
         <div class="package-card popular">
           <h3>Professional</h3>
           <div class="price">KES 7,500 <span>/mo</span></div>
@@ -1517,10 +1332,10 @@
             <li>Priority support</li>
             <li>Multiple user accounts</li>
           </ul>
-          <a href="index.html" class="btn-link">Choose Plan</a>
+          <a href="auth.html?package=professional" class="btn-link">Choose Plan</a>
         </div>
 
-        <!-- Enterprise Plan — links to contact section -->
+        <!-- ENTERPRISE → auth.html?package=enterprise -->
         <div class="package-card">
           <h3>Enterprise</h3>
           <div class="price">KES 15,000 <span>/mo</span></div>
@@ -1532,11 +1347,10 @@
             <li>24/7 premium support</li>
             <li>White‑label options</li>
           </ul>
-          <a href="#contact" class="btn-outline">Contact Sales</a>
+          <a href="auth.html?package=enterprise" class="btn-outline">Contact Sales →</a>
         </div>
       </div>
 
-      <!-- ═══ DISCLAIMER ═══ -->
       <div class="disclaimer-box">
         <strong>⚠️ Important Disclaimer</strong>
         <p>
@@ -1548,50 +1362,19 @@
     </div>
   </section>
 
-  <!-- ═══ DARK SECTION: CONTACT (Get in Touch) — Modern Curvy Form ═══ -->
+  <!-- ═══ CONTACT ═══ -->
   <section class="section-contact-dark" id="contact">
     <div class="container">
       <h2 class="section-title">Get in Touch</h2>
       <p class="section-sub">We'd love to hear from you. Reach out for inquiries, support, or partnerships.</p>
-
       <div class="contact-grid">
-        <!-- Left: Contact Details -->
         <div class="contact-info">
           <h3>Contact Information</h3>
           <p class="contact-desc">Our team is ready to assist you with property management, leasing, and investment opportunities.</p>
-
-          <div class="contact-detail">
-            <div class="contact-icon">📍</div>
-            <div>
-              <strong>Visit Us</strong>
-              <p>Meridian Properties,<br>Westlands, Nairobi, Kenya</p>
-            </div>
-          </div>
-
-          <div class="contact-detail">
-            <div class="contact-icon">📧</div>
-            <div>
-              <strong>Email Us</strong>
-              <p><a href="mailto:info@meridianproperties.co.ke">info@meridianproperties.co.ke</a></p>
-            </div>
-          </div>
-
-          <div class="contact-detail">
-            <div class="contact-icon">📞</div>
-            <div>
-              <strong>Call Us</strong>
-              <p><a href="tel:+254700123456">+254 700 123 456</a></p>
-            </div>
-          </div>
-
-          <div class="contact-detail">
-            <div class="contact-icon">🕘</div>
-            <div>
-              <strong>Working Hours</strong>
-              <p>Mon – Fri: 8:00 AM – 6:00 PM<br>Sat: 9:00 AM – 2:00 PM</p>
-            </div>
-          </div>
-
+          <div class="contact-detail"><div class="contact-icon">📍</div><div><strong>Visit Us</strong><p>Meridian Properties,<br>Westlands, Nairobi, Kenya</p></div></div>
+          <div class="contact-detail"><div class="contact-icon">📧</div><div><strong>Email Us</strong><p><a href="mailto:info@meridianproperties.co.ke">info@meridianproperties.co.ke</a></p></div></div>
+          <div class="contact-detail"><div class="contact-icon">📞</div><div><strong>Call Us</strong><p><a href="tel:+254700123456">+254 700 123 456</a></p></div></div>
+          <div class="contact-detail"><div class="contact-icon">🕘</div><div><strong>Working Hours</strong><p>Mon – Fri: 8:00 AM – 6:00 PM<br>Sat: 9:00 AM – 2:00 PM</p></div></div>
           <div class="contact-social">
             <a href="#" aria-label="Facebook">f</a>
             <a href="#" aria-label="Twitter">𝕏</a>
@@ -1599,32 +1382,15 @@
             <a href="#" aria-label="LinkedIn">in</a>
           </div>
         </div>
-
-        <!-- Right: Modern Curvy Contact Form with First & Last Name -->
         <div class="contact-form">
           <form id="contactForm" onsubmit="handleContactForm(event)">
             <div class="form-row">
-              <div class="form-group">
-                <label for="contactFirstName">First Name</label>
-                <input type="text" id="contactFirstName" placeholder="John" required />
-              </div>
-              <div class="form-group">
-                <label for="contactLastName">Last Name</label>
-                <input type="text" id="contactLastName" placeholder="Doe" required />
-              </div>
+              <div class="form-group"><label for="contactFirstName">First Name</label><input type="text" id="contactFirstName" placeholder="John" required /></div>
+              <div class="form-group"><label for="contactLastName">Last Name</label><input type="text" id="contactLastName" placeholder="Doe" required /></div>
             </div>
-            <div class="form-group">
-              <label for="contactEmail">Email Address</label>
-              <input type="email" id="contactEmail" placeholder="john@example.com" required />
-            </div>
-            <div class="form-group">
-              <label for="contactSubject">Subject</label>
-              <input type="text" id="contactSubject" placeholder="Property inquiry" />
-            </div>
-            <div class="form-group">
-              <label for="contactMessage">Message</label>
-              <textarea id="contactMessage" rows="5" placeholder="Tell us how we can help..."></textarea>
-            </div>
+            <div class="form-group"><label for="contactEmail">Email Address</label><input type="email" id="contactEmail" placeholder="john@example.com" required /></div>
+            <div class="form-group"><label for="contactSubject">Subject</label><input type="text" id="contactSubject" placeholder="Property inquiry" /></div>
+            <div class="form-group"><label for="contactMessage">Message</label><textarea id="contactMessage" rows="5" placeholder="Tell us how we can help..."></textarea></div>
             <button type="submit" class="btn-submit">Send Message</button>
           </form>
           <div id="formFeedback"></div>
@@ -1633,7 +1399,7 @@
     </div>
   </section>
 
-  <!-- ═══ FOOTER (light, full width) — contact column removed ═══ -->
+  <!-- ═══ FOOTER ═══ -->
   <footer class="footer">
     <div class="container">
       <div class="footer-grid">
@@ -1658,7 +1424,7 @@
         <div>
           <h4>Quick Links</h4>
           <div class="footer-links">
-            <a href="#features">Features</a>
+            <a href="#whyus">Why Us</a>
             <a href="#packages">Packages</a>
             <a href="#contact">Contact</a>
             <a href="#">About Us</a>
@@ -1684,11 +1450,10 @@
     </div>
   </footer>
 
-  <!-- ═══ SCROLL TO TOP BUTTON ═══ -->
-  <button class="scroll-top" id="scrollTopBtn" aria-label="Scroll to top">
-    ↑
-  </button>
+  <!-- ═══ SCROLL TO TOP ═══ -->
+  <button class="scroll-top" id="scrollTopBtn" aria-label="Scroll to top">↑</button>
 
+  <!-- ═══ SCRIPTS ═══ -->
   <script>
     // ── Mobile Menu ──
     const hamburger = document.getElementById('hamburger');
@@ -1699,99 +1464,53 @@
       navLinks.classList.toggle('open');
       overlay.classList.toggle('open');
       hamburger.classList.toggle('active');
-      
-      // Prevent body scroll when menu is open
-      if (navLinks.classList.contains('open')) {
-        document.body.style.overflow = 'hidden';
-      } else {
-        document.body.style.overflow = '';
-      }
+      document.body.style.overflow = navLinks.classList.contains('open') ? 'hidden' : '';
     }
-
     function closeMenu() {
       navLinks.classList.remove('open');
       overlay.classList.remove('open');
       hamburger.classList.remove('active');
       document.body.style.overflow = '';
     }
-
-    // Toggle menu on hamburger click
-    hamburger.addEventListener('click', function(e) {
-      e.stopPropagation();
-      toggleMenu();
-    });
-
-    // Close menu when clicking overlay
+    hamburger.addEventListener('click', e => { e.stopPropagation(); toggleMenu(); });
     overlay.addEventListener('click', closeMenu);
 
-    // ── Active link update and close menu on link click ──
+    // ── Active nav link ──
     const navItems = document.querySelectorAll('.nav-links a:not(.nav-btn)');
-
-    function updateActiveLink(clickedLink) {
-      navItems.forEach(link => link.classList.remove('active'));
-      if (clickedLink) {
-        clickedLink.classList.add('active');
-      }
+    function updateActiveLink(clicked) {
+      navItems.forEach(l => l.classList.remove('active'));
+      if (clicked) clicked.classList.add('active');
     }
-
-    // Handle nav link clicks - close menu on mobile and update active
     document.querySelectorAll('.nav-links a').forEach(link => {
       link.addEventListener('click', function(e) {
-        // Close mobile menu
-        if (window.innerWidth <= 768) {
-          closeMenu();
-        }
-        // Update active state (skip for nav-btn)
-        if (!this.classList.contains('nav-btn')) {
-          updateActiveLink(this);
-        }
+        if (window.innerWidth <= 768) closeMenu();
+        if (!this.classList.contains('nav-btn')) updateActiveLink(this);
       });
     });
-
-    // ── Initial active state: Home ──
     const homeLink = document.querySelector('.nav-links a[href="#home"]');
     if (homeLink) homeLink.classList.add('active');
+    window.addEventListener('resize', () => { if (window.innerWidth > 768 && navLinks.classList.contains('open')) closeMenu(); });
 
-    // ── Close menu on window resize (if open and screen becomes large) ──
-    window.addEventListener('resize', function() {
-      if (window.innerWidth > 768 && navLinks.classList.contains('open')) {
-        closeMenu();
-      }
-    });
-
-    // ── Scroll to Top Button ──
+    // ── Scroll to Top ──
     const scrollBtn = document.getElementById('scrollTopBtn');
-
-    window.addEventListener('scroll', function() {
-      if (window.scrollY > 400) {
-        scrollBtn.classList.add('visible');
-      } else {
-        scrollBtn.classList.remove('visible');
-      }
+    window.addEventListener('scroll', () => {
+      scrollBtn.classList.toggle('visible', window.scrollY > 400);
     });
+    scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
-    scrollBtn.addEventListener('click', function() {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-
-    // ── Contact Form Handler ──
+    // ── Contact Form ──
     function handleContactForm(e) {
       e.preventDefault();
       const feedback = document.getElementById('formFeedback');
       feedback.className = 'success';
       feedback.textContent = '✅ Your message has been sent! We\'ll get back to you soon.';
       document.getElementById('contactForm').reset();
-      setTimeout(() => {
-        feedback.className = '';
-        feedback.textContent = '';
-      }, 5000);
+      setTimeout(() => { feedback.className = ''; feedback.textContent = ''; }, 5000);
     }
 
-    // ═══════════════════════════════════════════
-    // ── HERO CAROUSEL ──
-    // using local images: ca1.jpg ... ca5.jpg
-    // ═══════════════════════════════════════════
+    // ── Hero Carousel ──
     (function() {
+      // ✅ Images are located in public/images/ – this relative path works perfectly.
       const localImages = [
         'images/ca1.jpg',
         'images/ca2.jpg',
@@ -1799,28 +1518,21 @@
         'images/ca4.jpg',
         'images/ca5.jpg'
       ];
-
-      // fallback emojis in case images fail to load
-      const fallbackEmojis = ['🏢', '🏙️', '🏠', '🌆', '🌇'];
-
+      const fallbackEmojis = ['🏢','🏙️','🏠','🌆','🌇'];
       const slidesContainer = document.getElementById('carouselSlides');
       const dotsContainer = document.getElementById('carouselDots');
       const prevBtn = document.getElementById('carouselPrev');
       const nextBtn = document.getElementById('carouselNext');
-
-      let currentIndex = 0;
-      let autoSlideInterval = null;
+      let currentIndex = 0, autoSlideInterval = null;
       const autoSlideDelay = 5000;
 
       function buildSlides() {
         slidesContainer.innerHTML = '';
         dotsContainer.innerHTML = '';
-
         localImages.forEach((src, index) => {
           const slide = document.createElement('div');
           slide.className = 'slide';
           slide.dataset.index = index;
-
           const img = document.createElement('img');
           img.src = src;
           img.alt = `Property image ${index + 1}`;
@@ -1834,14 +1546,11 @@
           };
           slide.appendChild(img);
           slidesContainer.appendChild(slide);
-
           const dot = document.createElement('button');
           dot.className = 'dot' + (index === 0 ? ' active' : '');
           dot.dataset.index = index;
           dot.setAttribute('aria-label', `Go to slide ${index + 1}`);
-          dot.addEventListener('click', function() {
-            goToSlide(parseInt(this.dataset.index));
-          });
+          dot.addEventListener('click', function() { goToSlide(parseInt(this.dataset.index)); });
           dotsContainer.appendChild(dot);
         });
       }
@@ -1849,99 +1558,48 @@
       function goToSlide(index) {
         const slides = slidesContainer.querySelectorAll('.slide');
         const dots = dotsContainer.querySelectorAll('.dot');
-
         if (index < 0) index = slides.length - 1;
         if (index >= slides.length) index = 0;
-
         currentIndex = index;
         slidesContainer.style.transform = `translateX(-${currentIndex * 100}%)`;
-
-        dots.forEach((dot, i) => {
-          dot.classList.toggle('active', i === currentIndex);
-        });
-
+        dots.forEach((dot, i) => dot.classList.toggle('active', i === currentIndex));
         resetAutoSlide();
       }
 
-      function nextSlide() {
-        goToSlide(currentIndex + 1);
-      }
-
-      function prevSlide() {
-        goToSlide(currentIndex - 1);
-      }
+      function nextSlide() { goToSlide(currentIndex + 1); }
+      function prevSlide() { goToSlide(currentIndex - 1); }
 
       function resetAutoSlide() {
-        if (autoSlideInterval) {
-          clearInterval(autoSlideInterval);
-          autoSlideInterval = null;
-        }
-        if (window.innerWidth > 480) {
-          autoSlideInterval = setInterval(nextSlide, autoSlideDelay);
-        }
+        if (autoSlideInterval) clearInterval(autoSlideInterval);
+        autoSlideInterval = null;
+        if (window.innerWidth > 480) autoSlideInterval = setInterval(nextSlide, autoSlideDelay);
       }
 
-      let touchStartX = 0;
-      let touchEndX = 0;
-
-      function handleTouchStart(e) {
-        touchStartX = e.changedTouches[0].screenX;
-      }
-
+      let touchStartX = 0, touchEndX = 0;
+      function handleTouchStart(e) { touchStartX = e.changedTouches[0].screenX; }
       function handleTouchEnd(e) {
         touchEndX = e.changedTouches[0].screenX;
         const diff = touchStartX - touchEndX;
-        if (Math.abs(diff) > 50) {
-          if (diff > 0) {
-            nextSlide();
-          } else {
-            prevSlide();
-          }
-        }
+        if (Math.abs(diff) > 50) { diff > 0 ? nextSlide() : prevSlide(); }
       }
 
       function initCarousel() {
         buildSlides();
         slidesContainer.style.transform = 'translateX(0%)';
-
-        nextBtn.addEventListener('click', function(e) {
-          e.stopPropagation();
-          nextSlide();
-        });
-        prevBtn.addEventListener('click', function(e) {
-          e.stopPropagation();
-          prevSlide();
-        });
-
+        nextBtn.addEventListener('click', e => { e.stopPropagation(); nextSlide(); });
+        prevBtn.addEventListener('click', e => { e.stopPropagation(); prevSlide(); });
         const carousel = document.getElementById('heroCarousel');
         carousel.addEventListener('touchstart', handleTouchStart, { passive: true });
         carousel.addEventListener('touchend', handleTouchEnd, { passive: true });
-
         carousel.setAttribute('role', 'region');
         carousel.setAttribute('aria-label', 'Property image carousel');
-
         resetAutoSlide();
-
-        carousel.addEventListener('mouseenter', function() {
-          if (autoSlideInterval) {
-            clearInterval(autoSlideInterval);
-            autoSlideInterval = null;
-          }
-        });
-        carousel.addEventListener('mouseleave', function() {
-          resetAutoSlide();
-        });
-
-        window.addEventListener('resize', function() {
-          resetAutoSlide();
-        });
+        carousel.addEventListener('mouseenter', () => { if (autoSlideInterval) { clearInterval(autoSlideInterval); autoSlideInterval = null; } });
+        carousel.addEventListener('mouseleave', resetAutoSlide);
+        window.addEventListener('resize', resetAutoSlide);
       }
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initCarousel);
-      } else {
-        initCarousel();
-      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initCarousel);
+      else initCarousel();
     })();
   </script>
 </body>
