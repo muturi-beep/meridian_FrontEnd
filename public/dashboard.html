@@ -586,14 +586,25 @@ td.actions{text-align:right;white-space:nowrap}
 
 <script>
 /* ══════════════════════════════════════════════════════
-   CONFIG
+   CONFIG  — smarter API base URL resolution
 ══════════════════════════════════════════════════════ */
 const PRODUCTION_API_URL = 'https://prophub-b5n6.onrender.com';
-const isLocalDev = location.protocol === 'file:'
-  || location.hostname === 'localhost'
-  || location.hostname === '127.0.0.1'
-  || location.hostname === '';
-const API = isLocalDev ? 'http://localhost:3000' : PRODUCTION_API_URL;
+
+const isLocalDev =
+  location.protocol === 'file:' ||
+  location.hostname === 'localhost' ||
+  location.hostname === '127.0.0.1' ||
+  location.hostname === '' ||
+  location.hostname.startsWith('192.168.') ||
+  location.hostname.startsWith('10.');
+
+const sameHostAsApi = location.hostname === 'prophub-b5n6.onrender.com';
+
+const API = isLocalDev
+  ? 'http://localhost:3000'
+  : (sameHostAsApi ? '' : PRODUCTION_API_URL);
+
+console.log('[dashboard] API base =', API || '(same-origin)');
 
 /* ══════════════════════════════════════════════════════
    SESSION
@@ -662,7 +673,7 @@ if (IS_TENANT) {
 }
 
 /* ══════════════════════════════════════════════════════
-   API HELPER
+   API HELPER  — improved error messages with URL + method
 ══════════════════════════════════════════════════════ */
 async function api(path, opts = {}) {
   const s = getSession();
@@ -672,11 +683,12 @@ async function api(path, opts = {}) {
   };
   if (s?.token) headers.Authorization = `Bearer ${s.token}`;
 
+  const fullUrl = `${API}${path}`;
   let res;
   try {
-    res = await fetch(`${API}${path}`, { ...opts, headers });
-  } catch {
-    throw new Error('Cannot reach the server. Check your connection.');
+    res = await fetch(fullUrl, { ...opts, headers });
+  } catch (err) {
+    throw new Error(`Cannot reach server at ${fullUrl}. ${err.message}`);
   }
 
   if (res.status === 401) {
@@ -685,8 +697,12 @@ async function api(path, opts = {}) {
     window.location.replace('auth.html');
     throw new Error('Unauthorized');
   }
+
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.message || 'Something went wrong.');
+  if (!res.ok) {
+    const msg = data.message || `HTTP ${res.status}`;
+    throw new Error(`${msg} — ${opts.method || 'GET'} ${fullUrl}`);
+  }
   return data;
 }
 
@@ -1001,12 +1017,10 @@ function renderTenantCharts(data) {
   const gridOpts = { color: 'rgba(255,255,255,.05)' };
   const tickOpts = { color: '#7a83a0' };
 
-  // Destroy only the two tenant-specific instances
   ['tenantPaymentsChart', 'tenantMaintChart'].forEach(k => {
     if (chartInstances[k]) { try { chartInstances[k].destroy(); } catch {} delete chartInstances[k]; }
   });
 
-  /* ── 1. Line chart — payments over the last 6 months ── */
   const payEl = document.getElementById('tenant-chart-payments');
   if (payEl && paymentsByMonth.length) {
     const labels  = paymentsByMonth.map(m => m.label);
@@ -1078,7 +1092,6 @@ function renderTenantCharts(data) {
     });
   }
 
-  /* ── 2. Pie chart — maintenance requests by status ── */
   const maintEl = document.getElementById('tenant-chart-maint');
   if (maintEl) {
     const labels = ['Open', 'In Progress', 'Resolved', 'Closed'];
@@ -1238,7 +1251,6 @@ function renderOverviewCharts(data) {
   Object.values(chartInstances).forEach(ch => { try { ch.destroy(); } catch {} });
   chartInstances = {};
 
-  /* ── 1. Revenue trend (line) ─────────────────── */
   const revEl = document.getElementById('chart-revenue');
   if (revEl && charts.revenueByMonth) {
     const labels = charts.revenueByMonth.map(m => m.label);
@@ -1311,7 +1323,6 @@ function renderOverviewCharts(data) {
     });
   }
 
-  /* ── 2. Unit status (doughnut) ───────────────── */
   const occEl = document.getElementById('chart-occupancy');
   if (occEl) {
     const hasData = (s.occupiedUnits + s.vacantUnits + (s.reservedUnits || 0) + (s.maintUnits || 0)) > 0;
@@ -1350,7 +1361,6 @@ function renderOverviewCharts(data) {
     }
   }
 
-  /* ── 3. Portfolio performance (bar) ──────────── */
   const propEl = document.getElementById('chart-properties');
   if (propEl && charts.propertyBreakdown) {
     const rows = charts.propertyBreakdown.filter(p => p.units > 0);
@@ -1401,7 +1411,6 @@ function renderOverviewCharts(data) {
     }
   }
 
-  /* ── 4. Payment status (doughnut) ────────────── */
   const payEl = document.getElementById('chart-payments');
   if (payEl && charts.paymentStatus) {
     const ps = charts.paymentStatus;
@@ -1814,8 +1823,13 @@ async function openUnitModal(u = null, presetProperty = null) {
   if (!state.properties || !state.properties.length) {
     try { state.properties = await api('/api/properties'); state.propsLoaded = true; } catch {}
   }
-  if (!state.tenants) {
-    try { state.tenants = await api('/api/tenants'); state.tenantsLoaded = true; } catch { state.tenants = []; }
+
+  // ✅ FIX: previously `!state.tenants` was checked — but state.tenants is
+  // initialized to [] (truthy), so this branch NEVER ran and the dropdown
+  // stayed empty. Now we also re-fetch when the list is empty.
+  if (!state.tenants || !state.tenants.length) {
+    try { state.tenants = await api('/api/tenants'); state.tenantsLoaded = true; }
+    catch { state.tenants = []; }
   }
 
   const props   = state.properties || [];

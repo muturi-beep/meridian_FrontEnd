@@ -9,11 +9,14 @@ const path     = require('path');
 
 const app = express();
 
+// ✅ Trust proxy (Render, Heroku, etc.)
+app.set('trust proxy', 1);
+
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
   : '*';
 app.use(cors({ origin: allowedOrigins }));
-app.use(express.json());
+app.use(express.json({ limit: '2mb' }));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -26,7 +29,7 @@ if (!JWT_SECRET) {
 }
 
 /* ══════════════════════════════════════════════════════
-   ORGANIZATION SCHEMA
+   SCHEMAS (unchanged)
 ══════════════════════════════════════════════════════ */
 const organizationSchema = new mongoose.Schema({
   name:       { type: String, required: true, trim: true },
@@ -41,9 +44,6 @@ const organizationSchema = new mongoose.Schema({
 });
 const Organization = mongoose.model('Organization', organizationSchema);
 
-/* ══════════════════════════════════════════════════════
-   PROPERTY SCHEMA
-══════════════════════════════════════════════════════ */
 const propertySchema = new mongoose.Schema({
   organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', required: true, index: true },
   name:         { type: String, required: true, trim: true },
@@ -76,7 +76,6 @@ function generateInviteCode() {
   return `${raw.slice(0, 4)}-${raw.slice(4)}`;
 }
 
-/* ── UNIT SCHEMA ─── */
 const unitSchema = new mongoose.Schema({
   organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', required: true, index: true },
   name:      { type: String, required: true },
@@ -90,7 +89,6 @@ const unitSchema = new mongoose.Schema({
 });
 const Unit = mongoose.model('Product', unitSchema);
 
-/* ── USER SCHEMA ───────────── */
 const userSchema = new mongoose.Schema({
   organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', required: true, index: true },
   firstName: { type: String, required: true },
@@ -104,7 +102,6 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
-/* ── MAINTENANCE SCHEMA ────────── */
 const maintenanceSchema = new mongoose.Schema({
   organization:    { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', required: true, index: true },
   requestedById:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null, index: true },
@@ -122,7 +119,6 @@ const maintenanceSchema = new mongoose.Schema({
 });
 const Maintenance = mongoose.model('Maintenance', maintenanceSchema);
 
-/* ── PAYMENT SCHEMA  (moved up — some tenant routes below use it) ── */
 const paymentSchema = new mongoose.Schema({
   organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', required: true, index: true },
   tenant:    { type: String, required: true },
@@ -171,11 +167,11 @@ function orgScope(req, extra = {}) {
   return { organization: req.user.organizationId, ...extra };
 }
 
-const MANAGEMENT   = ['agency-director', 'property-manager'];
+const MANAGEMENT    = ['agency-director', 'property-manager'];
 const FINANCE_VIEW  = ['agency-director', 'property-manager', 'finance-officer', 'auditor'];
 const FINANCE_WRITE = ['agency-director', 'property-manager', 'finance-officer'];
-const MAINT_WRITE  = ['agency-director', 'property-manager', 'maintenance-staff'];
-const UNIT_WRITE   = ['agency-director', 'property-manager', 'leasing-agent'];
+const MAINT_WRITE   = ['agency-director', 'property-manager', 'maintenance-staff'];
+const UNIT_WRITE    = ['agency-director', 'property-manager', 'leasing-agent'];
 
 function signToken(user) {
   return jwt.sign(
@@ -193,9 +189,37 @@ async function safeUserWithOrg(userDoc, orgDoc) {
 }
 
 /* ══════════════════════════════════════════════════════
-   AUTH ROUTES
+   DEBUG — list all registered routes (open in browser)
 ══════════════════════════════════════════════════════ */
-app.post('/auth/register', async (req, res) => {
+app.get(['/debug/routes', '/api/debug/routes'], (req, res) => {
+  const routes = [];
+  const stack = app._router?.stack || [];
+  stack.forEach(mw => {
+    if (mw.route && mw.route.path) {
+      routes.push({
+        path: mw.route.path,
+        methods: Object.keys(mw.route.methods).map(m => m.toUpperCase()),
+      });
+    }
+  });
+  res.json({
+    count: routes.length,
+    nodeEnv: process.env.NODE_ENV || 'development',
+    routes,
+  });
+});
+
+/* ══════════════════════════════════════════════════════
+   HEALTH
+══════════════════════════════════════════════════════ */
+app.get(['/api/health', '/health'], (req, res) => {
+  res.json({ message: '✅ Multi-tenant Properties API running!', ok: true });
+});
+
+/* ══════════════════════════════════════════════════════
+   AUTH ROUTES — now accept BOTH /auth/x and /api/auth/x
+══════════════════════════════════════════════════════ */
+app.post(['/auth/register', '/api/auth/register'], async (req, res) => {
   try {
     const { firstName, lastName, email, phone, role, password, orgAction, organizationName, inviteCode } = req.body;
 
@@ -270,7 +294,7 @@ app.post('/auth/register', async (req, res) => {
   }
 });
 
-app.post('/auth/login', async (req, res) => {
+app.post(['/auth/login', '/api/auth/login'], async (req, res) => {
   try {
     const { email, password, role } = req.body;
 
@@ -322,7 +346,7 @@ app.post('/auth/login', async (req, res) => {
   }
 });
 
-app.get('/auth/users', requireAuth, requireRole(...MANAGEMENT), async (req, res) => {
+app.get(['/auth/users', '/api/auth/users'], requireAuth, requireRole(...MANAGEMENT), async (req, res) => {
   try {
     const users = await User.find(orgScope(req)).select('-password').sort({ createdAt: -1 });
     res.json(users);
@@ -331,7 +355,7 @@ app.get('/auth/users', requireAuth, requireRole(...MANAGEMENT), async (req, res)
   }
 });
 
-app.get('/auth/users/:id', requireAuth, async (req, res) => {
+app.get(['/auth/users/:id', '/api/auth/users/:id'], requireAuth, async (req, res) => {
   try {
     const user = await User.findOne(orgScope(req, { _id: req.params.id })).select('-password');
     if (!user) return res.status(404).json({ message: 'User not found' });
@@ -341,7 +365,7 @@ app.get('/auth/users/:id', requireAuth, async (req, res) => {
   }
 });
 
-app.put('/auth/users/:id', requireAuth, async (req, res) => {
+app.put(['/auth/users/:id', '/api/auth/users/:id'], requireAuth, async (req, res) => {
   try {
     const target = await User.findOne(orgScope(req, { _id: req.params.id }));
     if (!target) return res.status(404).json({ message: 'User not found' });
@@ -366,7 +390,7 @@ app.put('/auth/users/:id', requireAuth, async (req, res) => {
   }
 });
 
-app.delete('/auth/users/:id', requireAuth, async (req, res) => {
+app.delete(['/auth/users/:id', '/api/auth/users/:id'], requireAuth, async (req, res) => {
   try {
     const target = await User.findOne(orgScope(req, { _id: req.params.id }));
     if (!target) return res.status(404).json({ message: 'User not found' });
@@ -387,7 +411,7 @@ app.delete('/auth/users/:id', requireAuth, async (req, res) => {
 /* ══════════════════════════════════════════════════════
    ORGANIZATION ROUTES
 ══════════════════════════════════════════════════════ */
-app.get('/organizations/me', requireAuth, async (req, res) => {
+app.get(['/organizations/me', '/api/organizations/me'], requireAuth, async (req, res) => {
   try {
     const org = await Organization.findById(req.user.organizationId);
     if (!org) return res.status(404).json({ message: 'Organization not found' });
@@ -402,7 +426,7 @@ app.get('/organizations/me', requireAuth, async (req, res) => {
   }
 });
 
-app.put('/organizations/me', requireAuth, requireRole(...MANAGEMENT), async (req, res) => {
+app.put(['/organizations/me', '/api/organizations/me'], requireAuth, requireRole(...MANAGEMENT), async (req, res) => {
   try {
     const org = await Organization.findById(req.user.organizationId);
     if (!org) return res.status(404).json({ message: 'Organization not found' });
@@ -426,16 +450,9 @@ app.put('/organizations/me', requireAuth, requireRole(...MANAGEMENT), async (req
 });
 
 /* ══════════════════════════════════════════════════════
-   HEALTH
-══════════════════════════════════════════════════════ */
-app.get('/api/health', (req, res) => {
-  res.json({ message: '✅ Multi-tenant Properties API running!' });
-});
-
-/* ══════════════════════════════════════════════════════
    DASHBOARD
 ══════════════════════════════════════════════════════ */
-app.get('/api/dashboard', requireAuth, async (req, res) => {
+app.get(['/api/dashboard', '/dashboard'], requireAuth, async (req, res) => {
   try {
     const [org, me, properties, units, payments, maintenance] = await Promise.all([
       Organization.findById(req.user.organizationId),
@@ -546,13 +563,13 @@ app.get('/api/dashboard', requireAuth, async (req, res) => {
 /* ══════════════════════════════════════════════════════
    PROFILE
 ══════════════════════════════════════════════════════ */
-app.get('/api/profile', requireAuth, async (req, res) => {
+app.get(['/api/profile', '/profile'], requireAuth, async (req, res) => {
   const me = await User.findById(req.user.id).select('-password');
   if (!me) return res.status(404).json({ message: 'User not found' });
   res.json(me);
 });
 
-app.put('/api/profile', requireAuth, async (req, res) => {
+app.put(['/api/profile', '/profile'], requireAuth, async (req, res) => {
   try {
     const me = await User.findById(req.user.id);
     if (!me) return res.status(404).json({ message: 'User not found' });
@@ -585,7 +602,7 @@ app.put('/api/profile', requireAuth, async (req, res) => {
 /* ══════════════════════════════════════════════════════
    ORGANIZATION SETTINGS
 ══════════════════════════════════════════════════════ */
-app.get('/api/organization', requireAuth, async (req, res) => {
+app.get(['/api/organization', '/organization'], requireAuth, async (req, res) => {
   const org = await Organization.findById(req.user.organizationId);
   if (!org) return res.status(404).json({ message: 'Organization not found' });
   const payload = {
@@ -596,7 +613,7 @@ app.get('/api/organization', requireAuth, async (req, res) => {
   res.json(payload);
 });
 
-app.put('/api/organization', requireAuth, requireRole(...MANAGEMENT), async (req, res) => {
+app.put(['/api/organization', '/organization'], requireAuth, requireRole(...MANAGEMENT), async (req, res) => {
   try {
     const org = await Organization.findById(req.user.organizationId);
     if (!org) return res.status(404).json({ message: 'Organization not found' });
@@ -626,7 +643,7 @@ app.put('/api/organization', requireAuth, requireRole(...MANAGEMENT), async (req
 /* ══════════════════════════════════════════════════════
    PROPERTIES
 ══════════════════════════════════════════════════════ */
-app.get('/api/properties', requireAuth, async (req, res) => {
+app.get(['/api/properties', '/properties'], requireAuth, async (req, res) => {
   try {
     const props = await Property.find(orgScope(req)).sort({ createdAt: -1 });
     const enriched = await Promise.all(props.map(async p => {
@@ -648,7 +665,7 @@ app.get('/api/properties', requireAuth, async (req, res) => {
   }
 });
 
-app.post('/api/properties', requireAuth, requireRole(...MANAGEMENT, 'leasing-agent'), async (req, res) => {
+app.post(['/api/properties', '/properties'], requireAuth, requireRole(...MANAGEMENT, 'leasing-agent'), async (req, res) => {
   try {
     const { name, type, location, address, description,
             contactName, contactPhone, status, units } = req.body;
@@ -700,7 +717,7 @@ app.post('/api/properties', requireAuth, requireRole(...MANAGEMENT, 'leasing-age
   }
 });
 
-app.get('/api/properties/:id/units', requireAuth, async (req, res) => {
+app.get(['/api/properties/:id/units', '/properties/:id/units'], requireAuth, async (req, res) => {
   try {
     const property = await Property.findOne(orgScope(req, { _id: req.params.id }));
     if (!property) return res.status(404).json({ message: 'Property not found.' });
@@ -712,7 +729,7 @@ app.get('/api/properties/:id/units', requireAuth, async (req, res) => {
   }
 });
 
-app.post('/api/properties/:id/units',
+app.post(['/api/properties/:id/units', '/properties/:id/units'],
   requireAuth, requireRole(...MANAGEMENT, 'leasing-agent'),
   async (req, res) => {
     try {
@@ -742,7 +759,7 @@ app.post('/api/properties/:id/units',
   }
 );
 
-app.put('/api/properties/:id', requireAuth, requireRole(...MANAGEMENT, 'leasing-agent'), async (req, res) => {
+app.put(['/api/properties/:id', '/properties/:id'], requireAuth, requireRole(...MANAGEMENT, 'leasing-agent'), async (req, res) => {
   try {
     const update = {
       name: req.body.name,
@@ -767,7 +784,7 @@ app.put('/api/properties/:id', requireAuth, requireRole(...MANAGEMENT, 'leasing-
   }
 });
 
-app.delete('/api/properties/:id', requireAuth, requireRole(...MANAGEMENT), async (req, res) => {
+app.delete(['/api/properties/:id', '/properties/:id'], requireAuth, requireRole(...MANAGEMENT), async (req, res) => {
   try {
     const deleted = await Property.findOneAndDelete(orgScope(req, { _id: req.params.id }));
     if (!deleted) return res.status(404).json({ message: 'Property not found.' });
@@ -785,7 +802,7 @@ app.delete('/api/properties/:id', requireAuth, requireRole(...MANAGEMENT), async
 /* ══════════════════════════════════════════════════════
    TENANTS
 ══════════════════════════════════════════════════════ */
-app.get('/api/tenants', requireAuth, async (req, res) => {
+app.get(['/api/tenants', '/tenants'], requireAuth, async (req, res) => {
   try {
     const tenants = await User.find(orgScope(req, { role: 'tenant' }))
       .select('-password').sort({ createdAt: -1 });
@@ -805,7 +822,7 @@ app.get('/api/tenants', requireAuth, async (req, res) => {
   }
 });
 
-app.post('/api/tenants', requireAuth, requireRole(...MANAGEMENT, 'leasing-agent'), async (req, res) => {
+app.post(['/api/tenants', '/tenants'], requireAuth, requireRole(...MANAGEMENT, 'leasing-agent'), async (req, res) => {
   try {
     const { firstName, lastName, email, phone, password, propertyId, unitId } = req.body;
 
@@ -870,9 +887,9 @@ app.post('/api/tenants', requireAuth, requireRole(...MANAGEMENT, 'leasing-agent'
 });
 
 /* ══════════════════════════════════════════════════════
-   UNIT ROUTES
+   UNITS (mounted at /products AND /api/products)
 ══════════════════════════════════════════════════════ */
-app.get('/products', requireAuth, async (req, res) => {
+app.get(['/products', '/api/products'], requireAuth, async (req, res) => {
   try {
     if (req.user.role === 'tenant') {
       const me = await User.findById(req.user.id);
@@ -917,7 +934,7 @@ async function resolveTenantAssignment(req) {
   };
 }
 
-app.post('/products', requireAuth, requireRole(...UNIT_WRITE), async (req, res) => {
+app.post(['/products', '/api/products'], requireAuth, requireRole(...UNIT_WRITE), async (req, res) => {
   try {
     const assignment = await resolveTenantAssignment(req);
     const unit = new Unit({
@@ -937,7 +954,7 @@ app.post('/products', requireAuth, requireRole(...UNIT_WRITE), async (req, res) 
   }
 });
 
-app.put('/products/:id', requireAuth, requireRole(...UNIT_WRITE), async (req, res) => {
+app.put(['/products/:id', '/api/products/:id'], requireAuth, requireRole(...UNIT_WRITE), async (req, res) => {
   try {
     const assignment = await resolveTenantAssignment(req);
 
@@ -981,7 +998,7 @@ app.put('/products/:id', requireAuth, requireRole(...UNIT_WRITE), async (req, re
   }
 });
 
-app.delete('/products/:id', requireAuth, requireRole(...UNIT_WRITE), async (req, res) => {
+app.delete(['/products/:id', '/api/products/:id'], requireAuth, requireRole(...UNIT_WRITE), async (req, res) => {
   try {
     const deleted = await Unit.findOneAndDelete(orgScope(req, { _id: req.params.id }));
     if (!deleted) return res.status(404).json({ message: 'Unit not found' });
@@ -994,7 +1011,7 @@ app.delete('/products/:id', requireAuth, requireRole(...UNIT_WRITE), async (req,
 /* ══════════════════════════════════════════════════════
    MAINTENANCE
 ══════════════════════════════════════════════════════ */
-app.get('/maintenance', requireAuth, async (req, res) => {
+app.get(['/maintenance', '/api/maintenance'], requireAuth, async (req, res) => {
   try {
     let query = orgScope(req);
 
@@ -1035,7 +1052,7 @@ async function resolveStaffAssignment(req) {
   };
 }
 
-app.post('/maintenance', requireAuth, async (req, res) => {
+app.post(['/maintenance', '/api/maintenance'], requireAuth, async (req, res) => {
   try {
     let propertyName    = req.body.property || '';
     let unitName        = req.body.unit     || '';
@@ -1083,7 +1100,7 @@ app.post('/maintenance', requireAuth, async (req, res) => {
   }
 });
 
-app.put('/maintenance/:id', requireAuth, requireRole(...MAINT_WRITE), async (req, res) => {
+app.put(['/maintenance/:id', '/api/maintenance/:id'], requireAuth, requireRole(...MAINT_WRITE), async (req, res) => {
   try {
     const assignment = await resolveStaffAssignment(req);
     const updateData = {
@@ -1110,7 +1127,7 @@ app.put('/maintenance/:id', requireAuth, requireRole(...MAINT_WRITE), async (req
   }
 });
 
-app.delete('/maintenance/:id', requireAuth, requireRole(...MAINT_WRITE), async (req, res) => {
+app.delete(['/maintenance/:id', '/api/maintenance/:id'], requireAuth, requireRole(...MAINT_WRITE), async (req, res) => {
   try {
     const deleted = await Maintenance.findOneAndDelete(orgScope(req, { _id: req.params.id }));
     if (!deleted) return res.status(404).json({ message: 'Work order not found' });
@@ -1123,7 +1140,7 @@ app.delete('/maintenance/:id', requireAuth, requireRole(...MAINT_WRITE), async (
 /* ══════════════════════════════════════════════════════
    TENANT SELF-SERVICE
 ══════════════════════════════════════════════════════ */
-app.get('/api/tenant/summary', requireAuth, requireRole('tenant'), async (req, res) => {
+app.get(['/api/tenant/summary', '/tenant/summary'], requireAuth, requireRole('tenant'), async (req, res) => {
   try {
     const me = await User.findById(req.user.id).select('-password');
     if (!me) return res.status(404).json({ message: 'User not found' });
@@ -1183,9 +1200,6 @@ app.get('/api/tenant/summary', requireAuth, requireRole('tenant'), async (req, r
     const maint = await Maintenance.find(maintQuery);
     const openMaint = maint.filter(m => m.status === 'Open' || m.status === 'In Progress').length;
 
-    /* ── CHART DATA ─────────────────────────────────── */
-
-    // Line chart: last 6 months of the tenant's own payments
     const paymentsByMonth = [];
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -1206,7 +1220,6 @@ app.get('/api/tenant/summary', requireAuth, requireRole('tenant'), async (req, r
       else if (p.status === 'Pending' || p.status === 'Overdue') m.pending += (p.amount || 0);
     });
 
-    // Pie chart: maintenance requests by status
     const maintByStatus = { Open: 0, 'In Progress': 0, Resolved: 0, Closed: 0 };
     maint.forEach(m => {
       if (maintByStatus[m.status] !== undefined) maintByStatus[m.status] += 1;
@@ -1237,7 +1250,7 @@ app.get('/api/tenant/summary', requireAuth, requireRole('tenant'), async (req, r
   }
 });
 
-app.get('/api/tenant/receipts', requireAuth, requireRole('tenant'), async (req, res) => {
+app.get(['/api/tenant/receipts', '/tenant/receipts'], requireAuth, requireRole('tenant'), async (req, res) => {
   try {
     const me = await User.findById(req.user.id);
     if (!me) return res.status(404).json({ message: 'User not found' });
@@ -1260,7 +1273,7 @@ app.get('/api/tenant/receipts', requireAuth, requireRole('tenant'), async (req, 
 /* ══════════════════════════════════════════════════════
    PAYMENTS
 ══════════════════════════════════════════════════════ */
-app.get('/payments', requireAuth, async (req, res) => {
+app.get(['/payments', '/api/payments'], requireAuth, async (req, res) => {
   try {
     let query = orgScope(req);
 
@@ -1286,7 +1299,7 @@ app.get('/payments', requireAuth, async (req, res) => {
   }
 });
 
-app.post('/payments', requireAuth, requireRole(...FINANCE_WRITE), async (req, res) => {
+app.post(['/payments', '/api/payments'], requireAuth, requireRole(...FINANCE_WRITE), async (req, res) => {
   try {
     let tenantName = req.body.tenant;
     let tenantId   = req.body.tenantId || null;
@@ -1322,7 +1335,7 @@ app.post('/payments', requireAuth, requireRole(...FINANCE_WRITE), async (req, re
   }
 });
 
-app.put('/payments/:id', requireAuth, requireRole(...FINANCE_WRITE), async (req, res) => {
+app.put(['/payments/:id', '/api/payments/:id'], requireAuth, requireRole(...FINANCE_WRITE), async (req, res) => {
   try {
     let tenantName = req.body.tenant;
     let tenantId   = req.body.tenantId;
@@ -1360,7 +1373,7 @@ app.put('/payments/:id', requireAuth, requireRole(...FINANCE_WRITE), async (req,
   }
 });
 
-app.delete('/payments/:id', requireAuth, requireRole(...FINANCE_WRITE), async (req, res) => {
+app.delete(['/payments/:id', '/api/payments/:id'], requireAuth, requireRole(...FINANCE_WRITE), async (req, res) => {
   try {
     const deleted = await Payment.findOneAndDelete(orgScope(req, { _id: req.params.id }));
     if (!deleted) return res.status(404).json({ message: 'Payment not found' });
@@ -1370,8 +1383,19 @@ app.delete('/payments/:id', requireAuth, requireRole(...FINANCE_WRITE), async (r
   }
 });
 
-app.use((req, res) => {
-  res.status(404).json({ message: 'Route not found' });
+/* ══════════════════════════════════════════════════════
+   CATCH-ALL 404 — only for /api/* paths to avoid breaking SPA
+══════════════════════════════════════════════════════ */
+app.use((req, res, next) => {
+  // Only return JSON 404 for API calls; let the SPA handle other paths.
+  if (req.path.startsWith('/api/') || req.path.startsWith('/auth/') ||
+      req.path.startsWith('/products') || req.path.startsWith('/maintenance') ||
+      req.path.startsWith('/payments') || req.path.startsWith('/tenants') ||
+      req.path.startsWith('/organization') || req.path.startsWith('/profile') ||
+      req.path.startsWith('/dashboard')) {
+    return res.status(404).json({ message: 'Route not found', path: req.path, method: req.method });
+  }
+  next();
 });
 
 /* ── CONNECT & START ─────────────────────────────────── */
@@ -1382,6 +1406,7 @@ mongoose.connect(process.env.MONGO_URI)
     console.log('📦 Using database:', mongoose.connection.db.databaseName);
     app.listen(PORT, () => {
       console.log(`✅ Server running on port ${PORT}`);
+      console.log(`   Debug routes: /debug/routes`);
     });
   })
   .catch(err => console.error('❌ MongoDB error:', err.message));
