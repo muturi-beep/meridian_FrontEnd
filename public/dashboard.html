@@ -588,7 +588,7 @@ td.actions{text-align:right;white-space:nowrap}
 /* ══════════════════════════════════════════════════════
    CONFIG  — smarter API base URL resolution
 ══════════════════════════════════════════════════════ */
-const PRODUCTION_API_URL = 'https://prophub-b5n6.onrender.com';
+const PRODUCTION_API_URL = import.meta.env.VITE_API_URL || 'https://prophub-b5n6.onrender.com';
 
 const isLocalDev =
   location.protocol === 'file:' ||
