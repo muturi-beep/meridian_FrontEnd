@@ -6,7 +6,7 @@
   "main": "api/index.js",
   "type": "commonjs",
   "engines": {
-    "node": "20.x"
+    "node": "24.x"
   },
   "scripts": {
     "start": "node api/index.js",
@@ -22,8 +22,5 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  }
 }
