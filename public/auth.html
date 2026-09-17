@@ -213,7 +213,6 @@
     </div>
 
     <div class="left-website">
-      <!-- ✅ FIXED: now links to index.html instead of home.html -->
       <a href="index.html" class="ws-link">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M7 1C5.5 3 5 5 5 7s.5 4 2 6M7 1c1.5 2 2 4 2 6s-.5 4-2 6M1 7h12" stroke="currentColor" stroke-width="1.3"/></svg>
         Visit Meridian Properties Website
@@ -362,9 +361,9 @@
   </div>
 
   <script>
-  // ── Smarter API base URL resolution ──
-  const PRODUCTION_API_URL = 'https://prophub-b5n6.onrender.com';
-
+  /* ══════════════════════════════════════════════════════
+     CONFIG — same-origin on Vercel, localhost in dev
+  ══════════════════════════════════════════════════════ */
   const isLocalDev =
     location.protocol === 'file:' ||
     location.hostname === 'localhost' ||
@@ -373,14 +372,9 @@
     location.hostname.startsWith('192.168.') ||
     location.hostname.startsWith('10.');
 
-  // If the page itself is served from the production API host, use relative URLs
-  // so we don't have to worry about CORS or hard-coded hosts.
-  const sameHostAsApi =
-    location.hostname === 'prophub-b5n6.onrender.com';
-
-  const API = isLocalDev
-    ? 'http://localhost:3000'
-    : (sameHostAsApi ? '' : PRODUCTION_API_URL);
+  // On Vercel, frontend + backend live on the same domain, so we use
+  // relative URLs. Only use localhost:3000 when running locally.
+  const API = isLocalDev ? 'http://localhost:3000' : '';
 
   console.log('[auth] API base =', API || '(same-origin)');
 
@@ -668,7 +662,7 @@
   document.querySelector('.payment-modal-content').addEventListener('click', function(e) {
     e.stopPropagation();
   });
-</script>
+  </script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {

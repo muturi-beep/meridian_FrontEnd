@@ -586,10 +586,8 @@ td.actions{text-align:right;white-space:nowrap}
 
 <script>
 /* ══════════════════════════════════════════════════════
-   CONFIG  — smarter API base URL resolution
+   CONFIG — same-origin on Vercel, localhost in dev
 ══════════════════════════════════════════════════════ */
-const PRODUCTION_API_URL = import.meta.env.VITE_API_URL || 'https://prophub-b5n6.onrender.com';
-
 const isLocalDev =
   location.protocol === 'file:' ||
   location.hostname === 'localhost' ||
@@ -598,11 +596,9 @@ const isLocalDev =
   location.hostname.startsWith('192.168.') ||
   location.hostname.startsWith('10.');
 
-const sameHostAsApi = location.hostname === 'prophub-b5n6.onrender.com';
-
-const API = isLocalDev
-  ? 'http://localhost:3000'
-  : (sameHostAsApi ? '' : PRODUCTION_API_URL);
+// On Vercel, frontend + backend live on the same domain, so we use
+// relative URLs. Only use localhost:3000 when running locally.
+const API = isLocalDev ? 'http://localhost:3000' : '';
 
 console.log('[dashboard] API base =', API || '(same-origin)');
 
@@ -673,7 +669,7 @@ if (IS_TENANT) {
 }
 
 /* ══════════════════════════════════════════════════════
-   API HELPER  — improved error messages with URL + method
+   API HELPER
 ══════════════════════════════════════════════════════ */
 async function api(path, opts = {}) {
   const s = getSession();
@@ -1001,7 +997,7 @@ function renderTenantOverview(data) {
 }
 
 /* ══════════════════════════════════════════════════════
-   TENANT CHARTS  — line (payments) + pie (maintenance)
+   TENANT CHARTS
 ══════════════════════════════════════════════════════ */
 function renderTenantCharts(data) {
   if (typeof Chart === 'undefined') return;
@@ -1138,7 +1134,6 @@ function renderTenantCharts(data) {
   }
 }
 
-/* ── Chart.js instances (destroyed before re-render) ─── */
 let chartInstances = {};
 
 function renderOverview(data) {
@@ -1684,7 +1679,7 @@ async function deleteProperty(id) {
 }
 
 /* ══════════════════════════════════════════════════════
-   UNITS  — grouped by property
+   UNITS
 ══════════════════════════════════════════════════════ */
 async function loadUnits() {
   const el = document.getElementById('unitsList');
@@ -1824,9 +1819,6 @@ async function openUnitModal(u = null, presetProperty = null) {
     try { state.properties = await api('/api/properties'); state.propsLoaded = true; } catch {}
   }
 
-  // ✅ FIX: previously `!state.tenants` was checked — but state.tenants is
-  // initialized to [] (truthy), so this branch NEVER ran and the dropdown
-  // stayed empty. Now we also re-fetch when the list is empty.
   if (!state.tenants || !state.tenants.length) {
     try { state.tenants = await api('/api/tenants'); state.tenantsLoaded = true; }
     catch { state.tenants = []; }
@@ -1935,7 +1927,7 @@ async function deleteUnit(id) {
 }
 
 /* ══════════════════════════════════════════════════════
-   TENANTS  — property-scoped onboarding
+   TENANTS
 ══════════════════════════════════════════════════════ */
 async function loadTenants() {
   const el = document.getElementById('tenantsList');
@@ -2532,7 +2524,7 @@ async function savePassword(e) {
 }
 
 /* ══════════════════════════════════════════════════════
-   TENANT DOCUMENTS  — downloadable receipts only
+   TENANT DOCUMENTS
 ══════════════════════════════════════════════════════ */
 async function loadTenantDocuments() {
   const el = document.getElementById('documentsList');
@@ -2682,7 +2674,7 @@ async function refreshActiveView() {
     else if (view === 'payments')                   { state.payLoaded = false;     await loadPayments(); }
     else if (view === 'documents' && IS_TENANT)     await loadTenantDocuments();
   } catch (e) {
-    /* Silent — 401 already redirected; other errors are non-fatal. */
+    /* Silent */
   } finally {
     pollInFlight = false;
   }
@@ -2701,7 +2693,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 /* ══════════════════════════════════════════════════════
-   GO — land on Properties after sign-in (or Overview for tenants)
+   GO
 ══════════════════════════════════════════════════════ */
 loadDashboard();
 if (!IS_TENANT) loadProperties();
