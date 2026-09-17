@@ -6,6 +6,7 @@
 <title>Dashboard — Meridian Properties</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <style>
 :root {
   --ink:#0c0f18; --ink-2:#131722; --ink-3:#1a2030; --ink-4:#222840;
@@ -242,7 +243,6 @@ td.actions{text-align:right;white-space:nowrap}
 .skeleton{background:linear-gradient(90deg,var(--ink-3) 25%,var(--ink-4) 50%,var(--ink-3) 75%);background-size:200% 100%;animation:sk 1.4s infinite;border-radius:6px}
 @keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-/* ═══ CHARTS ═══ */
 .charts-grid{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px}
 .charts-grid:last-of-type{margin-bottom:24px}
 .chart-card{background:var(--ink-2);border:1px solid var(--border);border-radius:var(--r);padding:18px;display:flex;flex-direction:column}
@@ -250,10 +250,8 @@ td.actions{text-align:right;white-space:nowrap}
 .chart-title{font-size:13.5px;font-weight:600;color:var(--t1)}
 .chart-sub{font-size:11px;color:var(--t2);margin-top:2px}
 .chart-body{position:relative;flex:1;min-height:230px}
-.chart-body.chart-sm{min-height:230px}
 .chart-empty{display:flex;align-items:center;justify-content:center;height:100%;min-height:200px;color:var(--t2);font-size:12.5px;text-align:center;padding:16px}
 
-/* ═══ UNITS — grouped by property ═══ */
 .units-group{margin-bottom:26px}
 .units-group:last-child{margin-bottom:0}
 .units-group-head{
@@ -267,7 +265,6 @@ td.actions{text-align:right;white-space:nowrap}
 }
 .units-group-sub{font-size:11.5px;color:var(--t2);margin-top:3px}
 
-/* ═══ LIVE INDICATOR ═══ */
 @keyframes pulseLive{
   0%  {box-shadow:0 0 0 0 rgba(62,207,142,.7)}
   70% {box-shadow:0 0 0 8px rgba(62,207,142,0)}
@@ -385,7 +382,6 @@ td.actions{text-align:right;white-space:nowrap}
     </div>
 
     <div class="content">
-      <!-- ═══ OVERVIEW ═══ -->
       <section class="view" id="view-overview">
         <div id="overviewLoading">
           <div class="stats-grid">
@@ -398,7 +394,6 @@ td.actions{text-align:right;white-space:nowrap}
         <div id="overviewContent" style="display:none"></div>
       </section>
 
-      <!-- ═══ PROPERTIES ═══ -->
       <section class="view active" id="view-properties">
         <div class="section-head">
           <div>
@@ -410,7 +405,6 @@ td.actions{text-align:right;white-space:nowrap}
         <div id="propertiesList"></div>
       </section>
 
-      <!-- ═══ UNITS ═══ -->
       <section class="view" id="view-units">
         <div class="section-head">
           <div>
@@ -422,7 +416,6 @@ td.actions{text-align:right;white-space:nowrap}
         <div id="unitsList"></div>
       </section>
 
-      <!-- ═══ TENANTS ═══ -->
       <section class="view" id="view-tenants">
         <div class="section-head">
           <div>
@@ -433,7 +426,6 @@ td.actions{text-align:right;white-space:nowrap}
         <div id="tenantsList"></div>
       </section>
 
-      <!-- ═══ MAINTENANCE ═══ -->
       <section class="view" id="view-maintenance">
         <div class="section-head">
           <div>
@@ -445,7 +437,6 @@ td.actions{text-align:right;white-space:nowrap}
         <div class="panel"><div id="maintenanceList"></div></div>
       </section>
 
-      <!-- ═══ PAYMENTS ═══ -->
       <section class="view" id="view-payments">
         <div class="section-head">
           <div>
@@ -457,24 +448,22 @@ td.actions{text-align:right;white-space:nowrap}
         <div class="panel"><div id="paymentsList"></div></div>
       </section>
 
-      <!-- ═══ DOCUMENTS ═══ -->
       <section class="view" id="view-documents">
         <div class="section-head">
           <div>
             <div class="section-title">Documents</div>
-            <div class="section-desc">Leases, contracts, and property files.</div>
+            <div class="section-desc">Payment receipts — view or download as PDF.</div>
           </div>
         </div>
         <div id="documentsList">
           <div class="empty">
             <div class="empty-ico">▦</div>
             <div class="empty-title">Documents coming soon</div>
-            <div class="empty-desc">Upload leases, IDs, inspection reports, and share them with your team. This feature will be available in the next update.</div>
+            <div class="empty-desc">Receipts will appear here once payments are recorded.</div>
           </div>
         </div>
       </section>
 
-      <!-- ═══ SETTINGS ═══ -->
       <section class="view" id="view-settings">
         <div class="section-head">
           <div>
@@ -510,7 +499,6 @@ td.actions{text-align:right;white-space:nowrap}
         </div>
       </section>
 
-      <!-- ═══ PROFILE ═══ -->
       <section class="view" id="view-profile">
         <div class="section-head">
           <div>
@@ -567,7 +555,6 @@ td.actions{text-align:right;white-space:nowrap}
   </main>
 </div>
 
-<!-- MODAL -->
 <div class="modal" id="modal">
   <form class="modal-box" id="modalForm" onsubmit="submitModal(event)">
     <div class="modal-head">
@@ -582,11 +569,26 @@ td.actions{text-align:right;white-space:nowrap}
   </form>
 </div>
 
+<!-- RECEIPT MODAL -->
+<div class="modal" id="receiptModal">
+  <div class="modal-box" style="max-width:600px">
+    <div class="modal-head">
+      <div class="modal-title">Payment Receipt</div>
+      <button type="button" class="modal-close" onclick="closeReceiptModal()">×</button>
+    </div>
+    <div class="modal-body" id="receiptModalBody"></div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-outline" onclick="closeReceiptModal()">Close</button>
+      <button type="button" class="btn btn-primary" id="receiptPdfBtn">Download PDF</button>
+    </div>
+  </div>
+</div>
+
 <div id="toasts"></div>
 
 <script>
 /* ══════════════════════════════════════════════════════
-   CONFIG — same-origin on Vercel, localhost in dev
+   CONFIG
 ══════════════════════════════════════════════════════ */
 const isLocalDev =
   location.protocol === 'file:' ||
@@ -596,8 +598,6 @@ const isLocalDev =
   location.hostname.startsWith('192.168.') ||
   location.hostname.startsWith('10.');
 
-// On Vercel, frontend + backend live on the same domain, so we use
-// relative URLs. Only use localhost:3000 when running locally.
 const API = isLocalDev ? 'http://localhost:3000' : '';
 
 console.log('[dashboard] API base =', API || '(same-origin)');
@@ -624,7 +624,7 @@ function clearSession() {
 }
 
 /* ══════════════════════════════════════════════════════
-   AUTH GUARD
+   AUTH GUARD + ROLE PERMISSIONS
 ══════════════════════════════════════════════════════ */
 const SESSION = getSession();
 if (!SESSION) {
@@ -637,8 +637,8 @@ window.addEventListener('pageshow', e => {
   }
 });
 
-/* ── Tenant-role detection ── */
 const IS_TENANT = SESSION && SESSION.role === 'tenant';
+const CAN_MANAGE_MAINT = SESSION && ['agency-director', 'property-manager', 'maintenance-staff'].includes(SESSION.role);
 
 if (IS_TENANT) {
   const ALLOWED = ['overview', 'maintenance', 'payments', 'documents'];
@@ -775,6 +775,7 @@ function switchView(name) {
   document.querySelectorAll('.sb-link[data-view]').forEach(l => l.classList.toggle('active', l.dataset.view === name));
   dropdown.classList.remove('open');
   if (window.innerWidth <= 1024) { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
+
   if (name === 'properties' && !state.propsLoaded) loadProperties();
   if (name === 'units'      && !state.unitsLoaded) loadUnits();
   if (name === 'tenants'    && !state.tenantsLoaded) loadTenants();
@@ -782,7 +783,22 @@ function switchView(name) {
   if (name === 'payments'   && !state.payLoaded) loadPayments();
   if (name === 'settings')   loadOrgSettings();
   if (name === 'profile')    loadProfile();
-  if (name === 'documents' && IS_TENANT) loadTenantDocuments();
+  if (name === 'documents') {
+    if (IS_TENANT) loadTenantDocuments();
+    else loadManagerDocuments();
+  }
+
+  /* ── Overview: always refresh so any status change (unit, maintenance,
+     tenant, payment) made from any view or by any user is reflected on
+     the pie chart when the user returns to Overview. ── */
+  if (name === 'overview') {
+    loadDashboard();
+    requestAnimationFrame(() => {
+      Object.values(chartInstances).forEach(ch => {
+        try { ch.resize(); } catch {}
+      });
+    });
+  }
 }
 
 /* ══════════════════════════════════════════════════════
@@ -810,8 +826,7 @@ const state = {
   properties: [], units: [], tenants: [], maintenance: [], payments: [],
 };
 
-/* ── Real-time polling state ── */
-const POLL_INTERVAL_MS = 15000;   // 15 seconds
+const POLL_INTERVAL_MS = 15000;
 let pollTimer = null;
 let pollInFlight = false;
 
@@ -839,6 +854,9 @@ paintIdentity({
   avatar: SESSION.avatar,
 });
 
+/* ══════════════════════════════════════════════════════
+   LOAD DASHBOARD
+══════════════════════════════════════════════════════ */
 async function loadDashboard() {
   try {
     if (IS_TENANT) {
@@ -855,6 +873,18 @@ async function loadDashboard() {
 
     const data = await api('/api/dashboard');
     state.dashboard = data;
+
+    try {
+      const units = await api('/products');
+      if (Array.isArray(units) && units.length > 0) {
+        state.units = units;
+        const badge = document.getElementById('badgeUnits');
+        if (badge) badge.textContent = units.length;
+      }
+    } catch (e) {
+      console.warn('[dashboard] units fetch failed — using cached units.', e.message);
+    }
+
     paintIdentity({
       firstName: data.user.firstName, lastName: data.user.lastName,
       role: data.user.role, organizationName: data.organization.name,
@@ -902,31 +932,11 @@ function renderTenantOverview(data) {
 
   c.innerHTML = `
     <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-lbl">My Property</div>
-        <div class="stat-val" style="font-size:20px">${esc(data.property || '—')}</div>
-        <div class="stat-sub">Assigned property</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-lbl">My Unit</div>
-        <div class="stat-val" style="font-size:20px">${esc(data.unit.name)}</div>
-        <div class="stat-sub">${data.unit.floor && data.unit.floor !== '—' ? `Floor ${esc(data.unit.floor)}` : 'Floor not set'}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-lbl">Monthly Rent</div>
-        <div class="stat-val money">${fmtMoney(data.rent)}</div>
-        <div class="stat-sub">Due each month</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-lbl">Payment Status</div>
-        <div class="stat-val" style="font-size:16px;padding-top:8px"><span class="pill ${statusPill}">${esc(cm.status)}</span></div>
-        <div class="stat-sub">${esc(cm.monthLabel || 'This month')}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-lbl">Open Requests</div>
-        <div class="stat-val">${data.maintenance.open}</div>
-        <div class="stat-sub">Maintenance issues in progress</div>
-      </div>
+      <div class="stat-card"><div class="stat-lbl">My Property</div><div class="stat-val" style="font-size:20px">${esc(data.property || '—')}</div><div class="stat-sub">Assigned property</div></div>
+      <div class="stat-card"><div class="stat-lbl">My Unit</div><div class="stat-val" style="font-size:20px">${esc(data.unit.name)}</div><div class="stat-sub">${data.unit.floor && data.unit.floor !== '—' ? `Floor ${esc(data.unit.floor)}` : 'Floor not set'}</div></div>
+      <div class="stat-card"><div class="stat-lbl">Monthly Rent</div><div class="stat-val money">${fmtMoney(data.rent)}</div><div class="stat-sub">Due each month</div></div>
+      <div class="stat-card"><div class="stat-lbl">Payment Status</div><div class="stat-val" style="font-size:16px;padding-top:8px"><span class="pill ${statusPill}">${esc(cm.status)}</span></div><div class="stat-sub">${esc(cm.monthLabel || 'This month')}</div></div>
+      <div class="stat-card"><div class="stat-lbl">Open Requests</div><div class="stat-val">${data.maintenance.open}</div><div class="stat-sub">Maintenance issues in progress</div></div>
     </div>
 
     <div class="panel" style="margin-bottom:24px">
@@ -947,21 +957,11 @@ function renderTenantOverview(data) {
 
     <div class="charts-grid">
       <div class="chart-card">
-        <div class="chart-head">
-          <div>
-            <div class="chart-title">My Payments — Last 6 Months</div>
-            <div class="chart-sub">Paid vs outstanding, in KES</div>
-          </div>
-        </div>
+        <div class="chart-head"><div><div class="chart-title">My Payments — Last 6 Months</div><div class="chart-sub">Paid vs outstanding, in KES</div></div></div>
         <div class="chart-body"><canvas id="tenant-chart-payments"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head">
-          <div>
-            <div class="chart-title">My Maintenance Requests</div>
-            <div class="chart-sub">By current status</div>
-          </div>
-        </div>
+        <div class="chart-head"><div><div class="chart-title">My Maintenance Requests</div><div class="chart-sub">By current status</div></div></div>
         <div class="chart-body chart-sm"><canvas id="tenant-chart-maint"></canvas></div>
       </div>
     </div>
@@ -996,9 +996,6 @@ function renderTenantOverview(data) {
   renderTenantCharts(data);
 }
 
-/* ══════════════════════════════════════════════════════
-   TENANT CHARTS
-══════════════════════════════════════════════════════ */
 function renderTenantCharts(data) {
   if (typeof Chart === 'undefined') return;
   const charts = data.charts || {};
@@ -1033,56 +1030,19 @@ function renderTenantCharts(data) {
       data: {
         labels,
         datasets: [
-          {
-            label: 'Paid',
-            data: paid,
-            borderColor: '#b8834a',
-            backgroundColor: grad,
-            borderWidth: 2,
-            fill: true,
-            tension: 0.35,
-            pointRadius: 4,
-            pointBackgroundColor: '#b8834a',
-            pointBorderColor: '#131722',
-            pointBorderWidth: 2,
-          },
-          {
-            label: 'Pending / Overdue',
-            data: pending,
-            borderColor: '#f5a623',
-            backgroundColor: 'rgba(245,166,35,0)',
-            borderWidth: 2,
-            borderDash: [5, 4],
-            fill: false,
-            tension: 0.35,
-            pointRadius: 4,
-            pointBackgroundColor: '#f5a623',
-            pointBorderColor: '#131722',
-            pointBorderWidth: 2,
-          },
+          { label: 'Paid', data: paid, borderColor: '#b8834a', backgroundColor: grad, borderWidth: 2, fill: true, tension: 0.35, pointRadius: 4, pointBackgroundColor: '#b8834a', pointBorderColor: '#131722', pointBorderWidth: 2 },
+          { label: 'Pending / Overdue', data: pending, borderColor: '#f5a623', backgroundColor: 'rgba(245,166,35,0)', borderWidth: 2, borderDash: [5, 4], fill: false, tension: 0.35, pointRadius: 4, pointBackgroundColor: '#f5a623', pointBorderColor: '#131722', pointBorderWidth: 2 },
         ],
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
+        responsive: true, maintainAspectRatio: false,
         plugins: {
           legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, padding: 14 } },
-          tooltip: {
-            backgroundColor: '#1a2030',
-            borderColor: 'rgba(255,255,255,.12)',
-            borderWidth: 1,
-            titleColor: '#edf0f8',
-            bodyColor: '#edf0f8',
-            padding: 10,
-            callbacks: { label: ctx => `${ctx.dataset.label}: ${fmtMoney(ctx.parsed.y)}` },
-          },
+          tooltip: { backgroundColor: '#1a2030', borderColor: 'rgba(255,255,255,.12)', borderWidth: 1, titleColor: '#edf0f8', bodyColor: '#edf0f8', padding: 10, callbacks: { label: ctx => `${ctx.dataset.label}: ${fmtMoney(ctx.parsed.y)}` } },
         },
         scales: {
           x: { grid: { display: false }, ticks: tickOpts },
-          y: {
-            beginAtZero: true, grid: gridOpts,
-            ticks: { ...tickOpts, callback: v => v >= 1000 ? (v / 1000) + 'k' : v },
-          },
+          y: { beginAtZero: true, grid: gridOpts, ticks: { ...tickOpts, callback: v => v >= 1000 ? (v / 1000) + 'k' : v } },
         },
       },
     });
@@ -1091,40 +1051,18 @@ function renderTenantCharts(data) {
   const maintEl = document.getElementById('tenant-chart-maint');
   if (maintEl) {
     const labels = ['Open', 'In Progress', 'Resolved', 'Closed'];
-    const values = [
-      maintByStatus.Open           || 0,
-      maintByStatus['In Progress'] || 0,
-      maintByStatus.Resolved       || 0,
-      maintByStatus.Closed         || 0,
-    ];
+    const values = [ maintByStatus.Open || 0, maintByStatus['In Progress'] || 0, maintByStatus.Resolved || 0, maintByStatus.Closed || 0 ];
     const total = values.reduce((a, b) => a + b, 0);
 
     if (total > 0) {
       chartInstances.tenantMaintChart = new Chart(maintEl, {
         type: 'pie',
-        data: {
-          labels,
-          datasets: [{
-            data: values,
-            backgroundColor: ['#f5a623', '#4a9ef5', '#3ecf8e', '#7a83a0'],
-            borderColor: '#131722',
-            borderWidth: 3,
-            hoverOffset: 6,
-          }],
-        },
+        data: { labels, datasets: [{ data: values, backgroundColor: ['#f5a623', '#4a9ef5', '#3ecf8e', '#7a83a0'], borderColor: '#131722', borderWidth: 3, hoverOffset: 6 }] },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
+          responsive: true, maintainAspectRatio: false,
           plugins: {
             legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, padding: 12 } },
-            tooltip: {
-              backgroundColor: '#1a2030',
-              borderColor: 'rgba(255,255,255,.12)',
-              borderWidth: 1,
-              titleColor: '#edf0f8',
-              bodyColor: '#edf0f8',
-              padding: 10,
-            },
+            tooltip: { backgroundColor: '#1a2030', borderColor: 'rgba(255,255,255,.12)', borderWidth: 1, titleColor: '#edf0f8', bodyColor: '#edf0f8', padding: 10 },
           },
         },
       });
@@ -1173,50 +1111,28 @@ function renderOverview(data) {
 
     <div class="charts-grid">
       <div class="chart-card">
-        <div class="chart-head">
-          <div>
-            <div class="chart-title">Revenue &amp; Pending Rent — Last 6 Months</div>
-            <div class="chart-sub">Paid vs outstanding, in KES</div>
-          </div>
-        </div>
+        <div class="chart-head"><div><div class="chart-title">Revenue &amp; Pending Rent — Last 6 Months</div><div class="chart-sub">Paid vs outstanding, in KES</div></div></div>
         <div class="chart-body"><canvas id="chart-revenue"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head">
-          <div>
-            <div class="chart-title">Unit Status</div>
-            <div class="chart-sub">Across all properties</div>
-          </div>
-        </div>
+        <div class="chart-head"><div><div class="chart-title">Unit Status</div><div class="chart-sub">Across all properties</div></div></div>
         <div class="chart-body chart-sm"><canvas id="chart-occupancy"></canvas></div>
       </div>
     </div>
 
     <div class="charts-grid">
       <div class="chart-card">
-        <div class="chart-head">
-          <div>
-            <div class="chart-title">Portfolio Performance</div>
-            <div class="chart-sub">Occupied vs vacant units per property</div>
-          </div>
-        </div>
+        <div class="chart-head"><div><div class="chart-title">Portfolio Performance</div><div class="chart-sub">Occupied vs vacant units per property</div></div></div>
         <div class="chart-body"><canvas id="chart-properties"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-head">
-          <div>
-            <div class="chart-title">Payment Status</div>
-            <div class="chart-sub">Counts of payment records</div>
-          </div>
-        </div>
+        <div class="chart-head"><div><div class="chart-title">Payment Status</div><div class="chart-sub">Counts of payment records</div></div></div>
         <div class="chart-body chart-sm"><canvas id="chart-payments"></canvas></div>
       </div>
     </div>
 
     <div class="panel" style="margin-bottom:24px">
-      <div class="panel-head">
-        <div class="panel-title">Quick Actions</div>
-      </div>
+      <div class="panel-head"><div class="panel-title">Quick Actions</div></div>
       <div class="panel-body">
         <div class="quick-grid" style="margin-top:0">
           <div class="quick-card" onclick="openPropertyModal()"><div class="quick-num">+</div><h4>Add a property</h4><p>Expand your portfolio.</p></div>
@@ -1230,6 +1146,9 @@ function renderOverview(data) {
   renderOverviewCharts(data);
 }
 
+/* ══════════════════════════════════════════════════════
+   OVERVIEW CHARTS
+══════════════════════════════════════════════════════ */
 function renderOverviewCharts(data) {
   if (typeof Chart === 'undefined') return;
   const charts = data.charts || {};
@@ -1261,58 +1180,19 @@ function renderOverviewCharts(data) {
       data: {
         labels,
         datasets: [
-          {
-            label: 'Paid',
-            data: paid,
-            borderColor: '#b8834a',
-            backgroundColor: grad,
-            borderWidth: 2,
-            fill: true,
-            tension: 0.35,
-            pointRadius: 4,
-            pointBackgroundColor: '#b8834a',
-            pointBorderColor: '#131722',
-            pointBorderWidth: 2,
-          },
-          {
-            label: 'Pending / Overdue',
-            data: pend,
-            borderColor: '#f5a623',
-            backgroundColor: 'rgba(245,166,35,0)',
-            borderWidth: 2,
-            borderDash: [5, 4],
-            fill: false,
-            tension: 0.35,
-            pointRadius: 4,
-            pointBackgroundColor: '#f5a623',
-            pointBorderColor: '#131722',
-            pointBorderWidth: 2,
-          },
+          { label: 'Paid', data: paid, borderColor: '#b8834a', backgroundColor: grad, borderWidth: 2, fill: true, tension: 0.35, pointRadius: 4, pointBackgroundColor: '#b8834a', pointBorderColor: '#131722', pointBorderWidth: 2 },
+          { label: 'Pending / Overdue', data: pend, borderColor: '#f5a623', backgroundColor: 'rgba(245,166,35,0)', borderWidth: 2, borderDash: [5, 4], fill: false, tension: 0.35, pointRadius: 4, pointBackgroundColor: '#f5a623', pointBorderColor: '#131722', pointBorderWidth: 2 },
         ],
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
+        responsive: true, maintainAspectRatio: false,
         plugins: {
           legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, padding: 14 } },
-          tooltip: {
-            backgroundColor: '#1a2030',
-            borderColor: 'rgba(255,255,255,.12)',
-            borderWidth: 1,
-            titleColor: '#edf0f8',
-            bodyColor: '#edf0f8',
-            padding: 10,
-            callbacks: { label: ctx => `${ctx.dataset.label}: ${fmtMoney(ctx.parsed.y)}` },
-          },
+          tooltip: { backgroundColor: '#1a2030', borderColor: 'rgba(255,255,255,.12)', borderWidth: 1, titleColor: '#edf0f8', bodyColor: '#edf0f8', padding: 10, callbacks: { label: ctx => `${ctx.dataset.label}: ${fmtMoney(ctx.parsed.y)}` } },
         },
         scales: {
           x: { grid: { display: false }, ticks: tickOpts },
-          y: {
-            beginAtZero: true, grid: gridOpts, ticks: {
-              ...tickOpts,
-              callback: v => v >= 1000 ? (v / 1000) + 'k' : v,
-            },
-          },
+          y: { beginAtZero: true, grid: gridOpts, ticks: { ...tickOpts, callback: v => v >= 1000 ? (v / 1000) + 'k' : v } },
         },
       },
     });
@@ -1320,34 +1200,46 @@ function renderOverviewCharts(data) {
 
   const occEl = document.getElementById('chart-occupancy');
   if (occEl) {
-    const hasData = (s.occupiedUnits + s.vacantUnits + (s.reservedUnits || 0) + (s.maintUnits || 0)) > 0;
-    if (hasData) {
+    const unitList = Array.isArray(state.units) ? state.units : [];
+    const norm = v => String(v ?? '').trim().toLowerCase();
+
+    const computed = { occupied: 0, vacant: 0, reserved: 0, maintenance: 0 };
+    unitList.forEach(u => {
+      const st = norm(u.status);
+      if      (st === 'occupied')    computed.occupied++;
+      else if (st === 'vacant')      computed.vacant++;
+      else if (st === 'reserved')    computed.reserved++;
+      else if (st === 'maintenance') computed.maintenance++;
+    });
+
+    const occ   = Math.max(Number(s.occupiedUnits || 0), computed.occupied);
+    const vac   = Math.max(Number(s.vacantUnits   || 0), computed.vacant);
+    const res   = Math.max(Number(s.reservedUnits || 0), computed.reserved);
+    const maint = Math.max(Number(s.maintUnits    || 0), computed.maintenance);
+
+    console.log('[overview] Unit status counts →', {
+      backend:  { occ: s.occupiedUnits, vac: s.vacantUnits, res: s.reservedUnits, maint: s.maintUnits, total: s.totalUnits },
+      computed: computed,
+      used:     { occ, vac, res, maint },
+      unitsInMemory: unitList.length,
+    });
+
+    if ((occ + vac + res + maint) > 0) {
       chartInstances.occupancy = new Chart(occEl, {
         type: 'doughnut',
         data: {
           labels: ['Occupied', 'Vacant', 'Reserved', 'Maintenance'],
           datasets: [{
-            data: [s.occupiedUnits, s.vacantUnits, s.reservedUnits || 0, s.maintUnits || 0],
+            data: [occ, vac, res, maint],
             backgroundColor: ['#3ecf8e', '#f5a623', '#4a9ef5', '#f06060'],
-            borderColor: '#131722',
-            borderWidth: 3,
-            hoverOffset: 6,
+            borderColor: '#131722', borderWidth: 3, hoverOffset: 6,
           }],
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: '68%',
+          responsive: true, maintainAspectRatio: false, cutout: '68%',
           plugins: {
             legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, padding: 12 } },
-            tooltip: {
-              backgroundColor: '#1a2030',
-              borderColor: 'rgba(255,255,255,.12)',
-              borderWidth: 1,
-              titleColor: '#edf0f8',
-              bodyColor: '#edf0f8',
-              padding: 10,
-            },
+            tooltip: { backgroundColor: '#1a2030', borderColor: 'rgba(255,255,255,.12)', borderWidth: 1, titleColor: '#edf0f8', bodyColor: '#edf0f8', padding: 10 },
           },
         },
       });
@@ -1365,35 +1257,15 @@ function renderOverviewCharts(data) {
         data: {
           labels: rows.map(p => p.name),
           datasets: [
-            {
-              label: 'Occupied',
-              data: rows.map(p => p.occupied),
-              backgroundColor: '#3ecf8e',
-              borderRadius: 6,
-              maxBarThickness: 40,
-            },
-            {
-              label: 'Vacant',
-              data: rows.map(p => p.vacant),
-              backgroundColor: '#f5a623',
-              borderRadius: 6,
-              maxBarThickness: 40,
-            },
+            { label: 'Occupied', data: rows.map(p => p.occupied), backgroundColor: '#3ecf8e', borderRadius: 6, maxBarThickness: 40 },
+            { label: 'Vacant',   data: rows.map(p => p.vacant),   backgroundColor: '#f5a623', borderRadius: 6, maxBarThickness: 40 },
           ],
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
+          responsive: true, maintainAspectRatio: false,
           plugins: {
             legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, padding: 14 } },
-            tooltip: {
-              backgroundColor: '#1a2030',
-              borderColor: 'rgba(255,255,255,.12)',
-              borderWidth: 1,
-              titleColor: '#edf0f8',
-              bodyColor: '#edf0f8',
-              padding: 10,
-            },
+            tooltip: { backgroundColor: '#1a2030', borderColor: 'rgba(255,255,255,.12)', borderWidth: 1, titleColor: '#edf0f8', bodyColor: '#edf0f8', padding: 10 },
           },
           scales: {
             x: { grid: { display: false }, ticks: tickOpts },
@@ -1418,25 +1290,14 @@ function renderOverviewCharts(data) {
           datasets: [{
             data: [ps.Paid, ps.Pending, ps.Overdue, ps.Failed],
             backgroundColor: ['#3ecf8e', '#f5a623', '#f06060', '#7a83a0'],
-            borderColor: '#131722',
-            borderWidth: 3,
-            hoverOffset: 6,
+            borderColor: '#131722', borderWidth: 3, hoverOffset: 6,
           }],
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: '68%',
+          responsive: true, maintainAspectRatio: false, cutout: '68%',
           plugins: {
             legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, padding: 12 } },
-            tooltip: {
-              backgroundColor: '#1a2030',
-              borderColor: 'rgba(255,255,255,.12)',
-              borderWidth: 1,
-              titleColor: '#edf0f8',
-              bodyColor: '#edf0f8',
-              padding: 10,
-            },
+            tooltip: { backgroundColor: '#1a2030', borderColor: 'rgba(255,255,255,.12)', borderWidth: 1, titleColor: '#edf0f8', bodyColor: '#edf0f8', padding: 10 },
           },
         },
       });
@@ -1486,7 +1347,6 @@ async function loadProperties() {
 }
 
 let modalHandler = null;
-
 let unitRows = [];
 
 function renderUnitRows() {
@@ -1502,8 +1362,7 @@ function renderUnitRows() {
       <input type="text"   placeholder="Floor"     value="${esc(u.floor||'')}"  oninput="updateUnitRow(${i},'floor',this.value)"/>
       <input type="number" placeholder="Rent KES"  value="${u.price ?? ''}"     oninput="updateUnitRow(${i},'price',this.value)"/>
       <select onchange="updateUnitRow(${i},'status',this.value)">
-        ${['Vacant','Occupied','Reserved','Maintenance'].map(s =>
-          `<option ${u.status === s ? 'selected' : ''}>${s}</option>`).join('')}
+        ${['Vacant','Occupied','Reserved','Maintenance'].map(s => `<option ${u.status === s ? 'selected' : ''}>${s}</option>`).join('')}
       </select>
       <button type="button" class="unit-remove" title="Remove" onclick="removeUnitRow(${i})">×</button>
     </div>
@@ -1520,10 +1379,8 @@ function addUnitRow() {
   const rows = document.querySelectorAll('#unitRows .unit-row');
   rows[rows.length - 1]?.querySelector('input')?.focus();
 }
-function removeUnitRow(i) {
-  unitRows.splice(i, 1);
-  renderUnitRows();
-}
+function removeUnitRow(i) { unitRows.splice(i, 1); renderUnitRows(); }
+
 function quickAddUnits() {
   const prefix = document.getElementById('qkPrefix').value.trim();
   const start  = parseInt(document.getElementById('qkStart').value, 10) || 1;
@@ -1536,12 +1393,7 @@ function quickAddUnits() {
   if (count > 200) return toast('Max 200 units per quick-add.', 'error');
 
   for (let i = 0; i < count; i++) {
-    unitRows.push({
-      name: `${prefix}-${start + i}`,
-      floor: floor || '',
-      price: rent,
-      status: 'Vacant',
-    });
+    unitRows.push({ name: `${prefix}-${start + i}`, floor: floor || '', price: rent, status: 'Vacant' });
   }
   renderUnitRows();
   toast(`${count} unit row(s) added.`, 'success');
@@ -1555,42 +1407,24 @@ function openPropertyModal(p = null) {
   document.getElementById('modalBody').innerHTML = `
     <div class="form-section">
       <div class="form-section-title">Property Details</div>
-      <div class="field"><label>Property Name *</label>
-        <input type="text" name="name" required value="${esc(p?.name||'')}" placeholder="e.g. Meridian Heights"/>
-      </div>
+      <div class="field"><label>Property Name *</label><input type="text" name="name" required value="${esc(p?.name||'')}" placeholder="e.g. Meridian Heights"/></div>
       <div class="frow">
         <div class="field"><label>Type</label>
-          <select name="type">
-            ${['Apartment','House','Commercial','Mixed-Use','Villa','Townhouse']
-              .map(t => `<option ${p?.type === t ? 'selected' : ''}>${t}</option>`).join('')}
-          </select>
+          <select name="type">${['Apartment','House','Commercial','Mixed-Use','Villa','Townhouse'].map(t => `<option ${p?.type === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
         </div>
         <div class="field"><label>Status</label>
-          <select name="status">
-            <option ${p?.status === 'Active'   ? 'selected' : ''}>Active</option>
-            <option ${p?.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
-          </select>
+          <select name="status"><option ${p?.status === 'Active' ? 'selected' : ''}>Active</option><option ${p?.status === 'Inactive' ? 'selected' : ''}>Inactive</option></select>
         </div>
       </div>
       <div class="frow">
-        <div class="field"><label>Location</label>
-          <input type="text" name="location" placeholder="e.g. Westlands, Nairobi" value="${esc(p?.location||'')}"/>
-        </div>
-        <div class="field"><label>Address</label>
-          <input type="text" name="address" value="${esc(p?.address||'')}"/>
-        </div>
+        <div class="field"><label>Location</label><input type="text" name="location" placeholder="e.g. Westlands, Nairobi" value="${esc(p?.location||'')}"/></div>
+        <div class="field"><label>Address</label><input type="text" name="address" value="${esc(p?.address||'')}"/></div>
       </div>
       <div class="frow">
-        <div class="field"><label>Contact Name</label>
-          <input type="text" name="contactName" value="${esc(p?.contactName||'')}"/>
-        </div>
-        <div class="field"><label>Contact Phone</label>
-          <input type="tel" name="contactPhone" value="${esc(p?.contactPhone||'')}"/>
-        </div>
+        <div class="field"><label>Contact Name</label><input type="text" name="contactName" value="${esc(p?.contactName||'')}"/></div>
+        <div class="field"><label>Contact Phone</label><input type="tel" name="contactPhone" value="${esc(p?.contactPhone||'')}"/></div>
       </div>
-      <div class="field"><label>Description</label>
-        <textarea name="description">${esc(p?.description||'')}</textarea>
-      </div>
+      <div class="field"><label>Description</label><textarea name="description">${esc(p?.description||'')}</textarea></div>
     </div>
 
     <div class="form-section">
@@ -1598,7 +1432,6 @@ function openPropertyModal(p = null) {
         <span>Apartments / Units in this property</span>
         <span class="form-hint">${isEdit ? 'Existing units stay as they are; rows added here will be appended.' : 'Optional — you can also add these later from the Units section.'}</span>
       </div>
-
       <div class="quick-add">
         <input id="qkPrefix" placeholder="Prefix (A)"/>
         <input id="qkStart" type="number" min="1" value="101" placeholder="Start #"/>
@@ -1607,12 +1440,8 @@ function openPropertyModal(p = null) {
         <input id="qkRent"  type="number" min="0" placeholder="Rent (KES)"/>
         <button type="button" class="btn btn-outline btn-sm" onclick="quickAddUnits()">Quick add</button>
       </div>
-
       <div id="unitRows" class="unit-rows"></div>
-
-      <button type="button" class="btn btn-outline btn-sm" style="margin-top:10px" onclick="addUnitRow()">
-        + Add unit
-      </button>
+      <button type="button" class="btn btn-outline btn-sm" style="margin-top:10px" onclick="addUnitRow()">+ Add unit</button>
     </div>
   `;
   renderUnitRows();
@@ -1633,18 +1462,12 @@ function openPropertyModal(p = null) {
 
     const cleanUnits = unitRows
       .filter(u => u.name && u.name.trim())
-      .map(u => ({
-        name:   u.name.trim(),
-        floor:  u.floor || '',
-        price:  Number(u.price) || 0,
-        status: u.status || 'Vacant',
-      }));
+      .map(u => ({ name: u.name.trim(), floor: u.floor || '', price: Number(u.price) || 0, status: u.status || 'Vacant' }));
 
     if (isEdit) {
       await api(`/api/properties/${p._id}`, { method: 'PUT', body: JSON.stringify(payload) });
       if (cleanUnits.length) {
-        await api(`/api/properties/${p._id}/units`,
-          { method: 'POST', body: JSON.stringify({ units: cleanUnits }) });
+        await api(`/api/properties/${p._id}/units`, { method: 'POST', body: JSON.stringify({ units: cleanUnits }) });
       }
       toast(`Property updated${cleanUnits.length ? ` · ${cleanUnits.length} unit(s) added` : ''}.`, 'success');
     } else {
@@ -1654,7 +1477,6 @@ function openPropertyModal(p = null) {
     }
 
     closeModal();
-
     state.propsLoaded = false;
     state.unitsLoaded = false;
     loadProperties();
@@ -1685,10 +1507,7 @@ async function loadUnits() {
   const el = document.getElementById('unitsList');
   el.innerHTML = `<div class="empty" style="border-style:solid"><div class="empty-desc">Loading units…</div></div>`;
   try {
-    const [props, list] = await Promise.all([
-      api('/api/properties'),
-      api('/products'),
-    ]);
+    const [props, list] = await Promise.all([api('/api/properties'), api('/products')]);
     state.properties  = props;
     state.propsLoaded = true;
     state.units       = list;
@@ -1697,12 +1516,7 @@ async function loadUnits() {
     document.getElementById('badgeUnits').textContent = list.length;
 
     if (!list.length) {
-      el.innerHTML = `<div class="empty">
-        <div class="empty-ico">⌂</div>
-        <div class="empty-title">No units yet</div>
-        <div class="empty-desc">Add units to a property — you can also create them in bulk when adding a property.</div>
-        <button class="btn btn-primary" onclick="openUnitModal()">+ Add Unit</button>
-      </div>`;
+      el.innerHTML = `<div class="empty"><div class="empty-ico">⌂</div><div class="empty-title">No units yet</div><div class="empty-desc">Add units to a property — you can also create them in bulk when adding a property.</div><button class="btn btn-primary" onclick="openUnitModal()">+ Add Unit</button></div>`;
       return;
     }
 
@@ -1713,7 +1527,6 @@ async function loadUnits() {
     });
 
     const sections = [];
-
     props.forEach(p => {
       const unitsInProp = grouped[p.name];
       if (!unitsInProp || !unitsInProp.length) return;
@@ -1739,7 +1552,6 @@ async function loadUnits() {
     }
 
     el.innerHTML = sections.join('');
-
     el.querySelectorAll('[data-add-unit]').forEach(btn => {
       btn.addEventListener('click', () => {
         const pid = btn.getAttribute('data-add-unit');
@@ -1748,12 +1560,7 @@ async function loadUnits() {
       });
     });
   } catch (err) {
-    el.innerHTML = `<div class="empty">
-      <div class="empty-ico">⚠</div>
-      <div class="empty-title">Couldn't load units</div>
-      <div class="empty-desc">${esc(err.message)}</div>
-      <button class="btn btn-primary" onclick="loadUnits()">Retry</button>
-    </div>`;
+    el.innerHTML = `<div class="empty"><div class="empty-ico">⚠</div><div class="empty-title">Couldn't load units</div><div class="empty-desc">${esc(err.message)}</div><button class="btn btn-primary" onclick="loadUnits()">Retry</button></div>`;
   }
 }
 
@@ -1762,9 +1569,7 @@ function renderUnitGroup({ title, subtitle, units, propertyId, propertyName }) {
   const vacant   = units.filter(u => u.status === 'Vacant').length;
   const monthly  = units.reduce((s, u) => s + (u.price || 0), 0);
 
-  const addBtn = propertyId
-    ? `<button class="btn btn-outline btn-sm" data-add-unit="${propertyId}">+ Add Unit to this property</button>`
-    : '';
+  const addBtn = propertyId ? `<button class="btn btn-outline btn-sm" data-add-unit="${propertyId}">+ Add Unit to this property</button>` : '';
 
   const rows = units.map(u => `
     <tr>
@@ -1775,10 +1580,8 @@ function renderUnitGroup({ title, subtitle, units, propertyId, propertyName }) {
       <td>${esc(u.tenant && u.tenant !== '—' ? u.tenant : '—')}</td>
       <td><span class="pill ${pillForStatus(u.status)}">${esc(u.status)}</span></td>
       <td class="actions">
-        <button class="btn btn-outline btn-sm"
-                onclick='openUnitModal(${JSON.stringify(u).replace(/'/g, "&#39;")})'>Edit</button>
-        <button class="btn btn-danger btn-sm"
-                onclick="deleteUnit('${u._id}')">Delete</button>
+        <button class="btn btn-outline btn-sm" onclick='openUnitModal(${JSON.stringify(u).replace(/'/g, "&#39;")})'>Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteUnit('${u._id}')">Delete</button>
       </td>
     </tr>`).join('');
 
@@ -1787,79 +1590,47 @@ function renderUnitGroup({ title, subtitle, units, propertyId, propertyName }) {
       <div class="units-group-head">
         <div>
           <div class="units-group-title">${esc(title)}</div>
-          <div class="units-group-sub">
-            ${esc(subtitle)} &middot; ${occupied} occupied &middot; ${vacant} vacant &middot; ${fmtMoney(monthly)}/month
-          </div>
+          <div class="units-group-sub">${esc(subtitle)} &middot; ${occupied} occupied &middot; ${vacant} vacant &middot; ${fmtMoney(monthly)}/month</div>
         </div>
         ${addBtn}
       </div>
-      <div class="panel">
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Unit</th><th>Property</th><th>Floor</th><th>Rent</th>
-                <th>Tenant</th><th>Status</th><th class="actions">Actions</th>
-              </tr>
-            </thead>
-            <tbody>${rows}</tbody>
-          </table>
-        </div>
-      </div>
+      <div class="panel"><div class="table-wrap"><table>
+        <thead><tr><th>Unit</th><th>Property</th><th>Floor</th><th>Rent</th><th>Tenant</th><th>Status</th><th class="actions">Actions</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div></div>
     </div>`;
 }
 
-/* ══════════════════════════════════════════════════════
-   UNIT MODAL
-══════════════════════════════════════════════════════ */
 async function openUnitModal(u = null, presetProperty = null) {
   document.getElementById('modalTitle').textContent = u ? 'Edit Unit' : 'Add Unit';
 
   if (!state.properties || !state.properties.length) {
     try { state.properties = await api('/api/properties'); state.propsLoaded = true; } catch {}
   }
-
   if (!state.tenants || !state.tenants.length) {
-    try { state.tenants = await api('/api/tenants'); state.tenantsLoaded = true; }
-    catch { state.tenants = []; }
+    try { state.tenants = await api('/api/tenants'); state.tenantsLoaded = true; } catch { state.tenants = []; }
   }
 
   const props   = state.properties || [];
   const tenants = state.tenants    || [];
-
   const selectedProperty = (u && u.property) || presetProperty || (props[0]?.name || '');
 
   document.getElementById('modalBody').innerHTML = `
-    <div class="field">
-      <label>Unit Name / Number *</label>
-      <input type="text" name="name" required value="${esc(u?.name || '')}" placeholder="e.g. A-101"/>
-    </div>
+    <div class="field"><label>Unit Name / Number *</label><input type="text" name="name" required value="${esc(u?.name || '')}" placeholder="e.g. A-101"/></div>
     <div class="frow">
-      <div class="field">
-        <label>Property</label>
+      <div class="field"><label>Property</label>
         <select name="property">
           <option value="">— Select property —</option>
           ${props.map(p => `<option value="${esc(p.name)}" ${selectedProperty === p.name ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}
-          ${selectedProperty && !props.find(p => p.name === selectedProperty)
-            ? `<option selected>${esc(selectedProperty)}</option>` : ''}
+          ${selectedProperty && !props.find(p => p.name === selectedProperty) ? `<option selected>${esc(selectedProperty)}</option>` : ''}
         </select>
       </div>
-      <div class="field">
-        <label>Floor</label>
-        <input type="text" name="floor" value="${esc(u?.floor && u.floor !== '—' ? u.floor : '')}"/>
-      </div>
+      <div class="field"><label>Floor</label><input type="text" name="floor" value="${esc(u?.floor && u.floor !== '—' ? u.floor : '')}"/></div>
     </div>
     <div class="frow">
-      <div class="field">
-        <label>Monthly Rent (KES) *</label>
-        <input type="number" name="price" required min="0" value="${u?.price ?? ''}"/>
-      </div>
-      <div class="field">
-        <label>Status</label>
-        <select name="status">
-          ${['Vacant','Occupied','Reserved','Maintenance']
-            .map(s => `<option ${u?.status === s ? 'selected' : ''}>${s}</option>`).join('')}
-        </select>
+      <div class="field"><label>Monthly Rent (KES) *</label><input type="number" name="price" required min="0" value="${u?.price ?? ''}"/></div>
+      <div class="field"><label>Status</label>
+        <select name="status">${['Vacant','Occupied','Reserved','Maintenance'].map(s => `<option ${u?.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select>
       </div>
     </div>
     <div class="field">
@@ -1871,9 +1642,7 @@ async function openUnitModal(u = null, presetProperty = null) {
           return `<option value="${t._id}" ${String(u?.tenantId || '') === String(t._id) ? 'selected' : ''}>${label}</option>`;
         }).join('')}
       </select>
-      <div style="font-size:11px;color:var(--t2);margin-top:4px">
-        Assigning a tenant will automatically mark this unit as <strong>Occupied</strong>.
-      </div>
+      <div style="font-size:11px;color:var(--t2);margin-top:4px">Assigning a tenant will automatically mark this unit as <strong>Occupied</strong>.</div>
     </div>`;
 
   modalHandler = async () => {
@@ -1888,25 +1657,18 @@ async function openUnitModal(u = null, presetProperty = null) {
     };
     if (!payload.name) throw new Error('Unit name is required.');
 
-    if (u) {
-      await api(`/products/${u._id}`, { method: 'PUT',  body: JSON.stringify(payload) });
-    } else {
-      await api('/products',           { method: 'POST', body: JSON.stringify(payload) });
-    }
+    if (u) await api(`/products/${u._id}`, { method: 'PUT',  body: JSON.stringify(payload) });
+    else   await api('/products',           { method: 'POST', body: JSON.stringify(payload) });
     toast(u ? 'Unit updated.' : 'Unit added.', 'success');
 
     closeModal();
-
     state.unitsLoaded   = false;
     state.propsLoaded   = false;
     state.tenantsLoaded = false;
-
     loadUnits();
     loadProperties();
     loadDashboard();
-    api('/api/tenants').then(l =>
-      document.getElementById('badgeTenants').textContent = l.length
-    ).catch(() => {});
+    api('/api/tenants').then(l => document.getElementById('badgeTenants').textContent = l.length).catch(() => {});
   };
 
   document.getElementById('modal').classList.add('open');
@@ -1922,8 +1684,7 @@ async function deleteUnit(id) {
     loadUnits();
     loadProperties();
     loadDashboard();
-  }
-  catch (e) { toast(e.message, 'error'); }
+  } catch (e) { toast(e.message, 'error'); }
 }
 
 /* ══════════════════════════════════════════════════════
@@ -1933,10 +1694,7 @@ async function loadTenants() {
   const el = document.getElementById('tenantsList');
   el.innerHTML = `<div class="empty" style="border-style:solid"><div class="empty-desc">Loading tenants…</div></div>`;
   try {
-    const [props, tenants] = await Promise.all([
-      api('/api/properties'),
-      api('/api/tenants'),
-    ]);
+    const [props, tenants] = await Promise.all([api('/api/properties'), api('/api/tenants')]);
     state.properties = props;
     state.propsLoaded = true;
     state.tenants = tenants;
@@ -1945,13 +1703,7 @@ async function loadTenants() {
     document.getElementById('badgeTenants').textContent = tenants.length;
 
     if (!props.length) {
-      el.innerHTML = `
-        <div class="empty">
-          <div class="empty-ico">▤</div>
-          <div class="empty-title">Add a property first</div>
-          <div class="empty-desc">You need at least one property (with units) before you can onboard tenants.</div>
-          <button class="btn btn-primary" onclick="switchView('properties'); openPropertyModal();">+ Add Property</button>
-        </div>`;
+      el.innerHTML = `<div class="empty"><div class="empty-ico">▤</div><div class="empty-title">Add a property first</div><div class="empty-desc">You need at least one property (with units) before you can onboard tenants.</div><button class="btn btn-primary" onclick="switchView('properties'); openPropertyModal();">+ Add Property</button></div>`;
       return;
     }
 
@@ -1989,12 +1741,8 @@ async function loadTenants() {
         <div class="panel-head"><div class="panel-title">Tenants Without a Property (${unassigned.length})</div></div>
         <div class="table-wrap"><table>
           <thead><tr><th>Tenant</th><th>Phone</th><th>Email</th></tr></thead>
-          <tbody>${unassigned.map(t => `
-            <tr>
-              <td>${esc(t.firstName + ' ' + t.lastName)}</td>
-              <td>${esc(t.phone || '—')}</td>
-              <td>${esc(t.email || '—')}</td>
-            </tr>`).join('')}</tbody></table></div>
+          <tbody>${unassigned.map(t => `<tr><td>${esc(t.firstName + ' ' + t.lastName)}</td><td>${esc(t.phone || '—')}</td><td>${esc(t.email || '—')}</td></tr>`).join('')}</tbody>
+        </table></div>
       </div>` : '';
 
     const allBlock = tenants.length ? `
@@ -2002,21 +1750,11 @@ async function loadTenants() {
         <div class="panel-head"><div class="panel-title">All Tenants (${tenants.length})</div></div>
         <div class="table-wrap"><table>
           <thead><tr><th>Tenant</th><th>Property</th><th>Unit</th><th>Phone</th><th>Email</th><th>Rent</th></tr></thead>
-          <tbody>${tenants.map(t => `
-            <tr>
-              <td>${esc(t.firstName + ' ' + t.lastName)}</td>
-              <td>${esc(t.property || '—')}</td>
-              <td>${esc(t.unitName || '—')}</td>
-              <td>${esc(t.phone || '—')}</td>
-              <td>${esc(t.email || '—')}</td>
-              <td>${t.rent ? fmtMoney(t.rent) : '—'}</td>
-            </tr>`).join('')}</tbody></table></div>
+          <tbody>${tenants.map(t => `<tr><td>${esc(t.firstName + ' ' + t.lastName)}</td><td>${esc(t.property || '—')}</td><td>${esc(t.unitName || '—')}</td><td>${esc(t.phone || '—')}</td><td>${esc(t.email || '—')}</td><td>${t.rent ? fmtMoney(t.rent) : '—'}</td></tr>`).join('')}</tbody>
+        </table></div>
       </div>` : '';
 
-    el.innerHTML = `
-      <div class="prop-grid">${propCards}</div>
-      ${unassignedBlock}
-      ${allBlock}`;
+    el.innerHTML = `<div class="prop-grid">${propCards}</div>${unassignedBlock}${allBlock}`;
   } catch (err) {
     el.innerHTML = `<div class="empty"><div class="empty-ico">⚠</div><div class="empty-title">Couldn't load tenants</div><div class="empty-desc">${esc(err.message)}</div><button class="btn btn-primary" onclick="loadTenants()">Retry</button></div>`;
   }
@@ -2027,18 +1765,12 @@ async function openTenantModalForProperty(propertyId) {
   if (!property) return toast('Property not found.', 'error');
 
   document.getElementById('modalTitle').textContent = `Add Tenant — ${property.name}`;
-  document.getElementById('modalBody').innerHTML =
-    `<div class="empty-desc" style="padding:20px;text-align:center">Loading units…</div>`;
+  document.getElementById('modalBody').innerHTML = `<div class="empty-desc" style="padding:20px;text-align:center">Loading units…</div>`;
   document.getElementById('modal').classList.add('open');
 
   let unitsInProperty = [];
-  try {
-    unitsInProperty = await api(`/api/properties/${propertyId}/units`);
-  } catch (err) {
-    toast(err.message, 'error');
-    closeModal();
-    return;
-  }
+  try { unitsInProperty = await api(`/api/properties/${propertyId}/units`); }
+  catch (err) { toast(err.message, 'error'); closeModal(); return; }
 
   const vacantUnits = unitsInProperty.filter(u => u.status === 'Vacant' && !u.tenantId);
 
@@ -2066,8 +1798,7 @@ async function openTenantModalForProperty(propertyId) {
       </div>
       <div class="field">
         <label>Temporary Password * (min 8 chars — tenant can change later)</label>
-        <input type="text" name="password" required minlength="8"
-               value="Welcome${Math.floor(1000 + Math.random() * 9000)}"/>
+        <input type="text" name="password" required minlength="8" value="Welcome${Math.floor(1000 + Math.random() * 9000)}"/>
       </div>
     </div>
 
@@ -2075,21 +1806,15 @@ async function openTenantModalForProperty(propertyId) {
       <div class="form-section-title">
         <span>Assign a Unit</span>
         <span class="form-hint">
-          ${vacantUnits.length
-            ? 'Only vacant units are shown'
-            : (unitsInProperty.length ? 'All units are occupied' : 'No units in this property yet')}
+          ${vacantUnits.length ? 'Only vacant units are shown' : (unitsInProperty.length ? 'All units are occupied' : 'No units in this property yet')}
         </span>
       </div>
-
       ${vacantUnits.length ? `
         <div class="field">
           <label>Unit *</label>
           <select name="unitId" required>
             <option value="">— Select a unit —</option>
-            ${vacantUnits.map(u => `
-              <option value="${u._id}">
-                ${esc(u.name)}${u.floor && u.floor !== '—' ? ` · Floor ${esc(u.floor)}` : ''} · ${fmtMoney(u.price)}
-              </option>`).join('')}
+            ${vacantUnits.map(u => `<option value="${u._id}">${esc(u.name)}${u.floor && u.floor !== '—' ? ` · Floor ${esc(u.floor)}` : ''} · ${fmtMoney(u.price)}</option>`).join('')}
           </select>
         </div>
       ` : `
@@ -2099,8 +1824,7 @@ async function openTenantModalForProperty(propertyId) {
             : 'This property has no units yet. Add units from the Properties section to assign this tenant, or create them without a unit for now.'}
         </div>
       `}
-    </div>
-  `;
+    </div>`;
 
   modalHandler = async () => {
     const form = document.getElementById('modalForm');
@@ -2125,7 +1849,6 @@ async function openTenantModalForProperty(propertyId) {
     state.tenantsLoaded = false;
     state.unitsLoaded   = false;
     state.propsLoaded   = false;
-
     loadTenants();
     loadProperties();
     loadDashboard();
@@ -2158,8 +1881,11 @@ async function loadMaintenance() {
       el.innerHTML = `<div class="empty" style="border:none"><div class="empty-ico">⚒</div><div class="empty-title">No maintenance requests</div><div class="empty-desc">${IS_TENANT ? "You haven't submitted any maintenance requests yet." : "When tenants report issues they'll appear here."}</div><button class="btn btn-primary" onclick="openMaintenanceModal()">${IS_TENANT ? '+ Report an Issue' : '+ New Request'}</button></div>`;
       return;
     }
+
+    const actionsHeader = CAN_MANAGE_MAINT ? `<th class="actions">Actions</th>` : '';
+
     el.innerHTML = `<div class="table-wrap"><table>
-      <thead><tr><th>Request</th><th>Property</th><th>Unit</th><th>Priority</th><th>Status</th><th>Date</th></tr></thead>
+      <thead><tr><th>Request</th><th>Property</th><th>Unit</th><th>Priority</th><th>Status</th><th>Date</th>${actionsHeader}</tr></thead>
       <tbody>${list.map(m => `
         <tr>
           <td>${esc(m.title)}</td>
@@ -2168,13 +1894,18 @@ async function loadMaintenance() {
           <td><span class="pill ${pillForStatus(m.priority)}">${esc(m.priority)}</span></td>
           <td><span class="pill ${pillForStatus(m.status)}">${esc(m.status)}</span></td>
           <td>${new Date(m.createdAt).toLocaleDateString()}</td>
+          ${CAN_MANAGE_MAINT ? `
+          <td class="actions">
+            <button class="btn btn-outline btn-sm" onclick='openMaintenanceModal(${JSON.stringify(m).replace(/'/g, "&#39;")})'>Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteMaintenance('${m._id}')">Delete</button>
+          </td>` : ''}
         </tr>`).join('')}</tbody></table></div>`;
   } catch (err) {
     el.innerHTML = `<div class="panel-body"><div class="empty-desc">${esc(err.message)}</div></div>`;
   }
 }
 
-async function openMaintenanceModal() {
+async function openMaintenanceModal(m = null) {
   if (IS_TENANT) {
     document.getElementById('modalTitle').textContent = 'Report a Maintenance Issue';
 
@@ -2215,12 +1946,7 @@ async function openMaintenanceModal() {
             </select>
           </div>
           <div class="field"><label>Priority</label>
-            <select name="priority">
-              <option>Low</option>
-              <option selected>Medium</option>
-              <option>High</option>
-              <option>Urgent</option>
-            </select>
+            <select name="priority"><option>Low</option><option selected>Medium</option><option>High</option><option>Urgent</option></select>
           </div>
         </div>
         <div class="field"><label>Description</label><textarea name="description" placeholder="Please describe the issue in detail so the maintenance team can help…"></textarea></div>
@@ -2240,32 +1966,61 @@ async function openMaintenanceModal() {
       closeModal();
       state.maintLoaded = false;
       loadMaintenance();
+      loadDashboard();
     };
 
     document.getElementById('modal').classList.add('open');
     return;
   }
 
-  document.getElementById('modalTitle').textContent = 'New Maintenance Request';
+  const isEdit = !!m;
+  document.getElementById('modalTitle').textContent = isEdit ? 'Edit Maintenance Request' : 'New Maintenance Request';
+
+  if (!state.properties || !state.properties.length) {
+    try { state.properties = await api('/api/properties'); state.propsLoaded = true; } catch {}
+  }
+  if (!state.units || !state.units.length) {
+    try { state.units = await api('/products'); state.unitsLoaded = true; } catch {}
+  }
+
+  const props = state.properties || [];
+  const units = state.units || [];
+
   document.getElementById('modalBody').innerHTML = `
-    <div class="field"><label>Title *</label><input type="text" name="title" required placeholder="e.g. Leaking tap in kitchen"/></div>
+    <div class="field"><label>Title *</label><input type="text" name="title" required value="${esc(m?.title || '')}" placeholder="e.g. Leaking tap in kitchen"/></div>
     <div class="frow">
       <div class="field"><label>Property</label>
-        <select name="property"><option value="">— Select —</option>${(state.properties||[]).map(p=>`<option>${esc(p.name)}</option>`).join('')}</select>
+        <select name="property">
+          <option value="">— Select —</option>
+          ${props.map(p => `<option ${m?.property === p.name ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}
+        </select>
       </div>
       <div class="field"><label>Unit</label>
-        <select name="unit"><option value="">— Select —</option>${(state.units||[]).map(u=>`<option>${esc(u.name)}</option>`).join('')}</select>
+        <select name="unit">
+          <option value="">— Select —</option>
+          ${units.map(u => `<option ${m?.unit === u.name ? 'selected' : ''}>${esc(u.name)}</option>`).join('')}
+        </select>
       </div>
     </div>
     <div class="frow">
       <div class="field"><label>Priority</label>
-        <select name="priority">${['Low','Medium','High','Urgent'].map(p=>`<option>${p}</option>`).join('')}</select>
+        <select name="priority">${['Low','Medium','High','Urgent'].map(p=>`<option ${m?.priority === p ? 'selected' : ''}>${p}</option>`).join('')}</select>
       </div>
       <div class="field"><label>Status</label>
-        <select name="status">${['Open','In Progress','Resolved','Closed'].map(s=>`<option>${s}</option>`).join('')}</select>
+        <select name="status">${['Open','In Progress','Resolved','Closed'].map(s=>`<option ${m?.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select>
       </div>
     </div>
-    <div class="field"><label>Description</label><textarea name="description"></textarea></div>`;
+    <div class="frow">
+      <div class="field"><label>Category</label>
+        <select name="category">
+          <option value="">— Optional —</option>
+          ${['Plumbing','Electrical','HVAC / Air Conditioning','Carpentry','Appliance','Pest Control','Security','Other'].map(c => `<option ${m?.category === c ? 'selected' : ''}>${c}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field"><label>Assigned To</label><input type="text" name="assignedTo" value="${esc(m?.assignedTo || '')}" placeholder="Staff member name"/></div>
+    </div>
+    <div class="field"><label>Description</label><textarea name="description">${esc(m?.description || '')}</textarea></div>`;
+
   modalHandler = async () => {
     const form = document.getElementById('modalForm');
     const payload = {
@@ -2274,16 +2029,44 @@ async function openMaintenanceModal() {
       unit:        form.querySelector('[name="unit"]').value,
       priority:    form.querySelector('[name="priority"]').value,
       status:      form.querySelector('[name="status"]').value,
+      category:    form.querySelector('[name="category"]').value,
+      assignedTo:  form.querySelector('[name="assignedTo"]').value.trim(),
       description: form.querySelector('[name="description"]').value.trim(),
     };
-    await api('/maintenance', { method: 'POST', body: JSON.stringify(payload) });
-    toast('Maintenance request created.', 'success');
+    if (!payload.title) throw new Error('Please enter a title for the request.');
+
+    if (isEdit) {
+      await api(`/maintenance/${m._id}`, { method: 'PUT', body: JSON.stringify(payload) });
+      toast('Maintenance request updated.', 'success');
+    } else {
+      await api('/maintenance', { method: 'POST', body: JSON.stringify(payload) });
+      toast('Maintenance request created.', 'success');
+    }
+
     closeModal();
     state.maintLoaded = false;
     loadMaintenance();
     loadDashboard();
   };
+
   document.getElementById('modal').classList.add('open');
+}
+
+async function deleteMaintenance(id) {
+  if (!CAN_MANAGE_MAINT) {
+    toast('You do not have permission to delete maintenance requests.', 'error');
+    return;
+  }
+  if (!confirm('Delete this maintenance record? This cannot be undone.')) return;
+  try {
+    await api(`/maintenance/${id}`, { method: 'DELETE' });
+    toast('Maintenance record deleted.', 'success');
+    state.maintLoaded = false;
+    loadMaintenance();
+    loadDashboard();
+  } catch (err) {
+    toast(err.message, 'error');
+  }
 }
 
 /* ══════════════════════════════════════════════════════
@@ -2346,15 +2129,14 @@ async function loadPayments() {
           <div class="panel-head"><div class="panel-title">Payment History (${payments.length})</div></div>
           ${payments.length ? `<div class="table-wrap"><table>
             <thead><tr><th>Date</th><th>Amount</th><th>Type</th><th>Method</th><th>Reference</th><th>Status</th></tr></thead>
-            <tbody>${payments.map(p => `
-              <tr>
-                <td>${p.date ? new Date(p.date).toLocaleDateString() : '—'}</td>
-                <td>${fmtMoney(p.amount)}</td>
-                <td>${esc(p.type || 'Rent')}</td>
-                <td>${esc(p.method || '—')}</td>
-                <td>${esc(p.reference || '—')}</td>
-                <td><span class="pill ${pillForStatus(p.status)}">${esc(p.status)}</span></td>
-              </tr>`).join('')}</tbody>
+            <tbody>${payments.map(p => `<tr>
+              <td>${p.date ? new Date(p.date).toLocaleDateString() : '—'}</td>
+              <td>${fmtMoney(p.amount)}</td>
+              <td>${esc(p.type || 'Rent')}</td>
+              <td>${esc(p.method || '—')}</td>
+              <td>${esc(p.reference || '—')}</td>
+              <td><span class="pill ${pillForStatus(p.status)}">${esc(p.status)}</span></td>
+            </tr>`).join('')}</tbody>
           </table></div>` : `<div class="empty" style="border:none"><div class="empty-ico">₭</div><div class="empty-title">No payments yet</div><div class="empty-desc">Your payment history will appear here once payments are recorded.</div></div>`}
         </div>`;
 
@@ -2371,54 +2153,99 @@ async function loadPayments() {
       return;
     }
     el.innerHTML = `<div class="table-wrap"><table>
-      <thead><tr><th>Tenant</th><th>Property</th><th>Unit</th><th>Amount</th><th>Date</th><th>Method</th><th>Status</th></tr></thead>
-      <tbody>${list.map(p => `
-        <tr>
-          <td>${esc(p.tenant)}</td>
-          <td>${esc(p.property || '—')}</td>
-          <td>${esc(p.unit || '—')}</td>
-          <td>${fmtMoney(p.amount)}</td>
-          <td>${p.date ? new Date(p.date).toLocaleDateString() : '—'}</td>
-          <td>${esc(p.method)}</td>
-          <td><span class="pill ${pillForStatus(p.status)}">${esc(p.status)}</span></td>
-        </tr>`).join('')}</tbody></table></div>`;
+      <thead><tr><th>Tenant</th><th>Property</th><th>Unit</th><th>Amount</th><th>Date</th><th>Method</th><th>Status</th><th class="actions">Actions</th></tr></thead>
+      <tbody>${list.map(p => `<tr>
+        <td>${esc(p.tenant)}</td>
+        <td>${esc(p.property || '—')}</td>
+        <td>${esc(p.unit || '—')}</td>
+        <td>${fmtMoney(p.amount)}</td>
+        <td>${p.date ? new Date(p.date).toLocaleDateString() : '—'}</td>
+        <td>${esc(p.method)}</td>
+        <td><span class="pill ${pillForStatus(p.status)}">${esc(p.status)}</span></td>
+        <td class="actions">
+          <button class="btn btn-outline btn-sm" onclick='openReceiptModal(${JSON.stringify(p).replace(/'/g, "&#39;")})'>Receipt</button>
+          <button class="btn btn-outline btn-sm" onclick='openPaymentModal(${JSON.stringify(p).replace(/'/g, "&#39;")})'>Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deletePayment('${p._id}')">Delete</button>
+        </td>
+      </tr>`).join('')}</tbody></table></div>`;
   } catch (err) {
     el.innerHTML = `<div class="panel-body"><div class="empty-desc">${esc(err.message)}</div></div>`;
   }
 }
 
-function openPaymentModal() {
-  document.getElementById('modalTitle').textContent = 'Record Payment';
+async function openPaymentModal(payment = null) {
+  const isEdit = !!payment;
+  document.getElementById('modalTitle').textContent = isEdit ? 'Edit Payment' : 'Record Payment';
+
+  if (!state.properties || !state.properties.length) {
+    try { state.properties = await api('/api/properties'); } catch {}
+  }
+  if (!state.units || !state.units.length) {
+    try { state.units = await api('/products'); } catch {}
+  }
+  if (!state.tenants || !state.tenants.length) {
+    try { state.tenants = await api('/api/tenants'); } catch {}
+  }
+  const props   = state.properties || [];
+  const units   = state.units      || [];
+  const tenants = state.tenants    || [];
+
+  const dateVal = payment?.date
+    ? new Date(payment.date).toISOString().slice(0, 10)
+    : new Date().toISOString().slice(0, 10);
+
   document.getElementById('modalBody').innerHTML = `
     <div class="field"><label>Tenant *</label>
       <select name="tenantId" required>
         <option value="">— Select tenant —</option>
-        ${(state.tenants||[]).map(t=>`<option value="${t._id}">${esc(t.firstName + ' ' + t.lastName)}</option>`).join('')}
+        ${tenants.map(t => `<option value="${t._id}" ${String(payment?.tenantId || '') === String(t._id) ? 'selected' : ''}>${esc(t.firstName + ' ' + t.lastName)}</option>`).join('')}
       </select>
     </div>
     <div class="frow">
-      <div class="field"><label>Amount (KES) *</label><input type="number" name="amount" min="0" required/></div>
+      <div class="field"><label>Amount (KES) *</label>
+        <input type="number" name="amount" min="0" required value="${payment?.amount ?? ''}"/>
+      </div>
       <div class="field"><label>Type</label>
-        <select name="type"><option>Rent</option><option>Deposit</option><option>Service Charge</option><option>Other</option></select>
+        <select name="type">
+          ${['Rent','Deposit','Service Charge','Other'].map(t => `<option ${payment?.type === t ? 'selected' : ''}>${t}</option>`).join('')}
+        </select>
       </div>
     </div>
     <div class="frow">
       <div class="field"><label>Method</label>
-        <select name="method">${['M-Pesa','Bank','Cash','Other'].map(m=>`<option>${m}</option>`).join('')}</select>
+        <select name="method">
+          ${['M-Pesa','Bank','Cash','Other'].map(m => `<option ${payment?.method === m ? 'selected' : ''}>${m}</option>`).join('')}
+        </select>
       </div>
       <div class="field"><label>Status</label>
-        <select name="status">${['Paid','Pending','Failed','Overdue'].map(s=>`<option>${s}</option>`).join('')}</select>
+        <select name="status">
+          ${['Paid','Pending','Failed','Overdue'].map(s => `<option ${payment?.status === s ? 'selected' : ''}>${s}</option>`).join('')}
+        </select>
       </div>
     </div>
     <div class="frow">
       <div class="field"><label>Property</label>
-        <select name="property"><option value="">— Optional —</option>${(state.properties||[]).map(p=>`<option>${esc(p.name)}</option>`).join('')}</select>
+        <select name="property">
+          <option value="">— Optional —</option>
+          ${props.map(p => `<option ${payment?.property === p.name ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}
+        </select>
       </div>
       <div class="field"><label>Unit</label>
-        <select name="unit"><option value="">— Optional —</option>${(state.units||[]).map(u=>`<option>${esc(u.name)}</option>`).join('')}</select>
+        <select name="unit">
+          <option value="">— Optional —</option>
+          ${units.map(u => `<option ${payment?.unit === u.name ? 'selected' : ''}>${esc(u.name)}</option>`).join('')}
+        </select>
       </div>
     </div>
-    <div class="field"><label>Reference</label><input type="text" name="reference" placeholder="M-Pesa code, bank ref, etc."/></div>`;
+    <div class="frow">
+      <div class="field"><label>Date</label>
+        <input type="date" name="date" value="${dateVal}"/>
+      </div>
+      <div class="field"><label>Reference</label>
+        <input type="text" name="reference" value="${esc(payment?.reference || '')}" placeholder="M-Pesa code, bank ref, etc."/>
+      </div>
+    </div>`;
+
   modalHandler = async () => {
     const form = document.getElementById('modalForm');
     const payload = {
@@ -2429,16 +2256,36 @@ function openPaymentModal() {
       status:    form.querySelector('[name="status"]').value,
       property:  form.querySelector('[name="property"]').value,
       unit:      form.querySelector('[name="unit"]').value,
+      date:      form.querySelector('[name="date"]').value || new Date(),
       reference: form.querySelector('[name="reference"]').value.trim(),
     };
-    await api('/payments', { method: 'POST', body: JSON.stringify(payload) });
-    toast('Payment recorded.', 'success');
+
+    if (isEdit) {
+      await api(`/payments/${payment._id}`, { method: 'PUT', body: JSON.stringify(payload) });
+      toast('Payment updated.', 'success');
+    } else {
+      await api('/payments', { method: 'POST', body: JSON.stringify(payload) });
+      toast('Payment recorded.', 'success');
+    }
     closeModal();
     state.payLoaded = false;
     loadPayments();
     loadDashboard();
+    if (getActiveView() === 'documents') loadManagerDocuments();
   };
   document.getElementById('modal').classList.add('open');
+}
+
+async function deletePayment(id) {
+  if (!confirm('Delete this payment record? This cannot be undone.')) return;
+  try {
+    await api(`/payments/${id}`, { method: 'DELETE' });
+    toast('Payment deleted.', 'success');
+    state.payLoaded = false;
+    loadPayments();
+    loadDashboard();
+    if (getActiveView() === 'documents') loadManagerDocuments();
+  } catch (err) { toast(err.message, 'error'); }
 }
 
 /* ══════════════════════════════════════════════════════
@@ -2524,8 +2371,53 @@ async function savePassword(e) {
 }
 
 /* ══════════════════════════════════════════════════════
-   TENANT DOCUMENTS
+   DOCUMENTS — receipts for both managers and tenants
 ══════════════════════════════════════════════════════ */
+
+async function loadManagerDocuments() {
+  const el = document.getElementById('documentsList');
+  if (!el) return;
+  el.innerHTML = `<div class="empty" style="border-style:solid"><div class="empty-desc">Loading payment records…</div></div>`;
+  try {
+    const payments = await api('/payments');
+
+    if (!payments.length) {
+      el.innerHTML = `<div class="empty">
+        <div class="empty-ico">▦</div>
+        <div class="empty-title">No payment receipts yet</div>
+        <div class="empty-desc">Once you record a payment, its receipt will appear here — ready to view or download as PDF.</div>
+      </div>`;
+      return;
+    }
+
+    el.innerHTML = `
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">Payment Receipts (${payments.length})</div></div>
+        <div class="table-wrap"><table>
+          <thead><tr>
+            <th>Date</th><th>Receipt No.</th><th>Tenant</th><th>Amount</th>
+            <th>Type</th><th>Method</th><th>Status</th><th class="actions">Actions</th>
+          </tr></thead>
+          <tbody>${payments.map(p => `<tr>
+            <td>${p.date ? new Date(p.date).toLocaleDateString() : '—'}</td>
+            <td>${esc(p.reference || String(p._id).slice(-8).toUpperCase())}</td>
+            <td>${esc(p.tenant || '—')}</td>
+            <td>${fmtMoney(p.amount)}</td>
+            <td>${esc(p.type || 'Rent')}</td>
+            <td>${esc(p.method || '—')}</td>
+            <td><span class="pill ${pillForStatus(p.status)}">${esc(p.status)}</span></td>
+            <td class="actions">
+              <button class="btn btn-outline btn-sm" onclick='openReceiptModal(${JSON.stringify(p).replace(/'/g, "&#39;")})'>View</button>
+              <button class="btn btn-primary btn-sm" onclick='downloadReceiptPDF(${JSON.stringify(p).replace(/'/g, "&#39;")})'>PDF</button>
+            </td>
+          </tr>`).join('')}</tbody>
+        </table></div>
+      </div>`;
+  } catch (err) {
+    el.innerHTML = `<div class="panel-body"><div class="empty-desc">${esc(err.message)}</div></div>`;
+  }
+}
+
 async function loadTenantDocuments() {
   const el = document.getElementById('documentsList');
   if (!el) return;
@@ -2546,18 +2438,21 @@ async function loadTenantDocuments() {
       <div class="panel">
         <div class="panel-head"><div class="panel-title">My Receipts (${receipts.length})</div></div>
         <div class="table-wrap"><table>
-          <thead><tr><th>Date</th><th>Receipt No.</th><th>Amount</th><th>Type</th><th>Method</th><th class="actions">Actions</th></tr></thead>
-          <tbody>${receipts.map(r => `
-            <tr>
-              <td>${r.date ? new Date(r.date).toLocaleDateString() : '—'}</td>
-              <td>${esc(r.reference || String(r._id).slice(-8).toUpperCase())}</td>
-              <td>${fmtMoney(r.amount)}</td>
-              <td>${esc(r.type || 'Rent')}</td>
-              <td>${esc(r.method || '—')}</td>
-              <td class="actions">
-                <button class="btn btn-outline btn-sm" onclick='downloadReceipt(${JSON.stringify(r).replace(/'/g, "&#39;")})'>Download</button>
-              </td>
-            </tr>`).join('')}</tbody>
+          <thead><tr>
+            <th>Date</th><th>Receipt No.</th><th>Amount</th>
+            <th>Type</th><th>Method</th><th class="actions">Actions</th>
+          </tr></thead>
+          <tbody>${receipts.map(r => `<tr>
+            <td>${r.date ? new Date(r.date).toLocaleDateString() : '—'}</td>
+            <td>${esc(r.reference || String(r._id).slice(-8).toUpperCase())}</td>
+            <td>${fmtMoney(r.amount)}</td>
+            <td>${esc(r.type || 'Rent')}</td>
+            <td>${esc(r.method || '—')}</td>
+            <td class="actions">
+              <button class="btn btn-outline btn-sm" onclick='openReceiptModal(${JSON.stringify(r).replace(/'/g, "&#39;")})'>View</button>
+              <button class="btn btn-primary btn-sm" onclick='downloadReceiptPDF(${JSON.stringify(r).replace(/'/g, "&#39;")})'>PDF</button>
+            </td>
+          </tr>`).join('')}</tbody>
         </table></div>
       </div>`;
   } catch (err) {
@@ -2565,63 +2460,133 @@ async function loadTenantDocuments() {
   }
 }
 
-function downloadReceipt(payment) {
-  const me = SESSION;
+let currentReceiptPayment = null;
+
+function openReceiptModal(payment) {
+  currentReceiptPayment = payment;
+  const body = document.getElementById('receiptModalBody');
   const org = SESSION.organizationName || 'Meridian Properties';
   const receiptNo = payment.reference || String(payment._id).slice(-8).toUpperCase();
   const dateStr = payment.date
     ? new Date(payment.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
     : '—';
 
-  const html = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>Receipt ${receiptNo}</title>
-<style>
-  body{font-family:'Helvetica Neue',Arial,sans-serif;background:#f5f5f5;padding:40px 20px;margin:0;color:#222}
-  .receipt{max-width:560px;margin:0 auto;background:#fff;border-radius:12px;padding:36px 32px;box-shadow:0 4px 20px rgba(0,0,0,.08);border-top:6px solid #b8834a}
-  h1{font-size:22px;margin:0 0 4px;letter-spacing:.02em}
-  .brand{color:#b8834a;font-size:13px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:22px}
-  .row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee;font-size:14px}
-  .row:last-child{border-bottom:none}
-  .row .lbl{color:#888;text-transform:uppercase;font-size:11px;letter-spacing:.08em}
-  .row .val{font-weight:600;text-align:right;max-width:60%}
-  .amount{font-size:28px;color:#b8834a;font-weight:700;text-align:center;margin:22px 0;padding:16px;background:#faf7f3;border-radius:10px}
-  .foot{text-align:center;color:#999;font-size:11px;margin-top:24px}
-</style>
-</head>
-<body>
-  <div class="receipt">
-    <h1>Payment Receipt</h1>
-    <div class="brand">${esc(org)}</div>
-    <div class="row"><span class="lbl">Receipt No.</span><span class="val">${esc(receiptNo)}</span></div>
-    <div class="row"><span class="lbl">Date</span><span class="val">${esc(dateStr)}</span></div>
-    <div class="row"><span class="lbl">Tenant</span><span class="val">${esc((me.firstName || '') + ' ' + (me.lastName || ''))}</span></div>
-    <div class="row"><span class="lbl">Property</span><span class="val">${esc(payment.property || '—')}</span></div>
-    <div class="row"><span class="lbl">Unit</span><span class="val">${esc(payment.unit || '—')}</span></div>
-    <div class="row"><span class="lbl">Payment Type</span><span class="val">${esc(payment.type || 'Rent')}</span></div>
-    <div class="row"><span class="lbl">Method</span><span class="val">${esc(payment.method || '—')}</span></div>
-    <div class="row"><span class="lbl">Status</span><span class="val">${esc(payment.status)}</span></div>
-    <div class="amount">KES ${Number(payment.amount || 0).toLocaleString('en-KE')}</div>
-    <div class="foot">This is a computer-generated receipt. No signature required.</div>
-  </div>
-</body>
-</html>`;
+  const rows = [
+    ['Receipt No.', receiptNo],
+    ['Date', dateStr],
+    ['Tenant', payment.tenant || '—'],
+    ['Property', payment.property || '—'],
+    ['Unit', payment.unit || '—'],
+    ['Payment Type', payment.type || 'Rent'],
+    ['Method', payment.method || '—'],
+    ['Status', payment.status || '—'],
+  ];
 
-  const blob = new Blob([html], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `Receipt-${receiptNo}.html`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  body.innerHTML = `
+    <div style="background:#fff;color:#1a1a1a;border-radius:12px;padding:32px 28px;border-top:6px solid var(--copper)">
+      <h2 style="font-family:var(--font-serif);font-size:24px;font-weight:700;color:#1a1a1a;margin:0 0 4px;letter-spacing:.01em">Payment Receipt</h2>
+      <div style="font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--copper);font-weight:600;margin-bottom:22px">${esc(org)}</div>
+
+      ${rows.map(([k, v]) => `
+        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee;font-size:14px">
+          <span style="color:#888;text-transform:uppercase;font-size:11px;letter-spacing:.08em">${esc(k)}</span>
+          <span style="font-weight:600;text-align:right;max-width:60%;color:#1a1a1a">${esc(v)}</span>
+        </div>
+      `).join('')}
+
+      <div style="font-size:28px;color:#b8834a;font-weight:700;text-align:center;margin:22px 0;padding:16px;background:#faf7f3;border-radius:10px">
+        KES ${Number(payment.amount || 0).toLocaleString('en-KE')}
+      </div>
+
+      <div style="text-align:center;color:#999;font-size:11px">This is a computer-generated receipt. No signature required.</div>
+    </div>`;
+
+  document.getElementById('receiptPdfBtn').onclick = () => downloadReceiptPDF(payment);
+  document.getElementById('receiptModal').classList.add('open');
 }
 
+function closeReceiptModal() {
+  document.getElementById('receiptModal').classList.remove('open');
+  currentReceiptPayment = null;
+}
+
+function downloadReceiptPDF(payment) {
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    toast('PDF library not loaded yet — please try again in a moment.', 'error');
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+  const W = doc.internal.pageSize.getWidth();
+
+  const org = SESSION.organizationName || 'Meridian Properties';
+  const receiptNo = payment.reference || String(payment._id).slice(-8).toUpperCase();
+  const dateStr = payment.date
+    ? new Date(payment.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+    : '—';
+
+  doc.setFillColor(184, 131, 74);
+  doc.rect(0, 0, W, 8, 'F');
+
+  doc.setFont('times', 'bold');
+  doc.setFontSize(26);
+  doc.setTextColor(20, 20, 20);
+  doc.text('Payment Receipt', 40, 80);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(150, 120, 90);
+  doc.text(org.toUpperCase(), 40, 100);
+
+  const rows = [
+    ['Receipt No.', receiptNo],
+    ['Date', dateStr],
+    ['Tenant', payment.tenant || '—'],
+    ['Property', payment.property || '—'],
+    ['Unit', payment.unit || '—'],
+    ['Payment Type', payment.type || 'Rent'],
+    ['Method', payment.method || '—'],
+    ['Status', payment.status || '—'],
+  ];
+
+  let y = 150;
+  rows.forEach(([k, v]) => {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(150, 150, 150);
+    doc.text(String(k).toUpperCase(), 40, y);
+
+    doc.setFontSize(11);
+    doc.setTextColor(30, 30, 30);
+    doc.text(String(v), W - 40, y, { align: 'right' });
+
+    doc.setDrawColor(230, 230, 230);
+    doc.line(40, y + 8, W - 40, y + 8);
+    y += 28;
+  });
+
+  y += 30;
+  doc.setFillColor(250, 247, 243);
+  doc.roundedRect(40, y, W - 80, 64, 8, 8, 'F');
+  doc.setFont('times', 'bold');
+  doc.setFontSize(26);
+  doc.setTextColor(184, 131, 74);
+  doc.text('KES ' + Number(payment.amount || 0).toLocaleString('en-KE'), W / 2, y + 40, { align: 'center' });
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(160, 160, 160);
+  doc.text('This is a computer-generated receipt. No signature required.', W / 2, y + 110, { align: 'center' });
+
+  doc.save(`Receipt-${receiptNo}.pdf`);
+}
+
+document.getElementById('receiptModal').addEventListener('click', function (e) {
+  if (e.target === this) closeReceiptModal();
+});
+
 /* ══════════════════════════════════════════════════════
-   MODAL (shared)
+   MODAL
 ══════════════════════════════════════════════════════ */
 function closeModal() {
   document.getElementById('modal').classList.remove('open');
@@ -2650,7 +2615,7 @@ document.getElementById('modal').addEventListener('click', e => {
 });
 
 /* ══════════════════════════════════════════════════════
-   REAL-TIME POLLING
+   POLLING — every 15 seconds for near-real-time sync
 ══════════════════════════════════════════════════════ */
 function getActiveView() {
   const active = document.querySelector('.view.active');
@@ -2662,6 +2627,8 @@ async function refreshActiveView() {
   if (document.visibilityState !== 'visible') return;
   const modal = document.getElementById('modal');
   if (modal && modal.classList.contains('open')) return;
+  const rModal = document.getElementById('receiptModal');
+  if (rModal && rModal.classList.contains('open')) return;
 
   pollInFlight = true;
   try {
@@ -2672,21 +2639,17 @@ async function refreshActiveView() {
     else if (view === 'tenants')                    { state.tenantsLoaded = false; await loadTenants(); }
     else if (view === 'maintenance')                { state.maintLoaded = false;   await loadMaintenance(); }
     else if (view === 'payments')                   { state.payLoaded = false;     await loadPayments(); }
-    else if (view === 'documents' && IS_TENANT)     await loadTenantDocuments();
-  } catch (e) {
-    /* Silent */
-  } finally {
+    else if (view === 'documents') {
+      if (IS_TENANT) await loadTenantDocuments();
+      else           await loadManagerDocuments();
+    }
+  } catch (e) { /* silent */ } finally {
     pollInFlight = false;
   }
 }
 
-function startPolling() {
-  stopPolling();
-  pollTimer = setInterval(refreshActiveView, POLL_INTERVAL_MS);
-}
-function stopPolling() {
-  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-}
+function startPolling() { stopPolling(); pollTimer = setInterval(refreshActiveView, POLL_INTERVAL_MS); }
+function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
 
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') refreshActiveView();
