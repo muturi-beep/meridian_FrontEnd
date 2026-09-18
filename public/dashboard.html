@@ -265,11 +265,75 @@ td.actions{text-align:right;white-space:nowrap}
 }
 .units-group-sub{font-size:11.5px;color:var(--t2);margin-top:3px}
 
-@keyframes pulseLive{
-  0%  {box-shadow:0 0 0 0 rgba(62,207,142,.7)}
-  70% {box-shadow:0 0 0 8px rgba(62,207,142,0)}
-  100%{box-shadow:0 0 0 0 rgba(62,207,142,0)}
-}
+/* ══════════════════════════════════════════════════════
+   RECEIPT STYLES (light surface, printed look)
+══════════════════════════════════════════════════════ */
+.receipt{background:#fff;color:#1a1a1a;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.25)}
+.receipt-bar{height:6px;background:linear-gradient(90deg,#b8834a,#d4a46a)}
+.receipt-inner{padding:26px 24px}
+.receipt-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:18px}
+.receipt-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:#1a1a1a;letter-spacing:-.01em;line-height:1.1}
+.receipt-org{font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:#b8834a;font-weight:700;margin-top:5px}
+.receipt-badge{padding:5px 12px;border-radius:20px;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.receipt-badge.ok{background:#e8f9f0;color:#1a9e6a}
+.receipt-badge.warn{background:#fef4e3;color:#c77e14}
+.receipt-badge.danger{background:#fdeaea;color:#c94040}
+.receipt-badge.mute{background:#f0f0f4;color:#666}
+
+.receipt-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;padding:14px 0;border-top:1px solid #eee;border-bottom:1px solid #eee;margin-bottom:18px}
+.receipt-meta-item{display:flex;flex-direction:column;gap:3px}
+.receipt-meta-item .k{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:#999;font-weight:700}
+.receipt-meta-item .v{font-size:13px;color:#1a1a1a;font-weight:600}
+
+.receipt-amount-box{background:linear-gradient(135deg,#faf6f1,#f5efe7);border-radius:12px;padding:20px;text-align:center;margin-bottom:16px}
+.receipt-amount-box .k{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#8a6a44;font-weight:700;margin-bottom:6px}
+.receipt-amount-box .v{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:700;color:#b8834a;letter-spacing:-.02em;line-height:1}
+
+.receipt-balance{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:center;padding:16px;background:#f7f8fa;border-radius:10px;margin-bottom:18px}
+.receipt-balance .col{text-align:center}
+.receipt-balance .lbl{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:#999;font-weight:700;margin-bottom:5px}
+.receipt-balance .val{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:700;color:#1a1a1a;letter-spacing:-.01em;line-height:1}
+.receipt-balance .val.warn{color:#c77e14}
+.receipt-balance .val.ok{color:#1a9e6a}
+.receipt-balance .arrow{color:#c8c8c8;font-size:16px}
+
+.receipt-section{margin-bottom:16px}
+.receipt-section-title{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:#8a6a44;font-weight:700;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #eee}
+.receipt-alloc-table{width:100%;font-size:12.5px;border-collapse:collapse}
+.receipt-alloc-table td{padding:6px 0;color:#444;border-bottom:1px dashed #eee}
+.receipt-alloc-table td:last-child{text-align:right;font-weight:700;color:#1a1a1a;white-space:nowrap}
+.receipt-alloc-table tr:last-child td{border-bottom:none}
+
+.receipt-summary-row{display:flex;justify-content:space-between;font-size:12.5px;padding:6px 0;border-bottom:1px dashed #eee}
+.receipt-summary-row:last-child{border-bottom:none}
+.receipt-summary-row .k{color:#777}
+.receipt-summary-row .v{font-weight:700;color:#1a1a1a}
+.receipt-summary-row .v.ok{color:#1a9e6a}
+.receipt-summary-row .v.warn{color:#c77e14}
+
+.receipt-foot{margin-top:18px;padding-top:16px;border-top:1px solid #eee;text-align:center;font-size:11px;color:#999;line-height:1.6}
+.receipt-foot strong{color:#b8834a}
+
+/* ══════════════════════════════════════════════════════
+   PAYMENT PREVIEW BOX (modal)
+══════════════════════════════════════════════════════ */
+.payment-preview{background:var(--ink-3);border:1px solid var(--border);border-radius:var(--rs);padding:14px 16px;margin-bottom:16px;font-size:12.5px}
+.payment-preview .pp-head{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--copper-l);font-weight:700;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.payment-preview .pp-head span:last-child{font-weight:500;color:var(--t2);letter-spacing:0;text-transform:none;font-size:11px}
+.payment-preview .pp-row{display:flex;justify-content:space-between;padding:5px 0;color:var(--t1)}
+.payment-preview .pp-row .k{color:var(--t2)}
+.payment-preview .pp-row .v{font-weight:600}
+.payment-preview .pp-row .v.warn{color:var(--amber)}
+.payment-preview .pp-row .v.ok{color:var(--green)}
+.payment-preview .pp-arrow{text-align:center;color:var(--t2);padding:6px 0;font-size:14px;letter-spacing:.3em}
+.payment-preview .pp-after{border-top:1px dashed var(--border);padding-top:9px;margin-top:5px}
+.payment-preview .pp-alloc{margin-top:10px;padding-top:9px;border-top:1px dashed var(--border);font-size:11.5px;color:var(--t2)}
+.payment-preview .pp-alloc-item{display:flex;justify-content:space-between;padding:3px 0}
+.payment-preview .pp-alloc-item span:last-child{color:var(--t1);font-weight:600}
+.payment-preview .pp-empty{font-size:12px;color:var(--t2);text-align:center;padding:8px}
+
+/* Balance table tweaks */
+.bal-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 
 @media (max-width:1024px){
   .sidebar{transform:translateX(-100%)}
@@ -304,7 +368,10 @@ td.actions{text-align:right;white-space:nowrap}
   .unit-remove{grid-column:1/-1;width:100%;height:34px;font-size:18px}
   .units-group-head{flex-direction:column;align-items:stretch}
   .units-group-head .btn{width:100%;justify-content:center}
-  #liveIndicator{display:none !important}
+  .receipt-meta{grid-template-columns:1fr}
+  .receipt-balance{grid-template-columns:1fr;gap:6px}
+  .receipt-balance .arrow{display:none}
+  .receipt-amount-box .v{font-size:30px}
 }
 @media (max-width:400px){
   .stats-grid{grid-template-columns:1fr}
@@ -354,11 +421,6 @@ td.actions{text-align:right;white-space:nowrap}
         <div class="tb-sub" id="tbSub">Here's what's happening with your property portfolio today.</div>
       </div>
       <div class="tb-actions">
-        <span id="liveIndicator" title="Live — updates automatically"
-              style="display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--t2);padding:0 8px">
-          <span style="width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulseLive 2s infinite"></span>
-          Live
-        </span>
         <button class="tb-icon-btn" aria-label="Notifications">🔔<span class="tb-dot"></span></button>
         <button class="avatar-btn" id="avatarBtn">
           <div class="avatar" id="avatar">—</div>
@@ -571,7 +633,7 @@ td.actions{text-align:right;white-space:nowrap}
 
 <!-- RECEIPT MODAL -->
 <div class="modal" id="receiptModal">
-  <div class="modal-box" style="max-width:600px">
+  <div class="modal-box" style="max-width:560px">
     <div class="modal-head">
       <div class="modal-title">Payment Receipt</div>
       <button type="button" class="modal-close" onclick="closeReceiptModal()">×</button>
@@ -730,6 +792,8 @@ function pillForStatus(s) {
   const map = {
     'Occupied':'pill-green', 'Vacant':'pill-amber', 'Reserved':'pill-blue', 'Maintenance':'pill-red',
     'Paid':'pill-green', 'Pending':'pill-amber', 'Failed':'pill-red', 'Overdue':'pill-red',
+    'Partial':'pill-amber', 'Unpaid':'pill-red', 'No rent set':'pill-mute',
+    'Arrears':'pill-red', 'Deposit Due':'pill-blue',
     'Open':'pill-amber', 'In Progress':'pill-blue', 'Resolved':'pill-green', 'Closed':'pill-mute',
     'Active':'pill-green', 'Inactive':'pill-mute',
     'Low':'pill-mute', 'Medium':'pill-blue', 'High':'pill-amber', 'Urgent':'pill-red',
@@ -788,9 +852,6 @@ function switchView(name) {
     else loadManagerDocuments();
   }
 
-  /* ── Overview: always refresh so any status change (unit, maintenance,
-     tenant, payment) made from any view or by any user is reflected on
-     the pie chart when the user returns to Overview. ── */
   if (name === 'overview') {
     loadDashboard();
     requestAnimationFrame(() => {
@@ -805,7 +866,6 @@ function switchView(name) {
    LOGOUT
 ══════════════════════════════════════════════════════ */
 function logout() {
-  stopPolling();
   clearSession();
   ['mp_session','mp_user','mp_token','user','token','auth'].forEach(k => {
     try { sessionStorage.removeItem(k); localStorage.removeItem(k); } catch {}
@@ -824,11 +884,208 @@ const state = {
   propsLoaded: false, unitsLoaded: false, tenantsLoaded: false,
   maintLoaded: false, payLoaded: false,
   properties: [], units: [], tenants: [], maintenance: [], payments: [],
+  tenantBalances: [],
+  showAllBalances: false,
 };
 
-const POLL_INTERVAL_MS = 15000;
-let pollTimer = null;
-let pollInFlight = false;
+/* ══════════════════════════════════════════════════════
+   LEDGER ENGINE
+   ─────────────────────────────────────────────────────
+   Builds a running account per tenant:
+     • Deposit obligation (1× monthly rent by default)
+     • Monthly rent obligation from first payment → now
+     • FIFO allocation of every "Paid" record
+     • Per-payment snapshots: balance before / after + splits
+══════════════════════════════════════════════════════ */
+const DEPOSIT_MONTHS = 1; // security deposit = 1 × monthly rent
+
+function buildTenantLedger(tenant, allPayments) {
+  const monthlyRent = Number(tenant.rent) || 0;
+  const depositRequired = monthlyRent * DEPOSIT_MONTHS;
+
+  const tName = `${tenant.firstName || ''} ${tenant.lastName || ''}`.trim().toLowerCase();
+  const matched = (allPayments || []).filter(p => {
+    if (p.tenantId && String(p.tenantId) === String(tenant._id)) return true;
+    if (p.tenant && p.tenant.trim().toLowerCase() === tName) return true;
+    return false;
+  });
+
+  const paidPayments = matched
+    .filter(p => String(p.status || '').toLowerCase() === 'paid')
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  // Ledger start month
+  let startMonth;
+  if (paidPayments.length) {
+    const d = new Date(paidPayments[0].date);
+    startMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+  } else {
+    const n = new Date();
+    startMonth = new Date(n.getFullYear(), n.getMonth(), 1);
+  }
+
+  const now = new Date();
+  const endMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  // Obligations
+  const obligations = [];
+  if (depositRequired > 0) {
+    obligations.push({
+      id: 'deposit', type: 'Deposit', label: 'Security Deposit',
+      amount: depositRequired, date: new Date(startMonth), paid: 0,
+    });
+  }
+  let cursor = new Date(startMonth);
+  let guard = 0;
+  while (cursor <= endMonth && guard++ < 120) {
+    obligations.push({
+      id: `rent-${cursor.getFullYear()}-${cursor.getMonth()}`,
+      type: 'Rent',
+      label: cursor.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }),
+      amount: monthlyRent,
+      date: new Date(cursor),
+      paid: 0,
+    });
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+
+  // Allocate
+  const runningBalances = new Map();
+  let totalPaidTracked = 0;
+
+  for (const p of paidPayments) {
+    const amt = Number(p.amount) || 0;
+    const pDate = new Date(p.date);
+    const pType = String(p.type || 'Rent').trim();
+
+    const dueUpTo = obligations
+      .filter(o => new Date(o.date) <= pDate)
+      .reduce((s, o) => s + o.amount, 0);
+    const balanceBefore = Math.max(0, dueUpTo - totalPaidTracked);
+
+    const allocations = [];
+    if (pType === 'Deposit') {
+      const dep = obligations.find(o => o.type === 'Deposit');
+      if (dep) {
+        const room = Math.max(0, dep.amount - dep.paid);
+        const applied = Math.min(room, amt);
+        if (applied > 0) {
+          dep.paid += applied;
+          allocations.push({ label: dep.label, amount: applied, type: 'Deposit' });
+        }
+        const excess = amt - applied;
+        if (excess > 0) allocateFIFO(obligations, excess, allocations);
+      } else {
+        allocateFIFO(obligations, amt, allocations);
+      }
+    } else {
+      allocateFIFO(obligations, amt, allocations);
+    }
+
+    totalPaidTracked += amt;
+    const balanceAfter = Math.max(0, dueUpTo - totalPaidTracked);
+
+    runningBalances.set(String(p._id), {
+      amount: amt, dueUpTo, balanceBefore, balanceAfter,
+      allocations, type: pType, date: p.date, reference: p.reference,
+    });
+  }
+
+  const totalDue = obligations.reduce((s, o) => s + o.amount, 0);
+  const balance = Math.max(0, totalDue - totalPaidTracked);
+
+  const depositObl = obligations.find(o => o.type === 'Deposit');
+  const rentObls = obligations.filter(o => o.type === 'Rent');
+  const depositDue = depositObl?.amount || 0;
+  const depositPaid = depositObl?.paid || 0;
+  const rentDue = rentObls.reduce((s, o) => s + o.amount, 0);
+  const rentPaid = rentObls.reduce((s, o) => s + o.paid, 0);
+
+  const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const arrears = rentObls
+    .filter(o => new Date(o.date) < currentMonthStart)
+    .reduce((s, o) => s + Math.max(0, o.amount - o.paid), 0);
+
+  const cm = rentObls.find(o => o.date.getMonth() === now.getMonth() && o.date.getFullYear() === now.getFullYear());
+
+  return {
+    tenant,
+    monthlyRent,
+    depositRequired,
+    obligations,
+    payments: paidPayments,
+    totalDue, totalPaid: totalPaidTracked, balance,
+    depositDue, depositPaid, depositBalance: Math.max(0, depositDue - depositPaid),
+    rentDue, rentPaid, rentBalance: Math.max(0, rentDue - rentPaid),
+    runningBalances,
+    arrears,
+    currentMonth: {
+      due: cm?.amount || 0,
+      paid: cm?.paid || 0,
+      balance: cm ? Math.max(0, cm.amount - cm.paid) : 0,
+      label: now.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }),
+      fullyPaid: cm ? cm.paid >= cm.amount : true,
+    },
+  };
+}
+
+function allocateFIFO(obligations, amount, allocations) {
+  const rentObls = obligations.filter(o => o.type === 'Rent');
+  let remaining = amount;
+  for (const o of rentObls) {
+    if (remaining <= 0) break;
+    const room = Math.max(0, o.amount - o.paid);
+    if (room <= 0) continue;
+    const applied = Math.min(room, remaining);
+    o.paid += applied;
+    allocations.push({ label: o.label + ' rent', amount: applied, type: 'Rent', period: o.label });
+    remaining -= applied;
+  }
+  return remaining;
+}
+
+/** Clone + allocate without mutating, for previews. */
+function simulateAllocation(ledger, amount, type) {
+  const obligations = ledger.obligations.map(o => ({ ...o }));
+  const allocations = [];
+  const amt = Number(amount) || 0;
+
+  if (type === 'Deposit') {
+    const dep = obligations.find(o => o.type === 'Deposit');
+    if (dep) {
+      const room = Math.max(0, dep.amount - dep.paid);
+      const applied = Math.min(room, amt);
+      if (applied > 0) {
+        dep.paid += applied;
+        allocations.push({ label: dep.label, amount: applied, type: 'Deposit' });
+      }
+      const excess = amt - applied;
+      if (excess > 0) allocateFIFO(obligations, excess, allocations);
+    } else {
+      allocateFIFO(obligations, amt, allocations);
+    }
+  } else {
+    allocateFIFO(obligations, amt, allocations);
+  }
+
+  const totalDue = obligations.reduce((s, o) => s + o.amount, 0);
+  const totalPaid = obligations.reduce((s, o) => s + o.paid, 0);
+  const newBalance = Math.max(0, totalDue - totalPaid);
+
+  const dep = obligations.find(o => o.type === 'Deposit');
+  const rentObls = obligations.filter(o => o.type === 'Rent');
+  const newDepositPaid = dep?.paid || 0;
+  const newRentPaid = rentObls.reduce((s, o) => s + o.paid, 0);
+
+  return {
+    allocations,
+    newBalance,
+    newDepositPaid,
+    newRentPaid,
+    newDepositBalance: Math.max(0, (dep?.amount || 0) - newDepositPaid),
+    newRentBalance: Math.max(0, rentObls.reduce((s, o) => s + o.amount, 0) - newRentPaid),
+  };
+}
 
 /* ══════════════════════════════════════════════════════
    BOOTSTRAP
@@ -1216,13 +1473,6 @@ function renderOverviewCharts(data) {
     const vac   = Math.max(Number(s.vacantUnits   || 0), computed.vacant);
     const res   = Math.max(Number(s.reservedUnits || 0), computed.reserved);
     const maint = Math.max(Number(s.maintUnits    || 0), computed.maintenance);
-
-    console.log('[overview] Unit status counts →', {
-      backend:  { occ: s.occupiedUnits, vac: s.vacantUnits, res: s.reservedUnits, maint: s.maintUnits, total: s.totalUnits },
-      computed: computed,
-      used:     { occ, vac, res, maint },
-      unitsInMemory: unitList.length,
-    });
 
     if ((occ + vac + res + maint) > 0) {
       chartInstances.occupancy = new Chart(occEl, {
@@ -2070,8 +2320,226 @@ async function deleteMaintenance(id) {
 }
 
 /* ══════════════════════════════════════════════════════
-   PAYMENTS
+   PAYMENTS — with running ledger + partial payments
 ══════════════════════════════════════════════════════ */
+
+function computeTenantBalances(tenants, payments) {
+  return (tenants || []).map(t => {
+    const ledger = buildTenantLedger(t, payments);
+    let status;
+    if (ledger.balance <= 0)                        status = 'Paid';
+    else if (ledger.arrears > 0)                    status = 'Arrears';
+    else if (ledger.currentMonth.paid > 0)          status = 'Partial';
+    else                                            status = 'Unpaid';
+    if (ledger.monthlyRent <= 0 && ledger.balance <= 0) status = 'No rent set';
+
+    return {
+      id: t._id,
+      name: `${t.firstName || ''} ${t.lastName || ''}`.trim() || '—',
+      property: t.property || '',
+      unit: t.unitName || '',
+      phone: t.phone || '',
+      rent: ledger.monthlyRent,
+      currentPaid: ledger.currentMonth.paid,
+      currentBalance: ledger.currentMonth.balance,
+      arrears: ledger.arrears,
+      balance: ledger.balance,
+      rentBalance: ledger.rentBalance,
+      depositBalance: ledger.depositBalance,
+      depositPaid: ledger.depositPaid,
+      depositDue: ledger.depositDue,
+      totalPaid: ledger.totalPaid,
+      totalDue: ledger.totalDue,
+      currentMonthLabel: ledger.currentMonth.label,
+      currentMonthFullyPaid: ledger.currentMonth.fullyPaid,
+      ledger,
+      status,
+    };
+  }).sort((a, b) => b.balance - a.balance || a.name.localeCompare(b.name));
+}
+
+function renderBalancesPanel() {
+  const rows = state.tenantBalances || [];
+
+  if (!rows.length) {
+    return `<div class="empty">
+      <div class="empty-ico">☺</div>
+      <div class="empty-title">No tenants to track yet</div>
+      <div class="empty-desc">Add tenants to a property and their rent balances will appear here — who has paid, who hasn't, and exactly how much is outstanding.</div>
+      <button class="btn btn-primary" onclick="switchView('tenants')">Go to Tenants</button>
+    </div>`;
+  }
+
+  const unpaid = rows.filter(r => r.balance > 0);
+  const totalRent = rows.reduce((s, r) => s + r.rent, 0);
+  const totalPaid = rows.reduce((s, r) => s + r.totalPaid, 0);
+  const totalOutstanding = rows.reduce((s, r) => s + r.balance, 0);
+  const totalArrears = rows.reduce((s, r) => s + r.arrears, 0);
+  const fullyPaid = rows.filter(r => r.balance <= 0).length;
+  const rate = totalRent > 0 ? Math.round((rows.reduce((s, r) => s + r.currentPaid, 0) / totalRent) * 100) : 0;
+  const monthLabel = new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+
+  const visible = state.showAllBalances ? rows : unpaid;
+
+  const body = visible.length ? `
+    <div class="table-wrap"><table>
+      <thead><tr>
+        <th>Tenant</th><th>Property / Unit</th><th>Rent Due</th>
+        <th>This Month</th><th>Arrears</th><th>Deposit</th><th>Total Balance</th><th>Status</th><th class="actions">Actions</th>
+      </tr></thead>
+      <tbody>${visible.map(r => `
+        <tr>
+          <td>
+            <div style="font-weight:600">${esc(r.name)}</div>
+            ${r.phone ? `<div style="font-size:11px;color:var(--t2)">${esc(r.phone)}</div>` : ''}
+          </td>
+          <td>
+            <div>${esc(r.property || '—')}</div>
+            <div style="font-size:11px;color:var(--t2)">Unit ${esc(r.unit || '—')}</div>
+          </td>
+          <td>${r.rent ? fmtMoney(r.rent) : '—'}</td>
+          <td>
+            ${fmtMoney(r.currentPaid)}
+            ${r.currentBalance > 0 ? `<div style="font-size:10.5px;color:var(--amber);font-weight:600">−${fmtMoney(r.currentBalance)} left</div>` : `<div style="font-size:10.5px;color:var(--green);font-weight:600">✓ Paid</div>`}
+          </td>
+          <td>${r.arrears > 0 ? `<span style="color:var(--red);font-weight:600">${fmtMoney(r.arrears)}</span>` : '—'}</td>
+          <td>
+            ${r.depositDue > 0
+              ? (r.depositBalance > 0
+                  ? `<span style="color:var(--blue);font-weight:600">${fmtMoney(r.depositPaid)}</span><div style="font-size:10.5px;color:var(--t2)">of ${fmtMoney(r.depositDue)}</div>`
+                  : `<span style="color:var(--green);font-weight:600">✓ Paid</span>`)
+              : '—'}
+          </td>
+          <td style="font-weight:700;color:${r.balance > 0 ? 'var(--amber)' : 'var(--green)'}">
+            ${fmtMoney(r.balance)}
+          </td>
+          <td><span class="pill ${pillForStatus(r.status)}">${esc(r.status)}</span></td>
+          <td class="actions">
+            <div class="bal-actions">
+              <button class="btn btn-primary btn-sm" onclick='recordForTenant(${JSON.stringify({ tenantId: r.id, amount: r.balance || r.rent, property: r.property, unit: r.unit }).replace(/'/g, "&#39;")})'>Record Payment</button>
+            </div>
+          </td>
+        </tr>`).join('')}</tbody>
+    </table></div>` : `
+    <div class="empty" style="border:none">
+      <div class="empty-ico">✓</div>
+      <div class="empty-title">Everyone is fully paid up</div>
+      <div class="empty-desc">All ${rows.length} tenant${rows.length === 1 ? '' : 's'} have cleared their rent for ${esc(monthLabel)}. Nothing outstanding.</div>
+    </div>`;
+
+  return `
+    <div class="stats-grid" style="margin-bottom:18px">
+      <div class="stat-card">
+        <div class="stat-lbl">Expected Rent</div>
+        <div class="stat-val money">${fmtMoney(totalRent)}</div>
+        <div class="stat-sub">${rows.length} tenant${rows.length === 1 ? '' : 's'} &middot; ${esc(monthLabel)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl">Total Collected</div>
+        <div class="stat-val money" style="color:var(--green)">${fmtMoney(totalPaid)}</div>
+        <div class="stat-sub">${fullyPaid} tenant(s) fully settled</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl">Outstanding</div>
+        <div class="stat-val money" style="color:${totalOutstanding > 0 ? 'var(--amber)' : 'var(--green)'}">${fmtMoney(totalOutstanding)}</div>
+        <div class="stat-sub">${unpaid.length} tenant(s) owing${totalArrears > 0 ? ` · ${fmtMoney(totalArrears)} arrears` : ''}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-lbl">Collection Rate</div>
+        <div class="stat-val">${rate}%</div>
+        <div class="stat-sub">Of this month's rent</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Account Balances${state.showAllBalances ? ' — All Tenants' : ` (${unpaid.length})`}</div>
+          <div class="section-desc" style="margin-top:3px">
+            ${state.showAllBalances
+              ? `All ${rows.length} tenant${rows.length === 1 ? '' : 's'} &middot; ${esc(monthLabel)}`
+              : `${unpaid.length} of ${rows.length} tenant(s) still owe &middot; ${esc(monthLabel)}`}
+          </div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="toggleBalancesView()">${state.showAllBalances ? 'Show only owing' : `Show all ${rows.length}`}</button>
+      </div>
+      ${body}
+    </div>`;
+}
+
+function toggleBalancesView() {
+  state.showAllBalances = !state.showAllBalances;
+  const wrap = document.getElementById('balancesWrap');
+  if (wrap) wrap.innerHTML = renderBalancesPanel();
+}
+
+function recordForTenant(preset) {
+  openPaymentModal(null, preset);
+}
+
+/* Live preview inside the payment modal */
+function updatePaymentPreview() {
+  const box = document.getElementById('paymentPreview');
+  if (!box) return;
+  const form = document.getElementById('modalForm');
+  const tenantId = form.querySelector('[name="tenantId"]')?.value;
+  const amount   = Number(form.querySelector('[name="amount"]')?.value) || 0;
+  const type     = form.querySelector('[name="type"]')?.value || 'Rent';
+
+  if (!tenantId) {
+    box.innerHTML = `<div class="pp-empty">Select a tenant to preview their updated balance.</div>`;
+    return;
+  }
+  const tenant = (state.tenants || []).find(t => String(t._id) === String(tenantId));
+  if (!tenant) {
+    box.innerHTML = `<div class="pp-empty">Tenant not found.</div>`;
+    return;
+  }
+
+  const ledger = buildTenantLedger(tenant, state.payments || []);
+  const sim = simulateAllocation(ledger, amount, type);
+
+  const before = ledger.balance;
+  const after  = sim.newBalance;
+  const beforeClass = before > 0 ? 'warn' : 'ok';
+  const afterClass  = after  > 0 ? 'warn' : 'ok';
+
+  const allocRows = sim.allocations.length
+    ? sim.allocations.map(a => `<div class="pp-alloc-item"><span>${esc(a.label)}</span><span>${fmtMoney(a.amount)}</span></div>`).join('')
+    : `<div class="pp-alloc-item" style="opacity:.7"><span>No active obligation to apply to</span><span></span></div>`;
+
+  box.innerHTML = `
+    <div class="pp-head">
+      <span>Account Preview</span>
+      <span>${esc(tenant.firstName || '')} ${esc(tenant.lastName || '')}</span>
+    </div>
+    <div class="pp-row"><span class="k">Current balance</span><span class="v ${beforeClass}">${fmtMoney(before)}</span></div>
+    <div class="pp-row"><span class="k">Rent outstanding</span><span class="v">${fmtMoney(ledger.rentBalance)}</span></div>
+    <div class="pp-row"><span class="k">Deposit outstanding</span><span class="v">${fmtMoney(ledger.depositBalance)}</span></div>
+    <div class="pp-arrow">↓</div>
+    <div class="pp-after">
+      <div class="pp-row"><span class="k">After this payment</span><span class="v ${afterClass}">${fmtMoney(after)}</span></div>
+    </div>
+    ${sim.allocations.length ? `
+      <div class="pp-alloc">
+        <div style="margin-bottom:6px;font-weight:600;color:var(--t2)">Applied to:</div>
+        ${allocRows}
+      </div>` : ''}
+  `;
+}
+
+/* Auto-fills amount with the tenant's outstanding balance */
+function autoFillAmount(sel) {
+  const t = (state.tenants || []).find(x => String(x._id) === String(sel.value));
+  const amtEl = document.querySelector('#modalForm [name="amount"]');
+  if (!amtEl) return;
+  if (t && !amtEl.value) {
+    const ledger = buildTenantLedger(t, state.payments || []);
+    amtEl.value = ledger.balance || ledger.monthlyRent || '';
+  }
+  updatePaymentPreview();
+}
+
 async function loadPayments() {
   const el = document.getElementById('paymentsList');
   el.innerHTML = `<div class="panel-body"><div class="empty-desc">Loading payments…</div></div>`;
@@ -2128,7 +2596,7 @@ async function loadPayments() {
         <div class="panel">
           <div class="panel-head"><div class="panel-title">Payment History (${payments.length})</div></div>
           ${payments.length ? `<div class="table-wrap"><table>
-            <thead><tr><th>Date</th><th>Amount</th><th>Type</th><th>Method</th><th>Reference</th><th>Status</th></tr></thead>
+            <thead><tr><th>Date</th><th>Amount</th><th>Type</th><th>Method</th><th>Reference</th><th>Status</th><th class="actions">Receipt</th></tr></thead>
             <tbody>${payments.map(p => `<tr>
               <td>${p.date ? new Date(p.date).toLocaleDateString() : '—'}</td>
               <td>${fmtMoney(p.amount)}</td>
@@ -2136,6 +2604,7 @@ async function loadPayments() {
               <td>${esc(p.method || '—')}</td>
               <td>${esc(p.reference || '—')}</td>
               <td><span class="pill ${pillForStatus(p.status)}">${esc(p.status)}</span></td>
+              <td class="actions"><button class="btn btn-outline btn-sm" onclick='openReceiptModal(${JSON.stringify(p).replace(/'/g, "&#39;")})'>View</button></td>
             </tr>`).join('')}</tbody>
           </table></div>` : `<div class="empty" style="border:none"><div class="empty-ico">₭</div><div class="empty-title">No payments yet</div><div class="empty-desc">Your payment history will appear here once payments are recorded.</div></div>`}
         </div>`;
@@ -2144,21 +2613,45 @@ async function loadPayments() {
       return;
     }
 
-    const list = await api('/payments');
-    state.payments = list;
-    state.payLoaded = true;
+    /* ── MANAGER VIEW ─────────────────────────────────── */
+    const [list, tenants] = await Promise.all([
+      api('/payments'),
+      api('/api/tenants').catch(() => state.tenants || []),
+    ]);
 
-    if (!list.length) {
-      el.innerHTML = `<div class="empty" style="border:none"><div class="empty-ico">₭</div><div class="empty-title">No payments recorded</div><div class="empty-desc">Log rent payments here as they come in.</div><button class="btn btn-primary" onclick="openPaymentModal()">+ Record Payment</button></div>`;
-      return;
-    }
-    el.innerHTML = `<div class="table-wrap"><table>
-      <thead><tr><th>Tenant</th><th>Property</th><th>Unit</th><th>Amount</th><th>Date</th><th>Method</th><th>Status</th><th class="actions">Actions</th></tr></thead>
-      <tbody>${list.map(p => `<tr>
+    state.payments = list;
+    state.tenants  = Array.isArray(tenants) ? tenants : [];
+    state.tenantsLoaded = true;
+    state.payLoaded = true;
+    state.tenantBalances = computeTenantBalances(state.tenants, list);
+
+    const badgeT = document.getElementById('badgeTenants');
+    if (badgeT) badgeT.textContent = state.tenants.length;
+
+    // Attach running-balance info to each payment record for display
+    const paymentRow = (p) => {
+      const tenant = state.tenants.find(t =>
+        String(t._id) === String(p.tenantId) ||
+        `${t.firstName} ${t.lastName}`.trim().toLowerCase() === String(p.tenant || '').trim().toLowerCase()
+      );
+      let balanceNote = '';
+      if (tenant) {
+        const ledger = buildTenantLedger(tenant, list);
+        const snap = ledger.runningBalances.get(String(p._id));
+        if (snap && snap.balanceAfter > 0) {
+          balanceNote = `<div style="font-size:10.5px;color:var(--amber);margin-top:3px">Bal. after: ${fmtMoney(snap.balanceAfter)}</div>`;
+        } else if (snap && snap.balanceAfter === 0) {
+          balanceNote = `<div style="font-size:10.5px;color:var(--green);margin-top:3px">✓ Settled up</div>`;
+        }
+      }
+      return `<tr>
         <td>${esc(p.tenant)}</td>
         <td>${esc(p.property || '—')}</td>
         <td>${esc(p.unit || '—')}</td>
-        <td>${fmtMoney(p.amount)}</td>
+        <td>
+          ${fmtMoney(p.amount)}
+          ${balanceNote}
+        </td>
         <td>${p.date ? new Date(p.date).toLocaleDateString() : '—'}</td>
         <td>${esc(p.method)}</td>
         <td><span class="pill ${pillForStatus(p.status)}">${esc(p.status)}</span></td>
@@ -2167,13 +2660,28 @@ async function loadPayments() {
           <button class="btn btn-outline btn-sm" onclick='openPaymentModal(${JSON.stringify(p).replace(/'/g, "&#39;")})'>Edit</button>
           <button class="btn btn-danger btn-sm" onclick="deletePayment('${p._id}')">Delete</button>
         </td>
-      </tr>`).join('')}</tbody></table></div>`;
+      </tr>`;
+    };
+
+    const paymentsTable = list.length
+      ? `<div class="table-wrap"><table>
+          <thead><tr><th>Tenant</th><th>Property</th><th>Unit</th><th>Amount</th><th>Date</th><th>Method</th><th>Status</th><th class="actions">Actions</th></tr></thead>
+          <tbody>${list.map(paymentRow).join('')}</tbody>
+        </table></div>`
+      : `<div class="empty" style="border:none"><div class="empty-ico">₭</div><div class="empty-title">No payments recorded</div><div class="empty-desc">Log rent payments here as they come in.</div><button class="btn btn-primary" onclick="openPaymentModal()">+ Record Payment</button></div>`;
+
+    el.innerHTML = `
+      <div id="balancesWrap">${renderBalancesPanel()}</div>
+      <div class="panel" style="margin-top:24px">
+        <div class="panel-head"><div class="panel-title">Payment Records (${list.length})</div></div>
+        ${paymentsTable}
+      </div>`;
   } catch (err) {
     el.innerHTML = `<div class="panel-body"><div class="empty-desc">${esc(err.message)}</div></div>`;
   }
 }
 
-async function openPaymentModal(payment = null) {
+async function openPaymentModal(payment = null, preset = null) {
   const isEdit = !!payment;
   document.getElementById('modalTitle').textContent = isEdit ? 'Edit Payment' : 'Record Payment';
 
@@ -2186,27 +2694,40 @@ async function openPaymentModal(payment = null) {
   if (!state.tenants || !state.tenants.length) {
     try { state.tenants = await api('/api/tenants'); } catch {}
   }
+  if (!state.payments || !state.payments.length) {
+    try { state.payments = await api('/payments'); } catch {}
+  }
+
   const props   = state.properties || [];
   const units   = state.units      || [];
   const tenants = state.tenants    || [];
+
+  const selectedTenantId = String(payment?.tenantId || preset?.tenantId || '');
+  const selectedProperty = payment?.property || preset?.property || '';
+  const selectedUnit     = payment?.unit     || preset?.unit     || '';
+  const amountValue      = payment?.amount ?? preset?.amount ?? '';
 
   const dateVal = payment?.date
     ? new Date(payment.date).toISOString().slice(0, 10)
     : new Date().toISOString().slice(0, 10);
 
   document.getElementById('modalBody').innerHTML = `
+    <div class="payment-preview" id="paymentPreview">
+      <div class="pp-empty">Select a tenant to preview their updated balance.</div>
+    </div>
+
     <div class="field"><label>Tenant *</label>
-      <select name="tenantId" required>
+      <select name="tenantId" required onchange="autoFillAmount(this)">
         <option value="">— Select tenant —</option>
-        ${tenants.map(t => `<option value="${t._id}" ${String(payment?.tenantId || '') === String(t._id) ? 'selected' : ''}>${esc(t.firstName + ' ' + t.lastName)}</option>`).join('')}
+        ${tenants.map(t => `<option value="${t._id}" ${selectedTenantId === String(t._id) ? 'selected' : ''}>${esc(t.firstName + ' ' + t.lastName)}</option>`).join('')}
       </select>
     </div>
     <div class="frow">
       <div class="field"><label>Amount (KES) *</label>
-        <input type="number" name="amount" min="0" required value="${payment?.amount ?? ''}"/>
+        <input type="number" name="amount" min="0" required value="${amountValue}" oninput="updatePaymentPreview()"/>
       </div>
       <div class="field"><label>Type</label>
-        <select name="type">
+        <select name="type" onchange="updatePaymentPreview()">
           ${['Rent','Deposit','Service Charge','Other'].map(t => `<option ${payment?.type === t ? 'selected' : ''}>${t}</option>`).join('')}
         </select>
       </div>
@@ -2227,13 +2748,13 @@ async function openPaymentModal(payment = null) {
       <div class="field"><label>Property</label>
         <select name="property">
           <option value="">— Optional —</option>
-          ${props.map(p => `<option ${payment?.property === p.name ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}
+          ${props.map(p => `<option ${selectedProperty === p.name ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}
         </select>
       </div>
       <div class="field"><label>Unit</label>
         <select name="unit">
           <option value="">— Optional —</option>
-          ${units.map(u => `<option ${payment?.unit === u.name ? 'selected' : ''}>${esc(u.name)}</option>`).join('')}
+          ${units.map(u => `<option ${selectedUnit === u.name ? 'selected' : ''}>${esc(u.name)}</option>`).join('')}
         </select>
       </div>
     </div>
@@ -2245,6 +2766,9 @@ async function openPaymentModal(payment = null) {
         <input type="text" name="reference" value="${esc(payment?.reference || '')}" placeholder="M-Pesa code, bank ref, etc."/>
       </div>
     </div>`;
+
+  // Initial preview
+  setTimeout(updatePaymentPreview, 0);
 
   modalHandler = async () => {
     const form = document.getElementById('modalForm');
@@ -2371,7 +2895,7 @@ async function savePassword(e) {
 }
 
 /* ══════════════════════════════════════════════════════
-   DOCUMENTS — receipts for both managers and tenants
+   DOCUMENTS
 ══════════════════════════════════════════════════════ */
 
 async function loadManagerDocuments() {
@@ -2380,6 +2904,7 @@ async function loadManagerDocuments() {
   el.innerHTML = `<div class="empty" style="border-style:solid"><div class="empty-desc">Loading payment records…</div></div>`;
   try {
     const payments = await api('/payments');
+    state.payments = payments;
 
     if (!payments.length) {
       el.innerHTML = `<div class="empty">
@@ -2460,47 +2985,146 @@ async function loadTenantDocuments() {
   }
 }
 
+/* ══════════════════════════════════════════════════════
+   RECEIPT (enhanced: running balance + allocations)
+══════════════════════════════════════════════════════ */
+
 let currentReceiptPayment = null;
 
-function openReceiptModal(payment) {
-  currentReceiptPayment = payment;
-  const body = document.getElementById('receiptModalBody');
+/** Resolve the tenant + ledger context for a payment record. */
+function resolveReceiptContext(payment) {
+  let tenant = null;
+  let payments = [];
+
+  if (IS_TENANT) {
+    const s = state.tenantSummary;
+    if (s?.user) {
+      tenant = {
+        _id: s.user._id, firstName: s.user.firstName, lastName: s.user.lastName,
+        rent: s.rent, property: s.property, unitName: s.unit?.name,
+      };
+      payments = s.payments || [];
+    }
+  } else {
+    tenant = (state.tenants || []).find(t =>
+      String(t._id) === String(payment.tenantId) ||
+      `${t.firstName} ${t.lastName}`.trim().toLowerCase() === String(payment.tenant || '').trim().toLowerCase()
+    );
+    payments = state.payments || [];
+  }
+
+  if (!tenant) return { tenant: null, ledger: null, snapshot: null };
+
+  const ledger = buildTenantLedger(tenant, payments);
+  const snapshot = ledger.runningBalances.get(String(payment._id)) || null;
+  return { tenant, ledger, snapshot };
+}
+
+function buildReceiptHTML(payment) {
+  const { tenant, ledger, snapshot } = resolveReceiptContext(payment);
   const org = SESSION.organizationName || 'Meridian Properties';
-  const receiptNo = payment.reference || String(payment._id).slice(-8).toUpperCase();
+  const receiptNo = payment.reference || String(payment._id || '').slice(-8).toUpperCase() || 'RCP-0001';
   const dateStr = payment.date
     ? new Date(payment.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
     : '—';
 
-  const rows = [
-    ['Receipt No.', receiptNo],
-    ['Date', dateStr],
-    ['Tenant', payment.tenant || '—'],
-    ['Property', payment.property || '—'],
-    ['Unit', payment.unit || '—'],
-    ['Payment Type', payment.type || 'Rent'],
-    ['Method', payment.method || '—'],
-    ['Status', payment.status || '—'],
-  ];
+  const amount = Number(payment.amount) || 0;
+  const balanceBefore = snapshot?.balanceBefore ?? ledger?.balance ?? 0;
+  const balanceAfter  = snapshot?.balanceAfter  ?? Math.max(0, balanceBefore - amount);
+  const allocations   = snapshot?.allocations   || [];
 
-  body.innerHTML = `
-    <div style="background:#fff;color:#1a1a1a;border-radius:12px;padding:32px 28px;border-top:6px solid var(--copper)">
-      <h2 style="font-family:var(--font-serif);font-size:24px;font-weight:700;color:#1a1a1a;margin:0 0 4px;letter-spacing:.01em">Payment Receipt</h2>
-      <div style="font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--copper);font-weight:600;margin-bottom:22px">${esc(org)}</div>
+  // Status
+  let badgeClass = 'mute', badgeLabel = 'Recorded';
+  if (String(payment.status).toLowerCase() === 'paid') {
+    if (balanceAfter <= 0) { badgeClass = 'ok';     badgeLabel = 'Paid in Full'; }
+    else                   { badgeClass = 'warn';   badgeLabel = 'Partial Payment'; }
+  } else if (String(payment.status).toLowerCase() === 'pending') {
+    badgeClass = 'warn'; badgeLabel = 'Pending';
+  } else if (['overdue','failed'].includes(String(payment.status).toLowerCase())) {
+    badgeClass = 'danger'; badgeLabel = String(payment.status);
+  }
 
-      ${rows.map(([k, v]) => `
-        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee;font-size:14px">
-          <span style="color:#888;text-transform:uppercase;font-size:11px;letter-spacing:.08em">${esc(k)}</span>
-          <span style="font-weight:600;text-align:right;max-width:60%;color:#1a1a1a">${esc(v)}</span>
+  const allocRows = allocations.length
+    ? `<div class="receipt-section">
+        <div class="receipt-section-title">Applied To</div>
+        <table class="receipt-alloc-table">
+          ${allocations.map(a => `<tr><td>${esc(a.label)}</td><td>${fmtMoney(a.amount)}</td></tr>`).join('')}
+        </table>
+      </div>`
+    : '';
+
+  let summaryBlock = '';
+  if (ledger) {
+    const depState = ledger.depositDue > 0
+      ? (ledger.depositBalance > 0
+          ? `<span class="v warn">${fmtMoney(ledger.depositPaid)} / ${fmtMoney(ledger.depositDue)}</span>`
+          : `<span class="v ok">✓ ${fmtMoney(ledger.depositPaid)}</span>`)
+      : `<span class="v">—</span>`;
+
+    summaryBlock = `
+      <div class="receipt-section">
+        <div class="receipt-section-title">Account Summary</div>
+        <div class="receipt-summary-row"><span class="k">Rent due (to date)</span><span class="v">${fmtMoney(ledger.rentDue)}</span></div>
+        <div class="receipt-summary-row"><span class="k">Rent paid</span><span class="v ok">${fmtMoney(ledger.rentPaid)}</span></div>
+        <div class="receipt-summary-row"><span class="k">Rent balance</span><span class="v ${ledger.rentBalance > 0 ? 'warn' : 'ok'}">${ledger.rentBalance > 0 ? fmtMoney(ledger.rentBalance) : '✓ Settled'}</span></div>
+        <div class="receipt-summary-row"><span class="k">Deposit (paid / required)</span>${depState}</div>
+      </div>`;
+  }
+
+  const footMessage = balanceAfter > 0
+    ? `Partial payment received. <strong>${fmtMoney(balanceAfter)}</strong> remains outstanding on this account.`
+    : `Account is fully settled as of this payment. Thank you!`;
+
+  return `
+    <div class="receipt">
+      <div class="receipt-bar"></div>
+      <div class="receipt-inner">
+        <div class="receipt-head">
+          <div>
+            <div class="receipt-title">Payment Receipt</div>
+            <div class="receipt-org">${esc(org)}</div>
+          </div>
+          <div class="receipt-badge ${badgeClass}">${esc(badgeLabel)}</div>
         </div>
-      `).join('')}
 
-      <div style="font-size:28px;color:#b8834a;font-weight:700;text-align:center;margin:22px 0;padding:16px;background:#faf7f3;border-radius:10px">
-        KES ${Number(payment.amount || 0).toLocaleString('en-KE')}
+        <div class="receipt-meta">
+          <div class="receipt-meta-item"><span class="k">Receipt No.</span><span class="v">${esc(receiptNo)}</span></div>
+          <div class="receipt-meta-item"><span class="k">Date</span><span class="v">${dateStr}</span></div>
+          <div class="receipt-meta-item"><span class="k">Tenant</span><span class="v">${esc(payment.tenant || '—')}</span></div>
+          <div class="receipt-meta-item"><span class="k">Property / Unit</span><span class="v">${esc(payment.property || '—')}${payment.unit ? ' · ' + esc(payment.unit) : ''}</span></div>
+          <div class="receipt-meta-item"><span class="k">Payment Type</span><span class="v">${esc(payment.type || 'Rent')}</span></div>
+          <div class="receipt-meta-item"><span class="k">Method</span><span class="v">${esc(payment.method || '—')}</span></div>
+        </div>
+
+        <div class="receipt-amount-box">
+          <div class="k">Amount Paid</div>
+          <div class="v">${fmtMoney(amount)}</div>
+        </div>
+
+        <div class="receipt-balance">
+          <div class="col">
+            <div class="lbl">Balance Before</div>
+            <div class="val ${balanceBefore > 0 ? 'warn' : 'ok'}">${fmtMoney(balanceBefore)}</div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="col">
+            <div class="lbl">Balance After</div>
+            <div class="val ${balanceAfter > 0 ? 'warn' : 'ok'}">${fmtMoney(balanceAfter)}</div>
+          </div>
+        </div>
+
+        ${allocRows}
+        ${summaryBlock}
+
+        <div class="receipt-foot">${footMessage}<br>This is a computer-generated receipt. No signature required.</div>
       </div>
-
-      <div style="text-align:center;color:#999;font-size:11px">This is a computer-generated receipt. No signature required.</div>
     </div>`;
+}
 
+function openReceiptModal(payment) {
+  currentReceiptPayment = payment;
+  const body = document.getElementById('receiptModalBody');
+  body.innerHTML = buildReceiptHTML(payment);
   document.getElementById('receiptPdfBtn').onclick = () => downloadReceiptPDF(payment);
   document.getElementById('receiptModal').classList.add('open');
 }
@@ -2519,40 +3143,65 @@ function downloadReceiptPDF(payment) {
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
   const W = doc.internal.pageSize.getWidth();
 
+  const { ledger, snapshot } = resolveReceiptContext(payment);
   const org = SESSION.organizationName || 'Meridian Properties';
-  const receiptNo = payment.reference || String(payment._id).slice(-8).toUpperCase();
+  const receiptNo = payment.reference || String(payment._id || '').slice(-8).toUpperCase() || 'RCP-0001';
   const dateStr = payment.date
     ? new Date(payment.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
     : '—';
 
+  const amount = Number(payment.amount) || 0;
+  const balanceBefore = snapshot?.balanceBefore ?? ledger?.balance ?? 0;
+  const balanceAfter  = snapshot?.balanceAfter  ?? Math.max(0, balanceBefore - amount);
+
+  // Status label
+  let statusLabel = String(payment.status || 'Recorded');
+  let statusColor = [120, 120, 120];
+  if (String(payment.status).toLowerCase() === 'paid') {
+    if (balanceAfter <= 0) { statusLabel = 'PAID IN FULL'; statusColor = [26, 158, 106]; }
+    else                   { statusLabel = 'PARTIAL PAYMENT'; statusColor = [199, 126, 20]; }
+  } else if (['overdue','failed'].includes(String(payment.status).toLowerCase())) {
+    statusColor = [201, 64, 64];
+  } else if (String(payment.status).toLowerCase() === 'pending') {
+    statusColor = [199, 126, 20];
+  }
+
+  // Copper top bar
   doc.setFillColor(184, 131, 74);
   doc.rect(0, 0, W, 8, 'F');
 
+  // Title
   doc.setFont('times', 'bold');
   doc.setFontSize(26);
   doc.setTextColor(20, 20, 20);
   doc.text('Payment Receipt', 40, 80);
 
-  doc.setFont('helvetica', 'normal');
+  doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
-  doc.setTextColor(150, 120, 90);
+  doc.setTextColor(184, 131, 74);
   doc.text(org.toUpperCase(), 40, 100);
 
-  const rows = [
+  // Status badge (top-right)
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
+  doc.text(statusLabel, W - 40, 80, { align: 'right' });
+
+  let y = 130;
+
+  // Meta block
+  const meta = [
     ['Receipt No.', receiptNo],
     ['Date', dateStr],
     ['Tenant', payment.tenant || '—'],
-    ['Property', payment.property || '—'],
-    ['Unit', payment.unit || '—'],
+    ['Property / Unit', `${payment.property || '—'}${payment.unit ? ' · ' + payment.unit : ''}`],
     ['Payment Type', payment.type || 'Rent'],
     ['Method', payment.method || '—'],
-    ['Status', payment.status || '—'],
   ];
 
-  let y = 150;
-  rows.forEach(([k, v]) => {
+  meta.forEach(([k, v]) => {
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
+    doc.setFontSize(8.5);
     doc.setTextColor(150, 150, 150);
     doc.text(String(k).toUpperCase(), 40, y);
 
@@ -2560,23 +3209,117 @@ function downloadReceiptPDF(payment) {
     doc.setTextColor(30, 30, 30);
     doc.text(String(v), W - 40, y, { align: 'right' });
 
-    doc.setDrawColor(230, 230, 230);
-    doc.line(40, y + 8, W - 40, y + 8);
-    y += 28;
+    doc.setDrawColor(235, 235, 235);
+    doc.line(40, y + 7, W - 40, y + 7);
+    y += 24;
   });
 
-  y += 30;
-  doc.setFillColor(250, 247, 243);
-  doc.roundedRect(40, y, W - 80, 64, 8, 8, 'F');
-  doc.setFont('times', 'bold');
-  doc.setFontSize(26);
-  doc.setTextColor(184, 131, 74);
-  doc.text('KES ' + Number(payment.amount || 0).toLocaleString('en-KE'), W / 2, y + 40, { align: 'center' });
+  y += 14;
 
+  // Amount box
+  doc.setFillColor(250, 246, 241);
+  doc.roundedRect(40, y, W - 80, 62, 8, 8, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(138, 106, 68);
+  doc.text('AMOUNT PAID', W / 2, y + 18, { align: 'center' });
+  doc.setFont('times', 'bold');
+  doc.setFontSize(28);
+  doc.setTextColor(184, 131, 74);
+  doc.text('KES ' + amount.toLocaleString('en-KE'), W / 2, y + 48, { align: 'center' });
+  y += 84;
+
+  // Balance before → after
+  const halfW = (W - 80) / 2 - 10;
+  doc.setFillColor(247, 248, 250);
+  doc.roundedRect(40, y, halfW, 56, 6, 6, 'F');
+  doc.roundedRect(40 + halfW + 20, y, halfW, 56, 6, 6, 'F');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(150, 150, 150);
+  doc.text('BALANCE BEFORE', 40 + halfW / 2, y + 18, { align: 'center' });
+  doc.text('BALANCE AFTER',  40 + halfW + 20 + halfW / 2, y + 18, { align: 'center' });
+
+  doc.setFont('times', 'bold');
+  doc.setFontSize(16);
+  doc.setTextColor(balanceBefore > 0 ? 199 : 26, balanceBefore > 0 ? 126 : 158, balanceBefore > 0 ? 20 : 106);
+  doc.text(fmtMoney(balanceBefore), 40 + halfW / 2, y + 42, { align: 'center' });
+
+  doc.setTextColor(balanceAfter > 0 ? 199 : 26, balanceAfter > 0 ? 126 : 158, balanceAfter > 0 ? 20 : 106);
+  doc.text(fmtMoney(balanceAfter), 40 + halfW + 20 + halfW / 2, y + 42, { align: 'center' });
+  y += 80;
+
+  // Allocation table
+  if (snapshot?.allocations?.length) {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(138, 106, 68);
+    doc.text('APPLIED TO', 40, y);
+    doc.setDrawColor(235, 235, 235);
+    doc.line(40, y + 6, W - 40, y + 6);
+    y += 20;
+
+    snapshot.allocations.forEach(a => {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10.5);
+      doc.setTextColor(60, 60, 60);
+      doc.text(String(a.label), 40, y);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(30, 30, 30);
+      doc.text(fmtMoney(a.amount), W - 40, y, { align: 'right' });
+      y += 18;
+    });
+    y += 6;
+  }
+
+  // Account summary
+  if (ledger) {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(138, 106, 68);
+    doc.text('ACCOUNT SUMMARY', 40, y);
+    doc.setDrawColor(235, 235, 235);
+    doc.line(40, y + 6, W - 40, y + 6);
+    y += 20;
+
+    const summary = [
+      ['Rent due (to date)', ledger.rentDue],
+      ['Rent paid', ledger.rentPaid],
+      ['Rent balance', ledger.rentBalance],
+    ];
+    if (ledger.depositDue > 0) {
+      summary.push(['Deposit paid', ledger.depositPaid]);
+      summary.push(['Deposit required', ledger.depositDue]);
+    }
+    summary.forEach(([k, v]) => {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(110, 110, 110);
+      doc.text(String(k), 40, y);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(30, 30, 30);
+      doc.text(fmtMoney(v), W - 40, y, { align: 'right' });
+      y += 16;
+    });
+    y += 10;
+  }
+
+  // Footer message
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
+  if (balanceAfter > 0) {
+    doc.setTextColor(199, 126, 20);
+    doc.text(`Partial payment received. ${fmtMoney(balanceAfter)} remains outstanding on this account.`,
+             W / 2, y, { align: 'center' });
+  } else {
+    doc.setTextColor(26, 158, 106);
+    doc.text('Account fully settled as of this payment. Thank you!', W / 2, y, { align: 'center' });
+  }
+  y += 16;
+  doc.setFontSize(8);
   doc.setTextColor(160, 160, 160);
-  doc.text('This is a computer-generated receipt. No signature required.', W / 2, y + 110, { align: 'center' });
+  doc.text('This is a computer-generated receipt. No signature required.', W / 2, y, { align: 'center' });
 
   doc.save(`Receipt-${receiptNo}.pdf`);
 }
@@ -2615,52 +3358,18 @@ document.getElementById('modal').addEventListener('click', e => {
 });
 
 /* ══════════════════════════════════════════════════════
-   POLLING — every 15 seconds for near-real-time sync
+   ACTIVE VIEW HELPER (used by payment/document actions)
 ══════════════════════════════════════════════════════ */
 function getActiveView() {
   const active = document.querySelector('.view.active');
   return active ? active.id.replace('view-', '') : 'overview';
 }
 
-async function refreshActiveView() {
-  if (pollInFlight) return;
-  if (document.visibilityState !== 'visible') return;
-  const modal = document.getElementById('modal');
-  if (modal && modal.classList.contains('open')) return;
-  const rModal = document.getElementById('receiptModal');
-  if (rModal && rModal.classList.contains('open')) return;
-
-  pollInFlight = true;
-  try {
-    const view = getActiveView();
-    if      (view === 'overview')                     await loadDashboard();
-    else if (view === 'properties')                 { state.propsLoaded = false;   await loadProperties(); }
-    else if (view === 'units')                      { state.unitsLoaded = false;   await loadUnits(); }
-    else if (view === 'tenants')                    { state.tenantsLoaded = false; await loadTenants(); }
-    else if (view === 'maintenance')                { state.maintLoaded = false;   await loadMaintenance(); }
-    else if (view === 'payments')                   { state.payLoaded = false;     await loadPayments(); }
-    else if (view === 'documents') {
-      if (IS_TENANT) await loadTenantDocuments();
-      else           await loadManagerDocuments();
-    }
-  } catch (e) { /* silent */ } finally {
-    pollInFlight = false;
-  }
-}
-
-function startPolling() { stopPolling(); pollTimer = setInterval(refreshActiveView, POLL_INTERVAL_MS); }
-function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
-
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') refreshActiveView();
-});
-
 /* ══════════════════════════════════════════════════════
    GO
 ══════════════════════════════════════════════════════ */
 loadDashboard();
 if (!IS_TENANT) loadProperties();
-startPolling();
 </script>
 </body>
 </html>
