@@ -134,6 +134,7 @@ const unitSchema = new mongoose.Schema({
 });
 const Unit = mongoose.model('Product', unitSchema);
 
+/* ── CHANGED: added rent + deposit fields for tenants ── */
 const userSchema = new mongoose.Schema({
   organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', required: true, index: true },
   firstName: { type: String, required: true },
@@ -143,6 +144,8 @@ const userSchema = new mongoose.Schema({
   role:      { type: String, required: true },
   password:  { type: String, required: true },
   avatar:    { type: String, default: '' },
+  rent:      { type: Number, default: null }, // tenant's agreed monthly rent (null → fall back to unit price)
+  deposit:   { type: Number, default: null }, // tenant's security deposit (null → fall back to 1× rent on the client)
   createdAt: { type: Date,   default: Date.now },
 });
 const User = mongoose.model('User', userSchema);
@@ -619,7 +622,20 @@ app.get(['/api/tenants', '/tenants'], requireAuth, async (req, res) => {
     const tenants = await User.find(orgScope(req, { role: 'tenant' })).select('-password').sort({ createdAt: -1 });
     const enriched = await Promise.all(tenants.map(async t => {
       const unit = await Unit.findOne(orgScope(req, { tenantId: t._id }));
-      return { ...t.toObject(), unitName: unit?.name || '', property: unit?.property || '', rent: unit?.price || 0 };
+      /* CHANGED: prefer stored tenant.rent / tenant.deposit; fall back to unit values */
+      const storedRent    = Number(t.rent);
+      const storedDeposit = Number(t.deposit);
+      return {
+        ...t.toObject(),
+        unitName: unit?.name || '',
+        property: unit?.property || '',
+        rent:    Number.isFinite(storedRent) && storedRent > 0
+                   ? storedRent
+                   : (unit?.price || 0),
+        deposit: Number.isFinite(storedDeposit) && storedDeposit > 0
+                   ? storedDeposit
+                   : 0,
+      };
     }));
     res.json(enriched);
   } catch (err) { res.status(500).json({ message: 'Unable to load tenants.' }); }
@@ -627,7 +643,8 @@ app.get(['/api/tenants', '/tenants'], requireAuth, async (req, res) => {
 
 app.post(['/api/tenants', '/tenants'], requireAuth, requireRole(...MANAGEMENT, 'leasing-agent'), async (req, res) => {
   try {
-    const { firstName, lastName, email, phone, password, propertyId, unitId } = req.body;
+    /* CHANGED: destructure rent + deposit from request body */
+    const { firstName, lastName, email, phone, password, propertyId, unitId, rent, deposit } = req.body;
     if (!firstName || !lastName || !email || !password) return res.status(400).json({ message: 'First name, last name, email and password are required.' });
     if (password.length < 8) return res.status(400).json({ message: 'Password must be at least 8 characters.' });
 
@@ -648,14 +665,39 @@ app.post(['/api/tenants', '/tenants'], requireAuth, requireRole(...MANAGEMENT, '
       if (unit.tenantId) return res.status(409).json({ message: `Unit ${unit.name} is already occupied.` });
     }
 
-    const tenant = new User({ organization: req.user.organizationId, firstName, lastName, email: email.toLowerCase().trim(), phone: phone || '', role: 'tenant', password: await bcrypt.hash(password, 10) });
+    /* CHANGED: normalise the incoming rent / deposit */
+    const parsedRent    = Number(rent);
+    const parsedDeposit = Number(deposit);
+    const rentValue    = Number.isFinite(parsedRent)    && parsedRent    > 0 ? parsedRent    : (unit?.price || null);
+    const depositValue = Number.isFinite(parsedDeposit) && parsedDeposit > 0 ? parsedDeposit : null;
+
+    const tenant = new User({
+      organization: req.user.organizationId,
+      firstName, lastName,
+      email: email.toLowerCase().trim(),
+      phone: phone || '',
+      role: 'tenant',
+      password: await bcrypt.hash(password, 10),
+      rent:    rentValue,
+      deposit: depositValue,
+    });
     await tenant.save();
 
     let assignedUnit = null;
-    if (unit) { unit.tenantId = tenant._id; unit.tenant = `${firstName} ${lastName}`.trim(); unit.status = 'Occupied'; await unit.save(); assignedUnit = unit; }
+    if (unit) {
+      unit.tenantId = tenant._id;
+      unit.tenant   = `${firstName} ${lastName}`.trim();
+      unit.status   = 'Occupied';
+      await unit.save();
+      assignedUnit = unit;
+    }
 
     const safe = tenant.toObject(); delete safe.password;
-    res.status(201).json({ message: assignedUnit ? `Tenant added and assigned to unit ${assignedUnit.name}.` : 'Tenant added successfully.', tenant: safe, unit: assignedUnit });
+    res.status(201).json({
+      message: assignedUnit ? `Tenant added and assigned to unit ${assignedUnit.name}.` : 'Tenant added successfully.',
+      tenant: safe,
+      unit: assignedUnit,
+    });
   } catch (err) { res.status(500).json({ message: 'Unable to add tenant.' }); }
 });
 
@@ -815,7 +857,7 @@ app.get(['/api/tenant/summary', '/tenant/summary'], requireAuth, requireRole('te
     const unit = await Unit.findOne(orgScope(req, { tenantId: me._id }));
 
     if (!unit) {
-      return res.json({ user: me, unit: null, property: null, rent: 0, currentMonth: { monthLabel: '', due: 0, paid: 0, balance: 0, status: 'No Unit' }, payments: [], maintenance: { open: 0, total: 0 }, charts: { paymentsByMonth: [], maintByStatus: { Open: 0, 'In Progress': 0, Resolved: 0, Closed: 0 } } });
+      return res.json({ user: me, unit: null, property: null, rent: 0, deposit: me.deposit || 0, currentMonth: { monthLabel: '', due: 0, paid: 0, balance: 0, status: 'No Unit' }, payments: [], maintenance: { open: 0, total: 0 }, charts: { paymentsByMonth: [], maintByStatus: { Open: 0, 'In Progress': 0, Resolved: 0, Closed: 0 } } });
     }
 
     const payments = await Payment.find(orgScope(req, { $or: [{ tenantId: me._id }, { tenantId: null, tenant: fullName }] })).sort({ date: -1, createdAt: -1 });
@@ -826,7 +868,9 @@ app.get(['/api/tenant/summary', '/tenant/summary'], requireAuth, requireRole('te
 
     const thisMonthPaid = payments.filter(p => { const d = p.date ? new Date(p.date) : new Date(p.createdAt); return d >= monthStart && d < monthEnd && p.status === 'Paid' && (p.type === 'Rent' || !p.type); }).reduce((s, p) => s + (p.amount || 0), 0);
 
-    const due = Number(unit.price) || 0;
+    /* CHANGED: prefer stored tenant rent, fall back to the unit price */
+    const storedRent = Number(me.rent);
+    const due = Number.isFinite(storedRent) && storedRent > 0 ? storedRent : (Number(unit.price) || 0);
     const balance = Math.max(0, due - thisMonthPaid);
     let status = 'Unpaid';
     if (due === 0) status = 'No Rent Due';
@@ -848,6 +892,7 @@ app.get(['/api/tenant/summary', '/tenant/summary'], requireAuth, requireRole('te
       unit: { id: unit._id, name: unit.name, floor: unit.floor, status: unit.status },
       property: unit.property,
       rent: due,
+      deposit: Number(me.deposit) || 0,
       currentMonth: { monthLabel: now.toLocaleString('en', { month: 'long', year: 'numeric' }), due, paid: thisMonthPaid, balance, status },
       payments,
       maintenance: { open: openMaint, total: maint.length },

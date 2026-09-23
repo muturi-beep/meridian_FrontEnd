@@ -889,45 +889,61 @@ const state = {
 };
 
 /* ══════════════════════════════════════════════════════
-   LEDGER ENGINE
+   LEDGER ENGINE (rewritten)
    ─────────────────────────────────────────────────────
-   Builds a running account per tenant:
-     • Deposit obligation (1× monthly rent by default)
-     • Monthly rent obligation from first payment → now
-     • FIFO allocation of every "Paid" record
-     • Per-payment snapshots: balance before / after + splits
+   • Deposit is per-tenant (tenant.deposit), falling back to
+     DEPOSIT_MONTHS × rent.
+   • Payment type only decides *priority*:
+       type "Deposit" → deposit first, then rent (oldest → newest)
+       everything else → rent first (oldest → newest), then deposit
+   • Whatever is left after every obligation is full is kept as a
+     credit, never silently dropped.
+   • The headline balance is derived from the obligations, so it can
+     never disagree with the per-obligation breakdown.
 ══════════════════════════════════════════════════════ */
-const DEPOSIT_MONTHS = 1; // security deposit = 1 × monthly rent
+const DEPOSIT_MONTHS = 1; // fallback when a tenant has no explicit deposit
+
+function normPayType(t) {
+  return String(t || 'Rent').trim().toLowerCase();
+}
 
 function buildTenantLedger(tenant, allPayments) {
   const monthlyRent = Number(tenant.rent) || 0;
-  const depositRequired = monthlyRent * DEPOSIT_MONTHS;
+  const depositRequired =
+    Number(tenant.deposit) > 0 ? Number(tenant.deposit) : monthlyRent * DEPOSIT_MONTHS;
 
+  /* ---- 1. Match this tenant's payment records -------------------------- */
   const tName = `${tenant.firstName || ''} ${tenant.lastName || ''}`.trim().toLowerCase();
   const matched = (allPayments || []).filter(p => {
-    if (p.tenantId && String(p.tenantId) === String(tenant._id)) return true;
-    if (p.tenant && p.tenant.trim().toLowerCase() === tName) return true;
+    if (p.tenantId != null && String(p.tenantId) === String(tenant._id)) return true;
+    if (p.tenantId == null && p.tenant && String(p.tenant).trim().toLowerCase() === tName) return true;
     return false;
   });
 
+  /* ---- 2. Only "paid" records move the ledger, oldest first ------------ */
   const paidPayments = matched
-    .filter(p => String(p.status || '').toLowerCase() === 'paid')
-    .sort((a, b) => new Date(a.date) - new Date(b.date));
+    .map((p, i) => ({ p, i }))
+    .filter(x => String(x.p.status || '').toLowerCase() === 'paid')
+    .sort((a, b) => {
+      const da = new Date(a.p.date || 0).getTime() || 0;
+      const db = new Date(b.p.date || 0).getTime() || 0;
+      return (da - db) || (a.i - b.i);
+    })
+    .map(x => x.p);
 
-  // Ledger start month
-  let startMonth;
-  if (paidPayments.length) {
-    const d = new Date(paidPayments[0].date);
-    startMonth = new Date(d.getFullYear(), d.getMonth(), 1);
-  } else {
-    const n = new Date();
-    startMonth = new Date(n.getFullYear(), n.getMonth(), 1);
-  }
+  /* ---- 3. When does the account start? --------------------------------- */
+  const anchors = [tenant.moveInDate, tenant.startDate, paidPayments[0]?.date]
+    .map(d => new Date(d))
+    .filter(d => !isNaN(d));
+  const anchor = anchors.length
+    ? new Date(Math.min(...anchors.map(d => d.getTime())))
+    : new Date();
 
+  const startMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
   const now = new Date();
   const endMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  // Obligations
+  /* ---- 4. Obligations -------------------------------------------------- */
   const obligations = [];
   if (depositRequired > 0) {
     obligations.push({
@@ -937,7 +953,7 @@ function buildTenantLedger(tenant, allPayments) {
   }
   let cursor = new Date(startMonth);
   let guard = 0;
-  while (cursor <= endMonth && guard++ < 120) {
+  while (cursor <= endMonth && guard++ < 240) {
     obligations.push({
       id: `rent-${cursor.getFullYear()}-${cursor.getMonth()}`,
       type: 'Rent',
@@ -949,76 +965,102 @@ function buildTenantLedger(tenant, allPayments) {
     cursor.setMonth(cursor.getMonth() + 1);
   }
 
-  // Allocate
+  const rentObls   = obligations.filter(o => o.type === 'Rent');
+  const depositObl = obligations.find(o => o.type === 'Deposit');
+
+  const payInto = (o, amount) => {
+    if (!o || amount <= 0) return 0;
+    const room = Math.max(0, o.amount - o.paid);
+    const applied = Math.min(room, amount);
+    o.paid += applied;
+    return applied;
+  };
+
+  /* ---- 5. Allocate every payment --------------------------------------- */
   const runningBalances = new Map();
   let totalPaidTracked = 0;
+  let totalCredit = 0;
 
   for (const p of paidPayments) {
-    const amt = Number(p.amount) || 0;
-    const pDate = new Date(p.date);
-    const pType = String(p.type || 'Rent').trim();
+    const amt   = Number(p.amount) || 0;
+    const pDate = new Date(p.date || new Date());
+    const pType = normPayType(p.type);
 
-    const dueUpTo = obligations
-      .filter(o => new Date(o.date) <= pDate)
-      .reduce((s, o) => s + o.amount, 0);
-    const balanceBefore = Math.max(0, dueUpTo - totalPaidTracked);
+    const dueObls   = obligations.filter(o => new Date(o.date) <= pDate);
+    const dueUpTo   = dueObls.reduce((s, o) => s + o.amount, 0);
+    const paidBefore = dueObls.reduce((s, o) => s + Math.min(o.paid, o.amount), 0);
+    const balanceBefore = Math.max(0, dueUpTo - paidBefore);
 
+    let remaining = amt;
     const allocations = [];
-    if (pType === 'Deposit') {
-      const dep = obligations.find(o => o.type === 'Deposit');
-      if (dep) {
-        const room = Math.max(0, dep.amount - dep.paid);
-        const applied = Math.min(room, amt);
-        if (applied > 0) {
-          dep.paid += applied;
-          allocations.push({ label: dep.label, amount: applied, type: 'Deposit' });
-        }
-        const excess = amt - applied;
-        if (excess > 0) allocateFIFO(obligations, excess, allocations);
-      } else {
-        allocateFIFO(obligations, amt, allocations);
-      }
-    } else {
-      allocateFIFO(obligations, amt, allocations);
-    }
 
+    const runRent = () => {
+      for (const o of rentObls) {
+        if (remaining <= 0) break;
+        const applied = payInto(o, remaining);
+        if (applied > 0) {
+          remaining -= applied;
+          allocations.push({ label: o.label + ' rent', amount: applied, type: 'Rent', period: o.label });
+        }
+      }
+    };
+    const runDeposit = () => {
+      if (remaining <= 0 || !depositObl) return;
+      const applied = payInto(depositObl, remaining);
+      if (applied > 0) {
+        remaining -= applied;
+        allocations.push({ label: depositObl.label, amount: applied, type: 'Deposit' });
+      }
+    };
+
+    if (pType === 'deposit') { runDeposit(); runRent(); }
+    else                     { runRent();    runDeposit(); }
+
+    const credit = remaining;
+    totalCredit += credit;
     totalPaidTracked += amt;
-    const balanceAfter = Math.max(0, dueUpTo - totalPaidTracked);
+
+    const paidAfter    = dueObls.reduce((s, o) => s + Math.min(o.paid, o.amount), 0);
+    const balanceAfter = Math.max(0, dueUpTo - paidAfter);
 
     runningBalances.set(String(p._id), {
       amount: amt, dueUpTo, balanceBefore, balanceAfter,
-      allocations, type: pType, date: p.date, reference: p.reference,
+      allocations, credit,
+      type: p.type || 'Rent', date: p.date, reference: p.reference,
     });
   }
 
-  const totalDue = obligations.reduce((s, o) => s + o.amount, 0);
-  const balance = Math.max(0, totalDue - totalPaidTracked);
+  /* ---- 6. Totals — derived from the obligations themselves ------------- */
+  const totalDue       = obligations.reduce((s, o) => s + o.amount, 0);
+  const totalAllocated = obligations.reduce((s, o) => s + Math.min(o.paid, o.amount), 0);
+  const balance        = Math.max(0, totalDue - totalAllocated);
 
-  const depositObl = obligations.find(o => o.type === 'Deposit');
-  const rentObls = obligations.filter(o => o.type === 'Rent');
-  const depositDue = depositObl?.amount || 0;
-  const depositPaid = depositObl?.paid || 0;
-  const rentDue = rentObls.reduce((s, o) => s + o.amount, 0);
-  const rentPaid = rentObls.reduce((s, o) => s + o.paid, 0);
+  const depositPaid = depositObl ? Math.min(depositObl.paid, depositObl.amount) : 0;
+  const rentDue     = rentObls.reduce((s, o) => s + o.amount, 0);
+  const rentPaid    = rentObls.reduce((s, o) => s + Math.min(o.paid, o.amount), 0);
 
   const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const arrears = rentObls
     .filter(o => new Date(o.date) < currentMonthStart)
     .reduce((s, o) => s + Math.max(0, o.amount - o.paid), 0);
 
-  const cm = rentObls.find(o => o.date.getMonth() === now.getMonth() && o.date.getFullYear() === now.getFullYear());
+  const cm = rentObls.find(
+    o => o.date.getMonth() === now.getMonth() && o.date.getFullYear() === now.getFullYear()
+  );
 
   return {
-    tenant,
-    monthlyRent,
-    depositRequired,
-    obligations,
+    tenant, monthlyRent, depositRequired, obligations,
     payments: paidPayments,
-    totalDue, totalPaid: totalPaidTracked, balance,
-    depositDue, depositPaid, depositBalance: Math.max(0, depositDue - depositPaid),
-    rentDue, rentPaid, rentBalance: Math.max(0, rentDue - rentPaid),
-    runningBalances,
-    arrears,
+    totalDue,
+    totalPaid: totalPaidTracked,
+    balance,
+    credit: totalCredit,
+    depositDue: depositRequired,
+    depositPaid,
+    depositBalance: Math.max(0, depositRequired - depositPaid),
+    rentDue, rentPaid,
+    rentBalance: Math.max(0, rentDue - rentPaid),
+    runningBalances, arrears,
     currentMonth: {
       due: cm?.amount || 0,
       paid: cm?.paid || 0,
@@ -1029,61 +1071,64 @@ function buildTenantLedger(tenant, allPayments) {
   };
 }
 
-function allocateFIFO(obligations, amount, allocations) {
-  const rentObls = obligations.filter(o => o.type === 'Rent');
-  let remaining = amount;
-  for (const o of rentObls) {
-    if (remaining <= 0) break;
-    const room = Math.max(0, o.amount - o.paid);
-    if (room <= 0) continue;
-    const applied = Math.min(room, remaining);
-    o.paid += applied;
-    allocations.push({ label: o.label + ' rent', amount: applied, type: 'Rent', period: o.label });
-    remaining -= applied;
-  }
-  return remaining;
-}
-
-/** Clone + allocate without mutating, for previews. */
+/* Non-mutating clone used by the payment-modal preview */
 function simulateAllocation(ledger, amount, type) {
   const obligations = ledger.obligations.map(o => ({ ...o }));
-  const allocations = [];
   const amt = Number(amount) || 0;
+  const t   = normPayType(type);
 
-  if (type === 'Deposit') {
-    const dep = obligations.find(o => o.type === 'Deposit');
-    if (dep) {
-      const room = Math.max(0, dep.amount - dep.paid);
-      const applied = Math.min(room, amt);
+  const rentObls   = obligations.filter(o => o.type === 'Rent');
+  const depositObl = obligations.find(o => o.type === 'Deposit');
+
+  const payInto = (o, a) => {
+    if (!o || a <= 0) return 0;
+    const room = Math.max(0, o.amount - o.paid);
+    const applied = Math.min(room, a);
+    o.paid += applied;
+    return applied;
+  };
+
+  let remaining = amt;
+  const allocations = [];
+
+  const runRent = () => {
+    for (const o of rentObls) {
+      if (remaining <= 0) break;
+      const applied = payInto(o, remaining);
       if (applied > 0) {
-        dep.paid += applied;
-        allocations.push({ label: dep.label, amount: applied, type: 'Deposit' });
+        remaining -= applied;
+        allocations.push({ label: o.label + ' rent', amount: applied, type: 'Rent', period: o.label });
       }
-      const excess = amt - applied;
-      if (excess > 0) allocateFIFO(obligations, excess, allocations);
-    } else {
-      allocateFIFO(obligations, amt, allocations);
     }
-  } else {
-    allocateFIFO(obligations, amt, allocations);
-  }
+  };
+  const runDeposit = () => {
+    if (remaining <= 0 || !depositObl) return;
+    const applied = payInto(depositObl, remaining);
+    if (applied > 0) {
+      remaining -= applied;
+      allocations.push({ label: depositObl.label, amount: applied, type: 'Deposit' });
+    }
+  };
 
-  const totalDue = obligations.reduce((s, o) => s + o.amount, 0);
-  const totalPaid = obligations.reduce((s, o) => s + o.paid, 0);
-  const newBalance = Math.max(0, totalDue - totalPaid);
+  if (t === 'deposit') { runDeposit(); runRent(); }
+  else                 { runRent();    runDeposit(); }
 
-  const dep = obligations.find(o => o.type === 'Deposit');
-  const rentObls = obligations.filter(o => o.type === 'Rent');
-  const newDepositPaid = dep?.paid || 0;
-  const newRentPaid = rentObls.reduce((s, o) => s + o.paid, 0);
+  const totalDue       = obligations.reduce((s, o) => s + o.amount, 0);
+  const totalAllocated = obligations.reduce((s, o) => s + Math.min(o.paid, o.amount), 0);
+  const newBalance     = Math.max(0, totalDue - totalAllocated);
+
+  const depositPaid = depositObl ? Math.min(depositObl.paid, depositObl.amount) : 0;
+  const rentDue     = rentObls.reduce((s, o) => s + o.amount, 0);
+  const rentPaid    = rentObls.reduce((s, o) => s + Math.min(o.paid, o.amount), 0);
 
   return {
     allocations,
     newBalance,
-    newDepositPaid,
-    newRentPaid,
-    newDepositBalance: Math.max(0, (dep?.amount || 0) - newDepositPaid),
-    newRentBalance: Math.max(0, rentObls.reduce((s, o) => s + o.amount, 0) - newRentPaid),
+    newDepositPaid: depositPaid,
+    newRentPaid: rentPaid,
+    newDepositBalance: Math.max(0, (depositObl?.amount || 0) - depositPaid),
+    newRentBalance: Math.max(0, rentDue - rentPaid),
+    credit: remaining,
   };
 }
 
@@ -2046,6 +2091,14 @@ async function openTenantModalForProperty(propertyId) {
         <div class="field"><label>Email *</label><input type="email" name="email" required/></div>
         <div class="field"><label>Phone</label><input type="tel" name="phone"/></div>
       </div>
+      <div class="frow">
+        <div class="field"><label>Monthly Rent (KES)</label>
+          <input type="number" name="rent" min="0" placeholder="Defaults to the unit's rent"/>
+        </div>
+        <div class="field"><label>Security Deposit (KES)</label>
+          <input type="number" name="deposit" min="0" placeholder="Defaults to 1× rent"/>
+        </div>
+      </div>
       <div class="field">
         <label>Temporary Password * (min 8 chars — tenant can change later)</label>
         <input type="text" name="password" required minlength="8" value="Welcome${Math.floor(1000 + Math.random() * 9000)}"/>
@@ -2085,6 +2138,8 @@ async function openTenantModalForProperty(propertyId) {
       phone:      form.querySelector('[name="phone"]').value.trim(),
       password:   form.querySelector('[name="password"]').value,
       propertyId: property._id,
+      rent:       Number(form.querySelector('[name="rent"]')?.value)    || undefined,
+      deposit:    Number(form.querySelector('[name="deposit"]')?.value) || undefined,
     };
     if (!payload.firstName || !payload.lastName || !payload.email || !payload.password) {
       throw new Error('Please fill in all required fields.');
@@ -2327,11 +2382,12 @@ function computeTenantBalances(tenants, payments) {
   return (tenants || []).map(t => {
     const ledger = buildTenantLedger(t, payments);
     let status;
-    if (ledger.balance <= 0)                        status = 'Paid';
-    else if (ledger.arrears > 0)                    status = 'Arrears';
-    else if (ledger.currentMonth.paid > 0)          status = 'Partial';
-    else                                            status = 'Unpaid';
-    if (ledger.monthlyRent <= 0 && ledger.balance <= 0) status = 'No rent set';
+    if (ledger.balance <= 0)                                                 status = 'Paid';
+    else if (ledger.arrears > 0)                                             status = 'Arrears';
+    else if (!ledger.currentMonth.fullyPaid && ledger.currentMonth.paid > 0) status = 'Partial';
+    else if (ledger.currentMonth.fullyPaid && ledger.depositBalance > 0)     status = 'Deposit Due';
+    else                                                                     status = 'Unpaid';
+    if (ledger.monthlyRent <= 0 && ledger.balance <= 0)                      status = 'No rent set';
 
     return {
       id: t._id,
@@ -2638,8 +2694,13 @@ async function loadPayments() {
       if (tenant) {
         const ledger = buildTenantLedger(tenant, list);
         const snap = ledger.runningBalances.get(String(p._id));
+        const accountNowClear = ledger.balance <= 0;
         if (snap && snap.balanceAfter > 0) {
-          balanceNote = `<div style="font-size:10.5px;color:var(--amber);margin-top:3px">Bal. after: ${fmtMoney(snap.balanceAfter)}</div>`;
+          if (accountNowClear) {
+            balanceNote = `<div style="font-size:10.5px;color:var(--green);margin-top:3px">Was ${fmtMoney(snap.balanceAfter)} · ✓ since cleared</div>`;
+          } else {
+            balanceNote = `<div style="font-size:10.5px;color:var(--amber);margin-top:3px">Bal. after: ${fmtMoney(snap.balanceAfter)}</div>`;
+          }
         } else if (snap && snap.balanceAfter === 0) {
           balanceNote = `<div style="font-size:10.5px;color:var(--green);margin-top:3px">✓ Settled up</div>`;
         }
@@ -3032,6 +3093,7 @@ function buildReceiptHTML(payment) {
   const balanceBefore = snapshot?.balanceBefore ?? ledger?.balance ?? 0;
   const balanceAfter  = snapshot?.balanceAfter  ?? Math.max(0, balanceBefore - amount);
   const allocations   = snapshot?.allocations   || [];
+  const accountNowClear = ledger ? ledger.balance <= 0 : false;
 
   // Status
   let badgeClass = 'mute', badgeLabel = 'Recorded';
@@ -3071,9 +3133,16 @@ function buildReceiptHTML(payment) {
       </div>`;
   }
 
-  const footMessage = balanceAfter > 0
-    ? `Partial payment received. <strong>${fmtMoney(balanceAfter)}</strong> remains outstanding on this account.`
-    : `Account is fully settled as of this payment. Thank you!`;
+  let footMessage;
+  if (balanceAfter > 0) {
+    if (accountNowClear) {
+      footMessage = `This receipt was issued with <strong>${fmtMoney(balanceAfter)}</strong> outstanding.<br>The account has since been <strong style="color:#1a9e6a">fully settled</strong>.`;
+    } else {
+      footMessage = `Partial payment received. <strong>${fmtMoney(balanceAfter)}</strong> remains outstanding on this account.`;
+    }
+  } else {
+    footMessage = `Account is fully settled as of this payment. Thank you!`;
+  }
 
   return `
     <div class="receipt">
@@ -3084,7 +3153,12 @@ function buildReceiptHTML(payment) {
             <div class="receipt-title">Payment Receipt</div>
             <div class="receipt-org">${esc(org)}</div>
           </div>
-          <div class="receipt-badge ${badgeClass}">${esc(badgeLabel)}</div>
+          <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+            <div class="receipt-badge ${badgeClass}">${esc(badgeLabel)}</div>
+            ${ledger && ledger.balance <= 0 && balanceAfter <= 0
+              ? `<div class="receipt-badge ok" style="font-size:9.5px">Account Closed</div>`
+              : ''}
+          </div>
         </div>
 
         <div class="receipt-meta">
@@ -3110,6 +3184,9 @@ function buildReceiptHTML(payment) {
           <div class="col">
             <div class="lbl">Balance After</div>
             <div class="val ${balanceAfter > 0 ? 'warn' : 'ok'}">${fmtMoney(balanceAfter)}</div>
+            ${balanceAfter > 0 && accountNowClear
+              ? `<div style="font-size:10px;color:#1a9e6a;font-weight:700;margin-top:6px">✓ Since cleared</div>`
+              : ''}
           </div>
         </div>
 
@@ -3153,6 +3230,7 @@ function downloadReceiptPDF(payment) {
   const amount = Number(payment.amount) || 0;
   const balanceBefore = snapshot?.balanceBefore ?? ledger?.balance ?? 0;
   const balanceAfter  = snapshot?.balanceAfter  ?? Math.max(0, balanceBefore - amount);
+  const accountNowClear = ledger ? ledger.balance <= 0 : false;
 
   // Status label
   let statusLabel = String(payment.status || 'Recorded');
@@ -3248,6 +3326,13 @@ function downloadReceiptPDF(payment) {
 
   doc.setTextColor(balanceAfter > 0 ? 199 : 26, balanceAfter > 0 ? 126 : 158, balanceAfter > 0 ? 20 : 106);
   doc.text(fmtMoney(balanceAfter), 40 + halfW + 20 + halfW / 2, y + 42, { align: 'center' });
+
+  if (balanceAfter > 0 && accountNowClear) {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(26, 158, 106);
+    doc.text('✓ SINCE CLEARED', 40 + halfW + 20 + halfW / 2, y + 56, { align: 'center' });
+  }
   y += 80;
 
   // Allocation table
@@ -3309,9 +3394,18 @@ function downloadReceiptPDF(payment) {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   if (balanceAfter > 0) {
-    doc.setTextColor(199, 126, 20);
-    doc.text(`Partial payment received. ${fmtMoney(balanceAfter)} remains outstanding on this account.`,
-             W / 2, y, { align: 'center' });
+    if (accountNowClear) {
+      doc.setTextColor(199, 126, 20);
+      doc.text(`This receipt was issued with ${fmtMoney(balanceAfter)} outstanding.`,
+               W / 2, y, { align: 'center' });
+      y += 14;
+      doc.setTextColor(26, 158, 106);
+      doc.text('The account has since been fully settled.', W / 2, y, { align: 'center' });
+    } else {
+      doc.setTextColor(199, 126, 20);
+      doc.text(`Partial payment received. ${fmtMoney(balanceAfter)} remains outstanding on this account.`,
+               W / 2, y, { align: 'center' });
+    }
   } else {
     doc.setTextColor(26, 158, 106);
     doc.text('Account fully settled as of this payment. Thank you!', W / 2, y, { align: 'center' });
