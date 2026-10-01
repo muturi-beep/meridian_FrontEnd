@@ -4,7 +4,6 @@ const cors     = require('cors');
 const mongoose = require('mongoose');
 const bcrypt   = require('bcryptjs');
 const jwt      = require('jsonwebtoken');
-const crypto   = require('crypto');
 const path     = require('path');
 
 const app = express();
@@ -52,118 +51,18 @@ app.use(async (req, res, next) => {
 });
 
 /* ══════════════════════════════════════════════════════
-   SCHEMAS
+   MODELS  (moved to backend/models/)
 ══════════════════════════════════════════════════════ */
-const organizationSchema = new mongoose.Schema({
-  name:       { type: String, required: true, trim: true },
-  slug:       { type: String, required: true, unique: true, lowercase: true, trim: true },
-  inviteCode: { type: String, required: true, unique: true },
-  type:       { type: String, default: '' },
-  email:      { type: String, default: '' },
-  phone:      { type: String, default: '' },
-  location:   { type: String, default: '' },
-  address:    { type: String, default: '' },
-  createdAt:  { type: Date,   default: Date.now },
-});
-const Organization = mongoose.model('Organization', organizationSchema);
+const Organization = require('../backend/models/Organization');
+const Property     = require('../backend/models/Property');
+const Unit         = require('../backend/models/Unit');
+const User         = require('../backend/models/User');
+const Maintenance  = require('../backend/models/Maintenance');
+const Payment      = require('../backend/models/Payment');
+const { generateUniqueSlug, generateInviteCode } = require('../backend/utils/slug');
 
-const propertySchema = new mongoose.Schema({
-  organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', required: true, index: true },
-  name:         { type: String, required: true, trim: true },
-  type:         { type: String, default: 'Apartment' },
-  location:     { type: String, default: '' },
-  address:      { type: String, default: '' },
-  description:  { type: String, default: '' },
-  contactName:  { type: String, default: '' },
-  contactPhone: { type: String, default: '' },
-  status:       { type: String, default: 'Active' },
-  createdAt:    { type: Date,   default: Date.now },
-  updatedAt:    { type: Date,   default: Date.now },
-});
-const Property = mongoose.model('Property', propertySchema);
 
-async function generateUniqueSlug(name) {
-  const base = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'agency';
-  let slug = base;
-  let attempt = 0;
-  while (await Organization.exists({ slug })) {
-    attempt += 1;
-    slug = `${base}-${crypto.randomBytes(2).toString('hex')}`;
-    if (attempt > 10) throw new Error('Could not generate a unique organization slug.');
-  }
-  return slug;
-}
 
-function generateInviteCode() {
-  const raw = crypto.randomBytes(4).toString('hex').toUpperCase();
-  return `${raw.slice(0, 4)}-${raw.slice(4)}`;
-}
-
-const unitSchema = new mongoose.Schema({
-  organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', required: true, index: true },
-  name:      { type: String, required: true },
-  price:     { type: Number, required: true },
-  property:  { type: String, default: '' },
-  tenant:    { type: String, default: '—' },
-  tenantId:  { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
-  floor:     { type: String, default: '—' },
-  status:    { type: String, default: 'Vacant' },
-  createdAt: { type: Date,   default: Date.now },
-});
-const Unit = mongoose.model('Product', unitSchema);
-
-/* ── CHANGED: added rent + deposit fields for tenants ── */
-const userSchema = new mongoose.Schema({
-  organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', required: true, index: true },
-  firstName: { type: String, required: true },
-  lastName:  { type: String, required: true },
-  email:     { type: String, required: true, unique: true, lowercase: true, trim: true },
-  phone:     { type: String, default: '' },
-  role:      { type: String, required: true },
-  password:  { type: String, required: true },
-  avatar:    { type: String, default: '' },
-  rent:      { type: Number, default: null }, // tenant's agreed monthly rent (null → fall back to unit price)
-  deposit:   { type: Number, default: null }, // tenant's security deposit (null → fall back to 1× rent on the client)
-  createdAt: { type: Date,   default: Date.now },
-});
-const User = mongoose.model('User', userSchema);
-
-const maintenanceSchema = new mongoose.Schema({
-  organization:    { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', required: true, index: true },
-  requestedById:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null, index: true },
-  requestedByName: { type: String, default: '' },
-  title:       { type: String, required: true },
-  category:    { type: String, default: '' },
-  property:    { type: String, default: '' },
-  unit:        { type: String, default: '' },
-  priority:    { type: String, default: 'Medium' },
-  status:      { type: String, default: 'Open' },
-  assignedTo:  { type: String, default: '' },
-  assignedToId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
-  description: { type: String, default: '' },
-  createdAt:   { type: Date,   default: Date.now },
-});
-const Maintenance = mongoose.model('Maintenance', maintenanceSchema);
-
-const paymentSchema = new mongoose.Schema({
-  organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', required: true, index: true },
-  tenant:    { type: String, required: true },
-  tenantId:  { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
-  property:  { type: String, default: '' },
-  unit:      { type: String, default: '' },
-  amount:    { type: Number, required: true },
-  type:      { type: String, default: 'Rent' },
-  status:    { type: String, default: 'Paid' },
-  method:    { type: String, default: 'M-Pesa' },
-  date:      { type: Date,   default: Date.now },
-  reference: { type: String, default: '' },
-  createdAt: { type: Date,   default: Date.now },
-});
-const Payment = mongoose.model('Payment', paymentSchema);
-
-/* ══════════════════════════════════════════════════════
-   AUTH MIDDLEWARE
-══════════════════════════════════════════════════════ */
 function requireAuth(req, res, next) {
   const header = req.headers.authorization || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
