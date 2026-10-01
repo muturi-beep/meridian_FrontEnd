@@ -3,7 +3,6 @@ const express  = require('express');
 const cors     = require('cors');
 const mongoose = require('mongoose');
 const bcrypt   = require('bcryptjs');
-const jwt      = require('jsonwebtoken');
 const path     = require('path');
 
 const app = express();
@@ -26,13 +25,6 @@ app.use(express.json({ limit: '2mb' }));
 ══════════════════════════════════════════════════════ */
 if (require.main === module) {
   app.use(express.static(path.join(__dirname, '..', 'public')));
-}
-
-const JWT_SECRET  = process.env.JWT_SECRET;
-const JWT_EXPIRES = '7d';
-
-if (!JWT_SECRET) {
-  console.error('❌ JWT_SECRET is not set. Add it in Vercel → Settings → Environment Variables.');
 }
 
 /* ══════════════════════════════════════════════════════
@@ -63,55 +55,12 @@ const { generateUniqueSlug, generateInviteCode } = require('../backend/utils/slu
 
 
 
-function requireAuth(req, res, next) {
-  const header = req.headers.authorization || '';
-  const token = header.startsWith('Bearer ') ? header.slice(7) : null;
-  if (!token) return res.status(401).json({ message: 'No token provided.' });
-
-  try {
-    req.user = jwt.verify(token, JWT_SECRET);
-    if (!req.user.organizationId) {
-      return res.status(401).json({ message: 'Session out of date — please log in again.' });
-    }
-    next();
-  } catch (err) {
-    return res.status(401).json({ message: 'Invalid or expired token.' });
-  }
-}
-
-function requireRole(...allowedRoles) {
-  return (req, res, next) => {
-    if (!req.user || !allowedRoles.includes(req.user.role)) {
-      return res.status(403).json({ message: 'You do not have permission to perform this action.' });
-    }
-    next();
-  };
-}
-
-function orgScope(req, extra = {}) {
-  return { organization: req.user.organizationId, ...extra };
-}
-
-const MANAGEMENT    = ['agency-director', 'property-manager'];
-const FINANCE_VIEW  = ['agency-director', 'property-manager', 'finance-officer', 'auditor'];
-const FINANCE_WRITE = ['agency-director', 'property-manager', 'finance-officer'];
-const MAINT_WRITE   = ['agency-director', 'property-manager', 'maintenance-staff'];
-const UNIT_WRITE    = ['agency-director', 'property-manager', 'leasing-agent'];
-
-function signToken(user) {
-  return jwt.sign(
-    { id: user._id, role: user.role, email: user.email, organizationId: user.organization },
-    JWT_SECRET,
-    { expiresIn: JWT_EXPIRES }
-  );
-}
-
-async function safeUserWithOrg(userDoc, orgDoc) {
-  const { password: _, ...safeUser } = userDoc.toObject();
-  safeUser.organizationId   = orgDoc._id;
-  safeUser.organizationName = orgDoc.name;
-  return safeUser;
-}
+/* ══════════════════════════════════════════════════════
+   AUTH — moved to backend/middleware + backend/utils
+══════════════════════════════════════════════════════ */
+const { requireAuth, requireRole, orgScope } = require('../backend/middleware/auth');
+const { signToken, safeUserWithOrg }         = require('../backend/utils/tokens');
+const { MANAGEMENT, FINANCE_VIEW, FINANCE_WRITE, MAINT_WRITE, UNIT_WRITE } = require('../backend/utils/roles');
 
 /* ══════════════════════════════════════════════════════
    DEBUG / HEALTH
