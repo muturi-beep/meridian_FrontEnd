@@ -61,6 +61,16 @@ const { generateUniqueSlug, generateInviteCode } = require('../backend/utils/slu
 const { requireAuth, requireRole, orgScope } = require('../backend/middleware/auth');
 const { signToken, safeUserWithOrg }         = require('../backend/utils/tokens');
 const { MANAGEMENT, FINANCE_VIEW, FINANCE_WRITE, MAINT_WRITE, UNIT_WRITE } = require('../backend/utils/roles');
+const authRoutes          = require('../backend/routes/auth');
+const profileRoutes       = require('../backend/routes/profile');
+const organizationRoutes  = require('../backend/routes/organizations');
+
+/* ══════════════════════════════════════════════════════
+   ROUTES  (moved to backend/routes/)
+══════════════════════════════════════════════════════ */
+app.use(authRoutes);
+app.use(profileRoutes);
+app.use(organizationRoutes);
 
 /* ══════════════════════════════════════════════════════
    DEBUG / HEALTH
@@ -86,162 +96,11 @@ app.get(['/api/health', '/health'], (req, res) => {
 /* ══════════════════════════════════════════════════════
    AUTH ROUTES
 ══════════════════════════════════════════════════════ */
-app.post(['/auth/register', '/api/auth/register'], async (req, res) => {
-  try {
-    const { firstName, lastName, email, phone, role, password, orgAction, organizationName, inviteCode } = req.body;
 
-    if (!firstName || !lastName || !email || !password) return res.status(400).json({ message: 'All required fields must be filled.' });
-    if (password.length < 8) return res.status(400).json({ message: 'Password must be at least 8 characters.' });
-    if (orgAction !== 'create' && orgAction !== 'join') return res.status(400).json({ message: 'Please specify whether you are creating or joining an agency.' });
-
-    const existing = await User.findOne({ email: email.toLowerCase().trim() });
-    if (existing) return res.status(409).json({ message: 'An account with this email already exists.' });
-
-    let organization, effectiveRole;
-
-    if (orgAction === 'create') {
-      if (!organizationName || !organizationName.trim()) return res.status(400).json({ message: 'Please enter a name for your agency.' });
-      const slug = await generateUniqueSlug(organizationName);
-      const code = generateInviteCode();
-      organization = await new Organization({ name: organizationName.trim(), slug, inviteCode: code }).save();
-      effectiveRole = 'agency-director';
-    } else {
-      if (!inviteCode || !inviteCode.trim()) return res.status(400).json({ message: 'Please enter your agency\'s invite code.' });
-      if (!role) return res.status(400).json({ message: 'Please select your role — it is required.' });
-      organization = await Organization.findOne({ inviteCode: inviteCode.trim().toUpperCase() });
-      if (!organization) return res.status(404).json({ message: 'That invite code doesn\'t match any agency. Double-check it with your team.' });
-      effectiveRole = role;
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ organization: organization._id, firstName, lastName, email, phone, role: effectiveRole, password: hashedPassword });
-    const saved = await user.save();
-    const token = signToken(saved);
-    const safeUser = await safeUserWithOrg(saved, organization);
-
-    const orgPayload = {
-      id: organization._id,
-      name: organization.name,
-      ...(MANAGEMENT.includes(effectiveRole) ? { inviteCode: organization.inviteCode } : {}),
-    };
-
-    res.status(201).json({
-      message: orgAction === 'create'
-        ? `✅ Agency "${organization.name}" created! Share invite code ${organization.inviteCode} with your team.`
-        : `✅ Account created — welcome to ${organization.name}!`,
-      user: safeUser, organization: orgPayload, token,
-    });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-app.post(['/auth/login', '/api/auth/login'], async (req, res) => {
-  try {
-    const { email, password, role } = req.body;
-    if (!email || !password || !role) return res.status(400).json({ message: 'Email, password and role are required.' });
-
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
-    if (!user) return res.status(401).json({ message: 'No account found with that email address.' });
-
-    const storedPassword = user.password;
-    const isBcryptHash = typeof storedPassword === 'string' && storedPassword.startsWith('$2');
-    let passwordMatches = false;
-
-    if (isBcryptHash) passwordMatches = await bcrypt.compare(password, storedPassword);
-    else if (storedPassword === password) { passwordMatches = true; user.password = await bcrypt.hash(password, 10); await user.save(); }
-
-    if (!passwordMatches) return res.status(401).json({ message: 'Incorrect password. Please try again.' });
-    if (user.role !== role) return res.status(401).json({ message: `This account is registered as "${user.role}", not "${role}".` });
-
-    const organization = await Organization.findById(user.organization);
-    if (!organization) return res.status(500).json({ message: 'Your account is not linked to a valid agency. Contact support.' });
-
-    const token = signToken(user);
-    const safeUser = await safeUserWithOrg(user, organization);
-    const orgPayload = {
-      id: organization._id,
-      name: organization.name,
-      ...(MANAGEMENT.includes(user.role) ? { inviteCode: organization.inviteCode } : {}),
-    };
-
-    res.json({ message: '✅ Login successful!', user: safeUser, organization: orgPayload, token });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-app.get(['/auth/users', '/api/auth/users'], requireAuth, requireRole(...MANAGEMENT), async (req, res) => {
-  try { res.json(await User.find(orgScope(req)).select('-password').sort({ createdAt: -1 })); }
-  catch (err) { res.status(500).json({ message: err.message }); }
-});
-
-app.get(['/auth/users/:id', '/api/auth/users/:id'], requireAuth, async (req, res) => {
-  try {
-    const user = await User.findOne(orgScope(req, { _id: req.params.id })).select('-password');
-    if (!user) return res.status(404).json({ message: 'User not found' });
-    res.json(user);
-  } catch (err) { res.status(500).json({ message: err.message }); }
-});
-
-app.put(['/auth/users/:id', '/api/auth/users/:id'], requireAuth, async (req, res) => {
-  try {
-    const target = await User.findOne(orgScope(req, { _id: req.params.id }));
-    if (!target) return res.status(404).json({ message: 'User not found' });
-
-    const isSelf = req.user.id === req.params.id;
-    const isPrivileged = MANAGEMENT.includes(req.user.role);
-    if (!isSelf && !isPrivileged) return res.status(403).json({ message: 'You can only update your own profile.' });
-
-    const { firstName, lastName, phone, avatar, password, role } = req.body;
-    const updateData = { firstName, lastName, phone, avatar };
-    if (role && isPrivileged) updateData.role = role;
-    if (password && password.length >= 8) updateData.password = await bcrypt.hash(password, 10);
-
-    const updated = await User.findByIdAndUpdate(req.params.id, updateData, { new: true }).select('-password');
-    res.json({ message: '✅ Profile updated!', user: updated });
-  } catch (err) { res.status(500).json({ message: err.message }); }
-});
-
-app.delete(['/auth/users/:id', '/api/auth/users/:id'], requireAuth, async (req, res) => {
-  try {
-    const target = await User.findOne(orgScope(req, { _id: req.params.id }));
-    if (!target) return res.status(404).json({ message: 'User not found' });
-
-    const isSelf = req.user.id === req.params.id;
-    const isPrivileged = MANAGEMENT.includes(req.user.role);
-    if (!isSelf && !isPrivileged) return res.status(403).json({ message: 'You do not have permission to delete this account.' });
-
-    await User.findByIdAndDelete(req.params.id);
-    res.json({ message: '✅ Account deleted successfully.' });
-  } catch (err) { res.status(500).json({ message: err.message }); }
-});
 
 /* ══════════════════════════════════════════════════════
    ORGANIZATION ROUTES
 ══════════════════════════════════════════════════════ */
-app.get(['/organizations/me', '/api/organizations/me'], requireAuth, async (req, res) => {
-  try {
-    const org = await Organization.findById(req.user.organizationId);
-    if (!org) return res.status(404).json({ message: 'Organization not found' });
-    const memberCount = await User.countDocuments(orgScope(req));
-    const payload = { id: org._id, name: org.name, slug: org.slug, memberCount };
-    if (MANAGEMENT.includes(req.user.role)) payload.inviteCode = org.inviteCode;
-    res.json(payload);
-  } catch (err) { res.status(500).json({ message: err.message }); }
-});
-
-app.put(['/organizations/me', '/api/organizations/me'], requireAuth, requireRole(...MANAGEMENT), async (req, res) => {
-  try {
-    const org = await Organization.findById(req.user.organizationId);
-    if (!org) return res.status(404).json({ message: 'Organization not found' });
-    if (req.body.name && req.body.name.trim()) org.name = req.body.name.trim();
-    if (req.body.regenerateInviteCode) org.inviteCode = generateInviteCode();
-    await org.save();
-    const memberCount = await User.countDocuments(orgScope(req));
-    res.json({ message: '✅ Agency settings updated!', id: org._id, name: org.name, slug: org.slug, inviteCode: org.inviteCode, memberCount });
-  } catch (err) { res.status(500).json({ message: err.message }); }
-});
 
 /* ══════════════════════════════════════════════════════
    DASHBOARD
@@ -309,62 +168,6 @@ app.get(['/api/dashboard', '/dashboard'], requireAuth, async (req, res) => {
 /* ══════════════════════════════════════════════════════
    PROFILE
 ══════════════════════════════════════════════════════ */
-app.get(['/api/profile', '/profile'], requireAuth, async (req, res) => {
-  const me = await User.findById(req.user.id).select('-password');
-  if (!me) return res.status(404).json({ message: 'User not found' });
-  res.json(me);
-});
-
-app.put(['/api/profile', '/profile'], requireAuth, async (req, res) => {
-  try {
-    const me = await User.findById(req.user.id);
-    if (!me) return res.status(404).json({ message: 'User not found' });
-
-    const { firstName, lastName, phone, avatar, currentPassword, newPassword } = req.body;
-    if (firstName) me.firstName = firstName;
-    if (lastName)  me.lastName  = lastName;
-    if (phone     !== undefined) me.phone  = phone;
-    if (avatar    !== undefined) me.avatar = avatar;
-
-    if (newPassword) {
-      if (newPassword.length < 8) return res.status(400).json({ message: 'New password must be at least 8 characters.' });
-      if (!currentPassword) return res.status(400).json({ message: 'Please enter your current password to set a new one.' });
-      const ok = await bcrypt.compare(currentPassword, me.password);
-      if (!ok) return res.status(400).json({ message: 'Current password is incorrect.' });
-      me.password = await bcrypt.hash(newPassword, 10);
-    }
-    await me.save();
-    const safe = me.toObject(); delete safe.password;
-    res.json({ message: 'Profile updated successfully.', user: safe });
-  } catch (err) { res.status(500).json({ message: 'Unable to update profile. Please try again.' }); }
-});
-
-/* ══════════════════════════════════════════════════════
-   ORGANIZATION SETTINGS
-══════════════════════════════════════════════════════ */
-app.get(['/api/organization', '/organization'], requireAuth, async (req, res) => {
-  const org = await Organization.findById(req.user.organizationId);
-  if (!org) return res.status(404).json({ message: 'Organization not found' });
-  const payload = { id: org._id, name: org.name, slug: org.slug, type: org.type, email: org.email, phone: org.phone, location: org.location, address: org.address };
-  if (MANAGEMENT.includes(req.user.role)) payload.inviteCode = org.inviteCode;
-  res.json(payload);
-});
-
-app.put(['/api/organization', '/organization'], requireAuth, requireRole(...MANAGEMENT), async (req, res) => {
-  try {
-    const org = await Organization.findById(req.user.organizationId);
-    if (!org) return res.status(404).json({ message: 'Organization not found' });
-    const { name, type, email, phone, location, address } = req.body;
-    if (name && name.trim()) org.name = name.trim();
-    if (type     !== undefined) org.type     = type;
-    if (email    !== undefined) org.email    = email;
-    if (phone    !== undefined) org.phone    = phone;
-    if (location !== undefined) org.location = location;
-    if (address  !== undefined) org.address  = address;
-    await org.save();
-    res.json({ message: 'Organization settings updated.', organization: { id: org._id, name: org.name, slug: org.slug, type: org.type, email: org.email, phone: org.phone, location: org.location, address: org.address, inviteCode: org.inviteCode } });
-  } catch (err) { res.status(500).json({ message: 'Unable to save organization settings.' }); }
-});
 
 /* ══════════════════════════════════════════════════════
    PROPERTIES
