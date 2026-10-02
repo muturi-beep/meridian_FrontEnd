@@ -8,11 +8,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <link rel="stylesheet" href="css/dashboard.css" />
-<script src="js/config.js"></script>
-<script src="js/session.js"></script>
-<script src="js/api.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/ledger.js"></script>
 </head>
 <body>
 
@@ -284,10 +279,14 @@
 
 <div id="toasts"></div>
 
-<script src="js/config.js"></script>
-<script src="js/session.js"></script>
-<script src="js/api.js"></script>
-<script src="js/ui.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/session.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/ledger.js"></script>
+  <script src="js/dashboard/state.js"></script>
+  <script src="js/dashboard/guard.js"></script>
+  <script src="js/dashboard/navigation.js"></script>
 
 <script>
 /* ══════════════════════════════════════════════════════
@@ -301,47 +300,6 @@
 /* ══════════════════════════════════════════════════════
    AUTH GUARD + ROLE PERMISSIONS
 ══════════════════════════════════════════════════════ */
-const SESSION = getSession();
-if (!SESSION) {
-  sessionStorage.setItem('mp_flash', 'Your session has expired. Please sign in again.');
-  window.location.replace('auth.html');
-}
-window.addEventListener('pageshow', e => {
-  if (e.persisted && !getSession()) {
-    window.location.replace('auth.html');
-  }
-});
-
-const IS_TENANT = SESSION && SESSION.role === 'tenant';
-const CAN_MANAGE_MAINT = SESSION && ['agency-director', 'property-manager', 'maintenance-staff'].includes(SESSION.role);
-
-if (IS_TENANT) {
-  const ALLOWED = ['overview', 'maintenance', 'payments', 'documents'];
-  document.querySelectorAll('.sb-link[data-view]').forEach(l => {
-    if (!ALLOWED.includes(l.dataset.view)) l.style.display = 'none';
-  });
-  document.querySelector('.dd-item[data-view="settings"]')?.setAttribute('style', 'display:none');
-
-  document.querySelector('.sb-link[data-view="properties"]')?.classList.remove('active');
-  document.querySelector('.sb-link[data-view="overview"]')?.classList.add('active');
-  document.getElementById('view-properties')?.classList.remove('active');
-  document.getElementById('view-overview')?.classList.add('active');
-
-  const maintDesc = document.querySelector('#view-maintenance .section-desc');
-  if (maintDesc) maintDesc.textContent = 'Report issues with your unit. Your property manager will be notified.';
-
-  const maintBtn = document.querySelector('#view-maintenance .section-head .btn');
-  if (maintBtn) maintBtn.textContent = '+ Report an Issue';
-
-  const payDesc = document.querySelector('#view-payments .section-desc');
-  if (payDesc) payDesc.textContent = 'Your rent history and current payment status.';
-
-  const payBtn = document.querySelector('#view-payments .section-head .btn');
-  if (payBtn) payBtn.style.display = 'none';
-
-  const docsDesc = document.querySelector('#view-documents .section-desc');
-  if (docsDesc) docsDesc.textContent = 'Download receipts for your payments.';
-}
 
 /* ══════════════════════════════════════════════════════
    API HELPER
@@ -355,86 +313,10 @@ if (IS_TENANT) {
 /* ══════════════════════════════════════════════════════
    SIDEBAR + DROPDOWN + VIEW SWITCHING
 ══════════════════════════════════════════════════════ */
-const sidebar   = document.getElementById('sidebar');
-const overlay   = document.getElementById('overlay');
-const hamburger = document.getElementById('hamburger');
-const dropdown  = document.getElementById('dropdown');
-const avatarBtn = document.getElementById('avatarBtn');
-
-hamburger.addEventListener('click', () => {
-  sidebar.classList.toggle('open');
-  overlay.classList.toggle('open');
-});
-overlay.addEventListener('click', () => {
-  sidebar.classList.remove('open');
-  overlay.classList.remove('open');
-});
-
-avatarBtn.addEventListener('click', e => {
-  e.stopPropagation();
-  dropdown.classList.toggle('open');
-});
-document.addEventListener('click', e => {
-  if (!dropdown.contains(e.target) && e.target !== avatarBtn) dropdown.classList.remove('open');
-});
-
-document.querySelectorAll('[data-view]').forEach(el => {
-  el.addEventListener('click', () => switchView(el.dataset.view));
-});
-
-function switchView(name) {
-  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === `view-${name}`));
-  document.querySelectorAll('.sb-link[data-view]').forEach(l => l.classList.toggle('active', l.dataset.view === name));
-  dropdown.classList.remove('open');
-  if (window.innerWidth <= 1024) { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
-
-  if (name === 'properties' && !state.propsLoaded) loadProperties();
-  if (name === 'units'      && !state.unitsLoaded) loadUnits();
-  if (name === 'tenants'    && !state.tenantsLoaded) loadTenants();
-  if (name === 'maintenance'&& !state.maintLoaded) loadMaintenance();
-  if (name === 'payments'   && !state.payLoaded) loadPayments();
-  if (name === 'settings')   loadOrgSettings();
-  if (name === 'profile')    loadProfile();
-  if (name === 'documents') {
-    if (IS_TENANT) loadTenantDocuments();
-    else loadManagerDocuments();
-  }
-
-  if (name === 'overview') {
-    loadDashboard();
-    requestAnimationFrame(() => {
-      Object.values(chartInstances).forEach(ch => {
-        try { ch.resize(); } catch {}
-      });
-    });
-  }
-}
-
-/* ══════════════════════════════════════════════════════
-   LOGOUT
-══════════════════════════════════════════════════════ */
-function logout() {
-  clearSession();
-  ['mp_session','mp_user','mp_token','user','token','auth'].forEach(k => {
-    try { sessionStorage.removeItem(k); localStorage.removeItem(k); } catch {}
-  });
-  window.location.replace('auth.html');
-}
-document.getElementById('logoutBtn').addEventListener('click', logout);
-document.getElementById('dropdownLogout').addEventListener('click', logout);
 
 /* ══════════════════════════════════════════════════════
    STATE
 ══════════════════════════════════════════════════════ */
-const state = {
-  dashboard: null,
-  tenantSummary: null,
-  propsLoaded: false, unitsLoaded: false, tenantsLoaded: false,
-  maintLoaded: false, payLoaded: false,
-  properties: [], units: [], tenants: [], maintenance: [], payments: [],
-  tenantBalances: [],
-  showAllBalances: false,
-};
 
 /* ══════════════════════════════════════════════════════
    LEDGER ENGINE (rewritten)
@@ -683,7 +565,6 @@ function renderTenantCharts(data) {
   }
 }
 
-let chartInstances = {};
 
 function renderOverview(data) {
   document.getElementById('overviewLoading').style.display = 'none';
@@ -2760,19 +2641,13 @@ document.getElementById('modal').addEventListener('click', e => {
   if (e.target.id === 'modal') closeModal();
 });
 
-/* ══════════════════════════════════════════════════════
-   ACTIVE VIEW HELPER (used by payment/document actions)
-══════════════════════════════════════════════════════ */
-function getActiveView() {
-  const active = document.querySelector('.view.active');
-  return active ? active.id.replace('view-', '') : 'overview';
-}
 
 /* ══════════════════════════════════════════════════════
    GO
 ══════════════════════════════════════════════════════ */
 loadDashboard();
 if (!IS_TENANT) loadProperties();
+
 </script>
 </body>
 </html>
