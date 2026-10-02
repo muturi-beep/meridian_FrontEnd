@@ -11,4 +11,7 @@ const state = {
   showAllBalances: false,
 };
 
+// Shared mutable globals for modals (used across all views)
 let chartInstances = {};
+let modalHandler = null;
+let unitRows = [];
