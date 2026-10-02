@@ -8,6 +8,10 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <link rel="stylesheet" href="css/dashboard.css" />
+<script src="js/config.js"></script>
+<script src="js/session.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
 </head>
 <body>
 
@@ -279,42 +283,19 @@
 
 <div id="toasts"></div>
 
+<script src="js/config.js"></script>
+<script src="js/session.js"></script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+
 <script>
 /* ══════════════════════════════════════════════════════
    CONFIG
 ══════════════════════════════════════════════════════ */
-const isLocalDev =
-  location.protocol === 'file:' ||
-  location.hostname === 'localhost' ||
-  location.hostname === '127.0.0.1' ||
-  location.hostname === '' ||
-  location.hostname.startsWith('192.168.') ||
-  location.hostname.startsWith('10.');
-
-const API = isLocalDev ? 'http://localhost:3000' : '';
-
-console.log('[dashboard] API base =', API || '(same-origin)');
 
 /* ══════════════════════════════════════════════════════
    SESSION
 ══════════════════════════════════════════════════════ */
-function getSession() {
-  try {
-    const raw = sessionStorage.getItem('mp_session');
-    if (!raw) return null;
-    const s = JSON.parse(raw);
-    if (!s || !s.token || !s.loggedIn) return null;
-    return s;
-  } catch { return null; }
-}
-function setSession(patch) {
-  const cur = getSession() || {};
-  sessionStorage.setItem('mp_session', JSON.stringify({ ...cur, ...patch }));
-}
-function clearSession() {
-  sessionStorage.removeItem('mp_session');
-  localStorage.removeItem('mp_session');
-}
 
 /* ══════════════════════════════════════════════════════
    AUTH GUARD + ROLE PERMISSIONS
@@ -364,76 +345,11 @@ if (IS_TENANT) {
 /* ══════════════════════════════════════════════════════
    API HELPER
 ══════════════════════════════════════════════════════ */
-async function api(path, opts = {}) {
-  const s = getSession();
-  const headers = {
-    'Content-Type': 'application/json',
-    ...(opts.headers || {}),
-  };
-  if (s?.token) headers.Authorization = `Bearer ${s.token}`;
 
-  const fullUrl = `${API}${path}`;
-  let res;
-  try {
-    res = await fetch(fullUrl, { ...opts, headers });
-  } catch (err) {
-    throw new Error(`Cannot reach server at ${fullUrl}. ${err.message}`);
-  }
-
-  if (res.status === 401) {
-    clearSession();
-    sessionStorage.setItem('mp_flash', 'Your session has expired. Please sign in again.');
-    window.location.replace('auth.html');
-    throw new Error('Unauthorized');
-  }
-
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    const msg = data.message || `HTTP ${res.status}`;
-    throw new Error(`${msg} — ${opts.method || 'GET'} ${fullUrl}`);
-  }
-  return data;
-}
 
 /* ══════════════════════════════════════════════════════
    UI HELPERS
 ══════════════════════════════════════════════════════ */
-function toast(msg, type = 'info') {
-  const box = document.getElementById('toasts');
-  const el = document.createElement('div');
-  el.className = `toast toast-${type}`;
-  el.textContent = msg;
-  box.appendChild(el);
-  requestAnimationFrame(() => el.classList.add('show'));
-  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 3800);
-}
-function initials(first, last) {
-  return `${(first||'?')[0]||''}${(last||'?')[0]||''}`.toUpperCase();
-}
-function fmtMoney(n) {
-  return 'KES ' + (Number(n) || 0).toLocaleString('en-KE');
-}
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 12) return 'Good morning';
-  if (h < 17) return 'Good afternoon';
-  return 'Good evening';
-}
-function pillForStatus(s) {
-  const map = {
-    'Occupied':'pill-green', 'Vacant':'pill-amber', 'Reserved':'pill-blue', 'Maintenance':'pill-red',
-    'Paid':'pill-green', 'Pending':'pill-amber', 'Failed':'pill-red', 'Overdue':'pill-red',
-    'Partial':'pill-amber', 'Unpaid':'pill-red', 'No rent set':'pill-mute',
-    'Arrears':'pill-red', 'Deposit Due':'pill-blue',
-    'Open':'pill-amber', 'In Progress':'pill-blue', 'Resolved':'pill-green', 'Closed':'pill-mute',
-    'Active':'pill-green', 'Inactive':'pill-mute',
-    'Low':'pill-mute', 'Medium':'pill-blue', 'High':'pill-amber', 'Urgent':'pill-red',
-  };
-  return map[s] || 'pill-mute';
-}
-function esc(s) {
-  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
 
 /* ══════════════════════════════════════════════════════
    SIDEBAR + DROPDOWN + VIEW SWITCHING
