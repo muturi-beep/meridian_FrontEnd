@@ -1,619 +1,624 @@
-<!DOCTYPE html>
+﻿<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Dashboard — Meridian Properties</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-<link rel="stylesheet" href="css/dashboard.css" />
-</head>
-<body>
-
-<div class="app">
-  <aside class="sidebar" id="sidebar">
-    <div class="sb-brand">
-      <div class="sb-brand-icon">
-        <svg viewBox="0 0 20 20" fill="none"><path d="M10 2L18 6.5V13.5L10 18L2 13.5V6.5Z" stroke="#0c0f18" stroke-width="1.5"/><path d="M10 5.5L15 8.5V12.5L10 15.5L5 12.5V8.5Z" fill="#0c0f18" opacity=".35"/></svg>
-      </div>
-      <div class="sb-brand-txt">Meridian<br><em>Properties</em></div>
-    </div>
-
-    <div class="sb-org">
-      <div class="sb-org-lbl">Organization</div>
-      <div class="sb-org-name" id="sbOrgName">—</div>
-    </div>
-
-    <nav class="sb-nav" id="sbNav">
-      <button class="sb-link" data-view="overview"><span class="sb-ico">◎</span> Overview</button>
-      <button class="sb-link active" data-view="properties"><span class="sb-ico">▤</span> Properties <span class="sb-badge" id="badgeProps">0</span></button>
-      <button class="sb-link" data-view="units"><span class="sb-ico">⌂</span> Units <span class="sb-badge" id="badgeUnits">0</span></button>
-      <button class="sb-link" data-view="tenants"><span class="sb-ico">☺</span> Tenants <span class="sb-badge" id="badgeTenants">0</span></button>
-      <button class="sb-link" data-view="maintenance"><span class="sb-ico">⚒</span> Maintenance <span class="sb-badge" id="badgeMaint">0</span></button>
-      <button class="sb-link" data-view="payments"><span class="sb-ico">₭</span> Payments</button>
-      <button class="sb-link" data-view="documents"><span class="sb-ico">▦</span> Documents</button>
-      <button class="sb-link" data-view="settings"><span class="sb-ico">⚙</span> Settings</button>
-    </nav>
-
-    <div class="sb-bottom">
-      <button class="sb-link" data-view="profile"><span class="sb-ico">◉</span> Profile</button>
-      <button class="sb-link" id="logoutBtn"><span class="sb-ico">⎋</span> Logout</button>
-    </div>
-  </aside>
-
-  <div class="overlay" id="overlay"></div>
-
-  <main class="main">
-    <header class="topbar">
-      <button class="hamburger" id="hamburger" aria-label="Menu">☰</button>
-      <div class="tb-greeting">
-        <div class="tb-title" id="tbTitle">Loading…</div>
-        <div class="tb-sub" id="tbSub">Here's what's happening with your property portfolio today.</div>
-      </div>
-      <div class="tb-actions">
-        <button class="tb-icon-btn" aria-label="Notifications">🔔<span class="tb-dot"></span></button>
-        <button class="avatar-btn" id="avatarBtn">
-          <div class="avatar" id="avatar">—</div>
-          <div class="av-txt">
-            <div class="av-name" id="avName">—</div>
-            <div class="av-role" id="avRole">—</div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>Dashboard â€” Meridian Properties</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="css/dashboard.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar" id="sidebar">
+        <div class="sb-brand">
+          <div class="sb-brand-icon">
+            <svg viewBox="0 0 20 20" fill="none">
+              <path
+                d="M10 2L18 6.5V13.5L10 18L2 13.5V6.5Z"
+                stroke="#0c0f18"
+                stroke-width="1.5"
+              />
+              <path
+                d="M10 5.5L15 8.5V12.5L10 15.5L5 12.5V8.5Z"
+                fill="#0c0f18"
+                opacity=".35"
+              />
+            </svg>
           </div>
-        </button>
-      </div>
-    </header>
-
-    <div class="dropdown" id="dropdown">
-      <div class="dropdown-head">
-        <div class="dd-name" id="ddName">—</div>
-        <div class="dd-email" id="ddEmail">—</div>
-      </div>
-      <button class="dd-item" data-view="profile">◉ My Profile</button>
-      <button class="dd-item" data-view="settings">⚙ Settings</button>
-      <div class="dd-sep"></div>
-      <button class="dd-item danger" id="dropdownLogout">⎋ Logout</button>
-    </div>
-
-    <div class="content">
-      <section class="view" id="view-overview">
-        <div id="overviewLoading">
-          <div class="stats-grid">
-            <div class="stat-card"><div class="skeleton" style="height:11px;width:60%;margin-bottom:10px"></div><div class="skeleton" style="height:26px;width:40%"></div></div>
-            <div class="stat-card"><div class="skeleton" style="height:11px;width:60%;margin-bottom:10px"></div><div class="skeleton" style="height:26px;width:40%"></div></div>
-            <div class="stat-card"><div class="skeleton" style="height:11px;width:60%;margin-bottom:10px"></div><div class="skeleton" style="height:26px;width:40%"></div></div>
-            <div class="stat-card"><div class="skeleton" style="height:11px;width:60%;margin-bottom:10px"></div><div class="skeleton" style="height:26px;width:40%"></div></div>
-          </div>
+          <div class="sb-brand-txt">Meridian<br /><em>Properties</em></div>
         </div>
-        <div id="overviewContent" style="display:none"></div>
-      </section>
 
-      <section class="view active" id="view-properties">
-        <div class="section-head">
-          <div>
-            <div class="section-title">Properties</div>
-            <div class="section-desc">Buildings and apartments you manage.</div>
-          </div>
-          <button class="btn btn-primary" onclick="openPropertyModal()">+ Add Property</button>
+        <div class="sb-org">
+          <div class="sb-org-lbl">Organization</div>
+          <div class="sb-org-name" id="sbOrgName">â€”</div>
         </div>
-        <div id="propertiesList"></div>
-      </section>
 
-      <section class="view" id="view-units">
-        <div class="section-head">
-          <div>
-            <div class="section-title">Units</div>
-            <div class="section-desc">Units grouped by property. Edit any unit and the change saves immediately.</div>
-          </div>
-          <button class="btn btn-primary" onclick="openUnitModal()">+ Add Unit</button>
-        </div>
-        <div id="unitsList"></div>
-      </section>
+        <nav class="sb-nav" id="sbNav">
+          <button class="sb-link" data-view="overview">
+            <span class="sb-ico"
+              ><svg viewBox="0 0 24 24">
+                <rect x="3" y="3" width="7" height="7" />
+                <rect x="14" y="3" width="7" height="7" />
+                <rect x="14" y="14" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" /></svg
+            ></span>
+            Overview
+          </button>
+          <button class="sb-link active" data-view="properties">
+            <span class="sb-ico"
+              ><svg viewBox="0 0 24 24">
+                <path d="M3 21h18M5 21V7l7-4 7 4v14" />
+                <path
+                  d="M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01"
+                /></svg
+            ></span>
+            Properties <span class="sb-badge" id="badgeProps">0</span>
+          </button>
+          <button class="sb-link" data-view="units">
+            <span class="sb-ico"
+              ><svg viewBox="0 0 24 24">
+                <path d="M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16" />
+                <path d="M15 12h.01" /></svg
+            ></span>
+            Units <span class="sb-badge" id="badgeUnits">0</span>
+          </button>
+          <button class="sb-link" data-view="tenants">
+            <span class="sb-ico"
+              ><svg viewBox="0 0 24 24">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" /></svg
+            ></span>
+            Tenants <span class="sb-badge" id="badgeTenants">0</span>
+          </button>
+          <button class="sb-link" data-view="maintenance">
+            <span class="sb-ico"
+              ><svg viewBox="0 0 24 24">
+                <path
+                  d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"
+                /></svg
+            ></span>
+            Maintenance <span class="sb-badge" id="badgeMaint">0</span>
+          </button>
+          <button class="sb-link" data-view="payments">
+            <span class="sb-ico"
+              ><svg viewBox="0 0 24 24">
+                <line x1="12" y1="2" x2="12" y2="22" />
+                <path
+                  d="M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+                /></svg
+            ></span>
+            Payments
+          </button>
+          <button class="sb-link" data-view="documents">
+            <span class="sb-ico"
+              ><svg viewBox="0 0 24 24">
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" /></svg
+            ></span>
+            Documents
+          </button>
+          <button class="sb-link" data-view="settings">
+            <span class="sb-ico"
+              ><svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="3" />
+                <path
+                  d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+                /></svg
+            ></span>
+            Settings
+          </button>
+        </nav>
 
-      <section class="view" id="view-tenants">
-        <div class="section-head">
-          <div>
-            <div class="section-title">Tenants</div>
-            <div class="section-desc">Choose a property below, then add a tenant and the unit they'll occupy.</div>
-          </div>
+        <div class="sb-bottom">
+          <button class="sb-link" data-view="profile">
+            <span class="sb-ico"
+              ><svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" />
+                <circle cx="12" cy="10" r="3" />
+                <path d="M6.5 20a6 6 0 0 1 11 0" /></svg
+            ></span>
+            Profile
+          </button>
+          <button class="sb-link" id="logoutBtn">
+            <span class="sb-ico"
+              ><svg viewBox="0 0 24 24">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" /></svg
+            ></span>
+            Logout
+          </button>
         </div>
-        <div id="tenantsList"></div>
-      </section>
+      </aside>
 
-      <section class="view" id="view-maintenance">
-        <div class="section-head">
-          <div>
-            <div class="section-title">Maintenance</div>
-            <div class="section-desc">Work orders and repair requests.</div>
-          </div>
-          <button class="btn btn-primary" onclick="openMaintenanceModal()">+ New Request</button>
-        </div>
-        <div class="panel"><div id="maintenanceList"></div></div>
-      </section>
+      <div class="overlay" id="overlay"></div>
 
-      <section class="view" id="view-payments">
-        <div class="section-head">
-          <div>
-            <div class="section-title">Payments</div>
-            <div class="section-desc">Rent records across your portfolio.</div>
-          </div>
-          <button class="btn btn-primary" onclick="openPaymentModal()">+ Record Payment</button>
-        </div>
-        <div class="panel"><div id="paymentsList"></div></div>
-      </section>
-
-      <section class="view" id="view-documents">
-        <div class="section-head">
-          <div>
-            <div class="section-title">Documents</div>
-            <div class="section-desc">Payment receipts — view or download as PDF.</div>
-          </div>
-        </div>
-        <div id="documentsList">
-          <div class="empty">
-            <div class="empty-ico">▦</div>
-            <div class="empty-title">Documents coming soon</div>
-            <div class="empty-desc">Receipts will appear here once payments are recorded.</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="view" id="view-settings">
-        <div class="section-head">
-          <div>
-            <div class="section-title">Organization Settings</div>
-            <div class="section-desc">Manage your agency's information.</div>
-          </div>
-        </div>
-        <div class="panel">
-          <div class="panel-body">
-            <form id="orgForm" onsubmit="saveOrg(event)">
-              <div class="field"><label>Organization Name</label><input type="text" id="org-name" required/></div>
-              <div class="frow">
-                <div class="field"><label>Account Type</label>
-                  <select id="org-type">
-                    <option value="Landlord">Landlord</option>
-                    <option value="Property Owner">Property Owner</option>
-                    <option value="Property Manager">Property Manager</option>
-                    <option value="Agency">Agency</option>
-                  </select>
-                </div>
-                <div class="field"><label>Email</label><input type="email" id="org-email"/></div>
-              </div>
-              <div class="frow">
-                <div class="field"><label>Phone</label><input type="tel" id="org-phone"/></div>
-                <div class="field"><label>Location</label><input type="text" id="org-location" placeholder="e.g. Westlands, Nairobi"/></div>
-              </div>
-              <div class="field"><label>Address</label><input type="text" id="org-address"/></div>
-              <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px">
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </section>
-
-      <section class="view" id="view-profile">
-        <div class="section-head">
-          <div>
-            <div class="section-title">My Profile</div>
-            <div class="section-desc">Manage your personal information.</div>
-          </div>
-        </div>
-        <div class="panel" style="margin-bottom:18px">
-          <div class="panel-body" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
-            <div class="avatar" id="profileAvatar" style="width:64px;height:64px;font-size:22px">—</div>
-            <div>
-              <div id="profileName" style="font-family:var(--font-serif);font-size:22px;font-weight:700;color:var(--white)">—</div>
-              <div id="profileRole" style="font-size:13px;color:var(--t2);margin-top:2px">—</div>
+      <main class="main">
+        <header class="topbar">
+          <button class="hamburger" id="hamburger" aria-label="Menu">
+            â˜°
+          </button>
+          <div class="tb-greeting">
+            <div class="tb-title" id="tbTitle">Loadingâ€¦</div>
+            <div class="tb-sub" id="tbSub">
+              Here's what's happening with your property portfolio today.
             </div>
           </div>
-        </div>
-
-        <div class="panel" style="margin-bottom:18px">
-          <div class="panel-head"><div class="panel-title">Personal Information</div></div>
-          <div class="panel-body">
-            <form id="profileForm" onsubmit="saveProfile(event)">
-              <div class="frow">
-                <div class="field"><label>First Name</label><input type="text" id="p-first" required/></div>
-                <div class="field"><label>Last Name</label><input type="text" id="p-last" required/></div>
+          <div class="tb-actions">
+            <button class="tb-icon-btn" aria-label="Notifications">
+              ðŸ””<span class="tb-dot"></span>
+            </button>
+            <button class="avatar-btn" id="avatarBtn">
+              <div class="avatar" id="avatar">â€”</div>
+              <div class="av-txt">
+                <div class="av-name" id="avName">â€”</div>
+                <div class="av-role" id="avRole">â€”</div>
               </div>
-              <div class="frow">
-                <div class="field"><label>Email (read-only)</label><input type="email" id="p-email" disabled/></div>
-                <div class="field"><label>Phone</label><input type="tel" id="p-phone"/></div>
-              </div>
-              <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px">
-                <button type="submit" class="btn btn-primary">Save Profile</button>
-              </div>
-            </form>
+            </button>
           </div>
-        </div>
+        </header>
 
-        <div class="panel">
-          <div class="panel-head"><div class="panel-title">Change Password</div></div>
-          <div class="panel-body">
-            <form id="passwordForm" onsubmit="savePassword(event)">
-              <div class="field"><label>Current Password</label><input type="password" id="p-cur" autocomplete="current-password"/></div>
-              <div class="frow">
-                <div class="field"><label>New Password</label><input type="password" id="p-new" autocomplete="new-password"/></div>
-                <div class="field"><label>Confirm New Password</label><input type="password" id="p-confirm" autocomplete="new-password"/></div>
-              </div>
-              <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px">
-                <button type="submit" class="btn btn-primary">Update Password</button>
-              </div>
-            </form>
+        <div class="dropdown" id="dropdown">
+          <div class="dropdown-head">
+            <div class="dd-name" id="ddName">â€”</div>
+            <div class="dd-email" id="ddEmail">â€”</div>
           </div>
+          <button class="dd-item" data-view="profile">â—‰ My Profile</button>
+          <button class="dd-item" data-view="settings">âš™ Settings</button>
+          <div class="dd-sep"></div>
+          <button class="dd-item danger" id="dropdownLogout">âŽ‹ Logout</button>
         </div>
-      </section>
+
+        <div class="content">
+          <section class="view" id="view-overview">
+            <div id="overviewLoading">
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <div
+                    class="skeleton"
+                    style="height: 11px; width: 60%; margin-bottom: 10px"
+                  ></div>
+                  <div class="skeleton" style="height: 26px; width: 40%"></div>
+                </div>
+                <div class="stat-card">
+                  <div
+                    class="skeleton"
+                    style="height: 11px; width: 60%; margin-bottom: 10px"
+                  ></div>
+                  <div class="skeleton" style="height: 26px; width: 40%"></div>
+                </div>
+                <div class="stat-card">
+                  <div
+                    class="skeleton"
+                    style="height: 11px; width: 60%; margin-bottom: 10px"
+                  ></div>
+                  <div class="skeleton" style="height: 26px; width: 40%"></div>
+                </div>
+                <div class="stat-card">
+                  <div
+                    class="skeleton"
+                    style="height: 11px; width: 60%; margin-bottom: 10px"
+                  ></div>
+                  <div class="skeleton" style="height: 26px; width: 40%"></div>
+                </div>
+              </div>
+            </div>
+            <div id="overviewContent" style="display: none"></div>
+          </section>
+
+          <section class="view active" id="view-properties">
+            <div class="section-head">
+              <div>
+                <div class="section-title">Properties</div>
+                <div class="section-desc">
+                  Buildings and apartments you manage.
+                </div>
+              </div>
+              <button class="btn btn-primary" onclick="openPropertyModal()">
+                + Add Property
+              </button>
+            </div>
+            <div id="propertiesList"></div>
+          </section>
+
+          <section class="view" id="view-units">
+            <div class="section-head">
+              <div>
+                <div class="section-title">Units</div>
+                <div class="section-desc">
+                  Units grouped by property. Edit any unit and the change saves
+                  immediately.
+                </div>
+              </div>
+              <button class="btn btn-primary" onclick="openUnitModal()">
+                + Add Unit
+              </button>
+            </div>
+            <div id="unitsList"></div>
+          </section>
+
+          <section class="view" id="view-tenants">
+            <div class="section-head">
+              <div>
+                <div class="section-title">Tenants</div>
+                <div class="section-desc">
+                  Choose a property below, then add a tenant and the unit
+                  they'll occupy.
+                </div>
+              </div>
+            </div>
+            <div id="tenantsList"></div>
+          </section>
+
+          <section class="view" id="view-maintenance">
+            <div class="section-head">
+              <div>
+                <div class="section-title">Maintenance</div>
+                <div class="section-desc">Work orders and repair requests.</div>
+              </div>
+              <button class="btn btn-primary" onclick="openMaintenanceModal()">
+                + New Request
+              </button>
+            </div>
+            <div class="panel"><div id="maintenanceList"></div></div>
+          </section>
+
+          <section class="view" id="view-payments">
+            <div class="section-head">
+              <div>
+                <div class="section-title">Payments</div>
+                <div class="section-desc">
+                  Rent records across your portfolio.
+                </div>
+              </div>
+              <button class="btn btn-primary" onclick="openPaymentModal()">
+                + Record Payment
+              </button>
+            </div>
+            <div class="panel"><div id="paymentsList"></div></div>
+          </section>
+
+          <section class="view" id="view-documents">
+            <div class="section-head">
+              <div>
+                <div class="section-title">Documents</div>
+                <div class="section-desc">
+                  Payment receipts â€” view or download as PDF.
+                </div>
+              </div>
+            </div>
+            <div id="documentsList">
+              <div class="empty">
+                <div class="empty-ico">â–¦</div>
+                <div class="empty-title">Documents coming soon</div>
+                <div class="empty-desc">
+                  Receipts will appear here once payments are recorded.
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="view" id="view-settings">
+            <div class="section-head">
+              <div>
+                <div class="section-title">Organization Settings</div>
+                <div class="section-desc">
+                  Manage your agency's information.
+                </div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-body">
+                <form id="orgForm" onsubmit="saveOrg(event)">
+                  <div class="field">
+                    <label>Organization Name</label
+                    ><input type="text" id="org-name" required />
+                  </div>
+                  <div class="frow">
+                    <div class="field">
+                      <label>Account Type</label>
+                      <select id="org-type">
+                        <option value="Landlord">Landlord</option>
+                        <option value="Property Owner">Property Owner</option>
+                        <option value="Property Manager">
+                          Property Manager
+                        </option>
+                        <option value="Agency">Agency</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label>Email</label><input type="email" id="org-email" />
+                    </div>
+                  </div>
+                  <div class="frow">
+                    <div class="field">
+                      <label>Phone</label><input type="tel" id="org-phone" />
+                    </div>
+                    <div class="field">
+                      <label>Location</label
+                      ><input
+                        type="text"
+                        id="org-location"
+                        placeholder="e.g. Westlands, Nairobi"
+                      />
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label>Address</label><input type="text" id="org-address" />
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      gap: 10px;
+                      justify-content: flex-end;
+                      margin-top: 6px;
+                    "
+                  >
+                    <button type="submit" class="btn btn-primary">
+                      Save Changes
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </section>
+
+          <section class="view" id="view-profile">
+            <div class="section-head">
+              <div>
+                <div class="section-title">My Profile</div>
+                <div class="section-desc">
+                  Manage your personal information.
+                </div>
+              </div>
+            </div>
+            <div class="panel" style="margin-bottom: 18px">
+              <div
+                class="panel-body"
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 20px;
+                  flex-wrap: wrap;
+                "
+              >
+                <div
+                  class="avatar"
+                  id="profileAvatar"
+                  style="width: 64px; height: 64px; font-size: 22px"
+                >
+                  â€”
+                </div>
+                <div>
+                  <div
+                    id="profileName"
+                    style="
+                      font-family: var(--font-serif);
+                      font-size: 22px;
+                      font-weight: 700;
+                      color: var(--white);
+                    "
+                  >
+                    â€”
+                  </div>
+                  <div
+                    id="profileRole"
+                    style="font-size: 13px; color: var(--t2); margin-top: 2px"
+                  >
+                    â€”
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel" style="margin-bottom: 18px">
+              <div class="panel-head">
+                <div class="panel-title">Personal Information</div>
+              </div>
+              <div class="panel-body">
+                <form id="profileForm" onsubmit="saveProfile(event)">
+                  <div class="frow">
+                    <div class="field">
+                      <label>First Name</label
+                      ><input type="text" id="p-first" required />
+                    </div>
+                    <div class="field">
+                      <label>Last Name</label
+                      ><input type="text" id="p-last" required />
+                    </div>
+                  </div>
+                  <div class="frow">
+                    <div class="field">
+                      <label>Email (read-only)</label
+                      ><input type="email" id="p-email" disabled />
+                    </div>
+                    <div class="field">
+                      <label>Phone</label><input type="tel" id="p-phone" />
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      gap: 10px;
+                      justify-content: flex-end;
+                      margin-top: 6px;
+                    "
+                  >
+                    <button type="submit" class="btn btn-primary">
+                      Save Profile
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <div class="panel-title">Change Password</div>
+              </div>
+              <div class="panel-body">
+                <form id="passwordForm" onsubmit="savePassword(event)">
+                  <div class="field">
+                    <label>Current Password</label
+                    ><input
+                      type="password"
+                      id="p-cur"
+                      autocomplete="current-password"
+                    />
+                  </div>
+                  <div class="frow">
+                    <div class="field">
+                      <label>New Password</label
+                      ><input
+                        type="password"
+                        id="p-new"
+                        autocomplete="new-password"
+                      />
+                    </div>
+                    <div class="field">
+                      <label>Confirm New Password</label
+                      ><input
+                        type="password"
+                        id="p-confirm"
+                        autocomplete="new-password"
+                      />
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      gap: 10px;
+                      justify-content: flex-end;
+                      margin-top: 6px;
+                    "
+                  >
+                    <button type="submit" class="btn btn-primary">
+                      Update Password
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
     </div>
-  </main>
-</div>
 
-<div class="modal" id="modal">
-  <form class="modal-box" id="modalForm" onsubmit="submitModal(event)">
-    <div class="modal-head">
-      <div class="modal-title" id="modalTitle">—</div>
-      <button type="button" class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal" id="modal">
+      <form class="modal-box" id="modalForm" onsubmit="submitModal(event)">
+        <div class="modal-head">
+          <div class="modal-title" id="modalTitle">â€”</div>
+          <button type="button" class="modal-close" onclick="closeModal()">
+            Ã—
+          </button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-foot">
+          <button type="button" class="btn btn-outline" onclick="closeModal()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary" id="modalSubmit">
+            Save
+          </button>
+        </div>
+      </form>
     </div>
-    <div class="modal-body" id="modalBody"></div>
-    <div class="modal-foot">
-      <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
-      <button type="submit" class="btn btn-primary" id="modalSubmit">Save</button>
+
+    <!-- RECEIPT MODAL -->
+    <div class="modal" id="receiptModal">
+      <div class="modal-box" style="max-width: 560px">
+        <div class="modal-head">
+          <div class="modal-title">Payment Receipt</div>
+          <button
+            type="button"
+            class="modal-close"
+            onclick="closeReceiptModal()"
+          >
+            Ã—
+          </button>
+        </div>
+        <div class="modal-body" id="receiptModalBody"></div>
+        <div class="modal-foot">
+          <button
+            type="button"
+            class="btn btn-outline"
+            onclick="closeReceiptModal()"
+          >
+            Close
+          </button>
+          <button type="button" class="btn btn-primary" id="receiptPdfBtn">
+            Download PDF
+          </button>
+        </div>
+      </div>
     </div>
-  </form>
-</div>
 
-<!-- RECEIPT MODAL -->
-<div class="modal" id="receiptModal">
-  <div class="modal-box" style="max-width:560px">
-    <div class="modal-head">
-      <div class="modal-title">Payment Receipt</div>
-      <button type="button" class="modal-close" onclick="closeReceiptModal()">×</button>
-    </div>
-    <div class="modal-body" id="receiptModalBody"></div>
-    <div class="modal-foot">
-      <button type="button" class="btn btn-outline" onclick="closeReceiptModal()">Close</button>
-      <button type="button" class="btn btn-primary" id="receiptPdfBtn">Download PDF</button>
-    </div>
-  </div>
-</div>
+    <div id="toasts"></div>
 
-<div id="toasts"></div>
+    <script src="js/config.js"></script>
+    <script src="js/session.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/ledger.js"></script>
+    <script src="js/dashboard/state.js"></script>
+    <script src="js/dashboard/guard.js"></script>
+    <script src="js/dashboard/navigation.js"></script>
+    <script src="js/dashboard/overview.js"></script>
+    <script src="js/dashboard/properties.js"></script>
+    <script src="js/dashboard/units.js"></script>
+    <script src="js/dashboard/tenants.js"></script>
+    <script src="js/dashboard/maintenance.js"></script>
+    <script src="js/dashboard/documents.js"></script>
+    <script src="js/dashboard/settings.js"></script>
+    <script src="js/dashboard/profile.js"></script>
+    <script src="js/dashboard/modal.js"></script>
+    <script src="js/dashboard/receipt.js"></script>
 
-  <script src="js/config.js"></script>
-  <script src="js/session.js"></script>
-  <script src="js/api.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/ledger.js"></script>
-  <script src="js/dashboard/state.js"></script>
-  <script src="js/dashboard/guard.js"></script>
-  <script src="js/dashboard/navigation.js"></script>
-  <script src="js/dashboard/overview.js"></script>
-  <script src="js/dashboard/properties.js"></script>
-  <script src="js/dashboard/units.js"></script>
-  <script src="js/dashboard/tenants.js"></script>
-  <script src="js/dashboard/maintenance.js"></script>
-  <script src="js/dashboard/documents.js"></script>
-  <script src="js/dashboard/settings.js"></script>
-  <script src="js/dashboard/profile.js"></script>
-  <script src="js/dashboard/modal.js"></script>
-  <script src="js/dashboard/receipt.js"></script>
-
-<script>
-/* ══════════════════════════════════════════════════════
-   CONFIG
-══════════════════════════════════════════════════════ */
-
-/* ══════════════════════════════════════════════════════
-   SESSION
-══════════════════════════════════════════════════════ */
-
-/* ══════════════════════════════════════════════════════
-   AUTH GUARD + ROLE PERMISSIONS
-══════════════════════════════════════════════════════ */
-
-/* ══════════════════════════════════════════════════════
-   API HELPER
-══════════════════════════════════════════════════════ */
-
-
-/* ══════════════════════════════════════════════════════
-   UI HELPERS
-══════════════════════════════════════════════════════ */
-
-/* ══════════════════════════════════════════════════════
-   SIDEBAR + DROPDOWN + VIEW SWITCHING
-══════════════════════════════════════════════════════ */
-
-/* ══════════════════════════════════════════════════════
-   STATE
-══════════════════════════════════════════════════════ */
-
-/* ══════════════════════════════════════════════════════
-   LEDGER ENGINE (rewritten)
-   ─────────────────────────────────────────────────────
-
-
-/* ══════════════════════════════════════════════════════
-   BOOTSTRAP
-══════════════════════════════════════════════════════ */
-function paintIdentity({ firstName, lastName, role, organizationName, avatar }) {
-  document.getElementById('sbOrgName').textContent = organizationName || '—';
-  document.getElementById('avName').textContent = firstName ? `${firstName} ${lastName||''}`.trim() : '—';
-  document.getElementById('avRole').textContent = role || '—';
-  document.getElementById('ddName').textContent = firstName ? `${firstName} ${lastName||''}`.trim() : '—';
-  document.getElementById('ddEmail').textContent = SESSION.email || '—';
-  document.getElementById('tbTitle').textContent = `${greeting()}, ${firstName || 'there'}`;
-  document.getElementById('tbSub').textContent = organizationName
-    ? `Here's what's happening at ${organizationName} today.`
-    : "Here's what's happening with your property portfolio today.";
-
-  const av = document.getElementById('avatar');
-  if (avatar) av.innerHTML = `<img src="${esc(avatar)}" alt="">`;
-  else av.textContent = initials(firstName, lastName);
-}
-paintIdentity({
-  firstName: SESSION.firstName, lastName: SESSION.lastName,
-  role: SESSION.role, organizationName: SESSION.organizationName,
-  avatar: SESSION.avatar,
-});
-
-/* ══════════════════════════════════════════════════════
-   LOAD DASHBOARD
-══════════════════════════════════════════════════════ */
-
-/* ══════════════════════════════════════════════════════
-   PROPERTIES
-══════════════════════════════════════════════════════ */
-
-/* ══════════════════════════════════════════════════════
-   UNITS
-══════════════════════════════════════════════════════ */
-
-/* ══════════════════════════════════════════════════════
-   TENANTS
-══════════════════════════════════════════════════════ */
-
-
-/* ══════════════════════════════════════════════════════
-   MAINTENANCE
-══════════════════════════════════════════════════════ */
-
-/* ══════════════════════════════════════════════════════
-   PAYMENTS — with running ledger + partial payments
-══════════════════════════════════════════════════════ */
-
-    /* ── MANAGER VIEW ─────────────────────────────────── */
-    const [list, tenants] = await Promise.all([
-      api('/payments'),
-      api('/api/tenants').catch(() => state.tenants || []),
-    ]);
-
-    state.payments = list;
-    state.tenants  = Array.isArray(tenants) ? tenants : [];
-    state.tenantsLoaded = true;
-    state.payLoaded = true;
-    state.tenantBalances = computeTenantBalances(state.tenants, list);
-
-    const badgeT = document.getElementById('badgeTenants');
-    if (badgeT) badgeT.textContent = state.tenants.length;
-
-    // Attach running-balance info to each payment record for display
-    const paymentRow = (p) => {
-      const tenant = state.tenants.find(t =>
-        String(t._id) === String(p.tenantId) ||
-        `${t.firstName} ${t.lastName}`.trim().toLowerCase() === String(p.tenant || '').trim().toLowerCase()
-      );
-      let balanceNote = '';
-      if (tenant) {
-        const ledger = buildTenantLedger(tenant, list);
-        const snap = ledger.runningBalances.get(String(p._id));
-        const accountNowClear = ledger.balance <= 0;
-        if (snap && snap.balanceAfter > 0) {
-          if (accountNowClear) {
-            balanceNote = `<div style="font-size:10.5px;color:var(--green);margin-top:3px">Was ${fmtMoney(snap.balanceAfter)} · ✓ since cleared</div>`;
-          } else {
-            balanceNote = `<div style="font-size:10.5px;color:var(--amber);margin-top:3px">Bal. after: ${fmtMoney(snap.balanceAfter)}</div>`;
-          }
-        } else if (snap && snap.balanceAfter === 0) {
-          balanceNote = `<div style="font-size:10.5px;color:var(--green);margin-top:3px">✓ Settled up</div>`;
+    <script>
+      (function paintBadgesOnLoad() {
+        const s = getSession();
+        const cached = s && s.cachedStats;
+        const set = (id, val, loading) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.textContent = val;
+          el.classList.toggle("is-loading", !!loading);
+        };
+        if (cached) {
+          set("badgeProps", cached.totalProperties);
+          set("badgeUnits", cached.totalUnits);
+          set("badgeTenants", cached.totalTenants);
+          set("badgeMaint", cached.maintenanceRequests);
+        } else {
+          set("badgeProps", "\u2026", true);
+          set("badgeUnits", "\u2026", true);
+          set("badgeTenants", "\u2026", true);
+          set("badgeMaint", "\u2026", true);
         }
-      }
-      return `<tr>
-        <td>${esc(p.tenant)}</td>
-        <td>${esc(p.property || '—')}</td>
-        <td>${esc(p.unit || '—')}</td>
-        <td>
-          ${fmtMoney(p.amount)}
-          ${balanceNote}
-        </td>
-        <td>${p.date ? new Date(p.date).toLocaleDateString() : '—'}</td>
-        <td>${esc(p.method)}</td>
-        <td><span class="pill ${pillForStatus(p.status)}">${esc(p.status)}</span></td>
-        <td class="actions">
-          <button class="btn btn-outline btn-sm" onclick='openReceiptModal(${JSON.stringify(p).replace(/'/g, "&#39;")})'>Receipt</button>
-          <button class="btn btn-outline btn-sm" onclick='openPaymentModal(${JSON.stringify(p).replace(/'/g, "&#39;")})'>Edit</button>
-          <button class="btn btn-danger btn-sm" onclick="deletePayment('${p._id}')">Delete</button>
-        </td>
-      </tr>`;
-    };
+      })();
 
-    const paymentsTable = list.length
-      ? `<div class="table-wrap"><table>
-          <thead><tr><th>Tenant</th><th>Property</th><th>Unit</th><th>Amount</th><th>Date</th><th>Method</th><th>Status</th><th class="actions">Actions</th></tr></thead>
-          <tbody>${list.map(paymentRow).join('')}</tbody>
-        </table></div>`
-      : `<div class="empty" style="border:none"><div class="empty-ico">₭</div><div class="empty-title">No payments recorded</div><div class="empty-desc">Log rent payments here as they come in.</div><button class="btn btn-primary" onclick="openPaymentModal()">+ Record Payment</button></div>`;
+      paintIdentity({
+        firstName: SESSION.firstName,
+        lastName: SESSION.lastName,
+        role: SESSION.role,
+        organizationName: SESSION.organizationName,
+        avatar: SESSION.avatar,
+      });
 
-    el.innerHTML = `
-      <div id="balancesWrap">${renderBalancesPanel()}</div>
-      <div class="panel" style="margin-top:24px">
-        <div class="panel-head"><div class="panel-title">Payment Records (${list.length})</div></div>
-        ${paymentsTable}
-      </div>`;
-  } catch (err) {
-    el.innerHTML = `<div class="panel-body"><div class="empty-desc">${esc(err.message)}</div></div>`;
-  }
-}
-
-async function openPaymentModal(payment = null, preset = null) {
-  const isEdit = !!payment;
-  document.getElementById('modalTitle').textContent = isEdit ? 'Edit Payment' : 'Record Payment';
-
-  if (!state.properties || !state.properties.length) {
-    try { state.properties = await api('/api/properties'); } catch {}
-  }
-  if (!state.units || !state.units.length) {
-    try { state.units = await api('/products'); } catch {}
-  }
-  if (!state.tenants || !state.tenants.length) {
-    try { state.tenants = await api('/api/tenants'); } catch {}
-  }
-  if (!state.payments || !state.payments.length) {
-    try { state.payments = await api('/payments'); } catch {}
-  }
-
-  const props   = state.properties || [];
-  const units   = state.units      || [];
-  const tenants = state.tenants    || [];
-
-  const selectedTenantId = String(payment?.tenantId || preset?.tenantId || '');
-  const selectedProperty = payment?.property || preset?.property || '';
-  const selectedUnit     = payment?.unit     || preset?.unit     || '';
-  const amountValue      = payment?.amount ?? preset?.amount ?? '';
-
-  const dateVal = payment?.date
-    ? new Date(payment.date).toISOString().slice(0, 10)
-    : new Date().toISOString().slice(0, 10);
-
-  document.getElementById('modalBody').innerHTML = `
-    <div class="payment-preview" id="paymentPreview">
-      <div class="pp-empty">Select a tenant to preview their updated balance.</div>
-    </div>
-
-    <div class="field"><label>Tenant *</label>
-      <select name="tenantId" required onchange="autoFillAmount(this)">
-        <option value="">— Select tenant —</option>
-        ${tenants.map(t => `<option value="${t._id}" ${selectedTenantId === String(t._id) ? 'selected' : ''}>${esc(t.firstName + ' ' + t.lastName)}</option>`).join('')}
-      </select>
-    </div>
-    <div class="frow">
-      <div class="field"><label>Amount (KES) *</label>
-        <input type="number" name="amount" min="0" required value="${amountValue}" oninput="updatePaymentPreview()"/>
-      </div>
-      <div class="field"><label>Type</label>
-        <select name="type" onchange="updatePaymentPreview()">
-          ${['Rent','Deposit','Service Charge','Other'].map(t => `<option ${payment?.type === t ? 'selected' : ''}>${t}</option>`).join('')}
-        </select>
-      </div>
-    </div>
-    <div class="frow">
-      <div class="field"><label>Method</label>
-        <select name="method">
-          ${['M-Pesa','Bank','Cash','Other'].map(m => `<option ${payment?.method === m ? 'selected' : ''}>${m}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field"><label>Status</label>
-        <select name="status">
-          ${['Paid','Pending','Failed','Overdue'].map(s => `<option ${payment?.status === s ? 'selected' : ''}>${s}</option>`).join('')}
-        </select>
-      </div>
-    </div>
-    <div class="frow">
-      <div class="field"><label>Property</label>
-        <select name="property">
-          <option value="">— Optional —</option>
-          ${props.map(p => `<option ${selectedProperty === p.name ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field"><label>Unit</label>
-        <select name="unit">
-          <option value="">— Optional —</option>
-          ${units.map(u => `<option ${selectedUnit === u.name ? 'selected' : ''}>${esc(u.name)}</option>`).join('')}
-        </select>
-      </div>
-    </div>
-    <div class="frow">
-      <div class="field"><label>Date</label>
-        <input type="date" name="date" value="${dateVal}"/>
-      </div>
-      <div class="field"><label>Reference</label>
-        <input type="text" name="reference" value="${esc(payment?.reference || '')}" placeholder="M-Pesa code, bank ref, etc."/>
-      </div>
-    </div>`;
-
-  // Initial preview
-  setTimeout(updatePaymentPreview, 0);
-
-  modalHandler = async () => {
-    const form = document.getElementById('modalForm');
-    const payload = {
-      tenantId:  form.querySelector('[name="tenantId"]').value,
-      amount:    Number(form.querySelector('[name="amount"]').value) || 0,
-      type:      form.querySelector('[name="type"]').value,
-      method:    form.querySelector('[name="method"]').value,
-      status:    form.querySelector('[name="status"]').value,
-      property:  form.querySelector('[name="property"]').value,
-      unit:      form.querySelector('[name="unit"]').value,
-      date:      form.querySelector('[name="date"]').value || new Date(),
-      reference: form.querySelector('[name="reference"]').value.trim(),
-    };
-
-    if (isEdit) {
-      await api(`/payments/${payment._id}`, { method: 'PUT', body: JSON.stringify(payload) });
-      toast('Payment updated.', 'success');
-    } else {
-      await api('/payments', { method: 'POST', body: JSON.stringify(payload) });
-      toast('Payment recorded.', 'success');
-    }
-    closeModal();
-    state.payLoaded = false;
-    loadPayments();
-    loadDashboard();
-    if (getActiveView() === 'documents') loadManagerDocuments();
-  };
-  document.getElementById('modal').classList.add('open');
-}
-
-async function deletePayment(id) {
-  if (!confirm('Delete this payment record? This cannot be undone.')) return;
-  try {
-    await api(`/payments/${id}`, { method: 'DELETE' });
-    toast('Payment deleted.', 'success');
-    state.payLoaded = false;
-    loadPayments();
-    loadDashboard();
-    if (getActiveView() === 'documents') loadManagerDocuments();
-  } catch (err) { toast(err.message, 'error'); }
-}
-
-/* ══════════════════════════════════════════════════════
-   SETTINGS
-══════════════════════════════════════════════════════ */
-
-/* ══════════════════════════════════════════════════════
-   PROFILE
-══════════════════════════════════════════════════════ */
-
-/* ══════════════════════════════════════════════════════
-   DOCUMENTS
-══════════════════════════════════════════════════════ */
-
-/* ══════════════════════════════════════════════════════
-   RECEIPT (enhanced: running balance + allocations)
-══════════════════════════════════════════════════════ */
-
-
-/* ══════════════════════════════════════════════════════
-   MODAL
-══════════════════════════════════════════════════════ */
-
-
-/* ══════════════════════════════════════════════════════
-   GO
-══════════════════════════════════════════════════════ */
-loadDashboard();
-if (!IS_TENANT) loadProperties();
-
-</script>
-</body>
+      loadDashboard();
+      if (!IS_TENANT) loadProperties();
+    </script>
+  </body>
 </html>

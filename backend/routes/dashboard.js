@@ -34,6 +34,7 @@ router.get(['/api/dashboard', '/dashboard'], requireAuth, async (req, res) => {
     const monthlyRevenue = payments.filter(p => p.status === 'Paid' && p.date && new Date(p.date).getMonth() === now.getMonth() && new Date(p.date).getFullYear() === now.getFullYear()).reduce((s, p) => s + (p.amount || 0), 0);
     const pendingRent = payments.filter(p => p.status === 'Pending' || p.status === 'Overdue').reduce((s, p) => s + (p.amount || 0), 0);
     const openMaintenance = maintenance.filter(m => m.status === 'Open' || m.status === 'In Progress').length;
+    const totalTenants = await User.countDocuments(orgScope(req, { role: 'tenant' }));
 
     const propertyBreakdown = properties.map(p => {
       const pUnits = units.filter(u => u.property === p.name);
@@ -63,7 +64,7 @@ router.get(['/api/dashboard', '/dashboard'], requireAuth, async (req, res) => {
     res.json({
       user: { id: me._id, firstName: me.firstName, lastName: me.lastName, email: me.email, phone: me.phone, role: me.role, avatar: me.avatar },
       organization: { id: org._id, name: org.name, type: org.type, email: org.email, phone: org.phone, location: org.location, address: org.address, inviteCode: MANAGEMENT.includes(req.user.role) ? org.inviteCode : undefined },
-      stats: { totalProperties: properties.length, totalUnits, occupiedUnits, vacantUnits, reservedUnits, maintUnits, monthlyRevenue, pendingRent, maintenanceRequests: openMaintenance, occupancyRate: totalUnits ? Math.round((occupiedUnits / totalUnits) * 1000) / 10 : 0 },
+      stats: { totalProperties: properties.length, totalUnits, totalTenants, occupiedUnits, vacantUnits, reservedUnits, maintUnits, monthlyRevenue, pendingRent, maintenanceRequests: openMaintenance, occupancyRate: totalUnits ? Math.round((occupiedUnits / totalUnits) * 1000) / 10 : 0 },
       charts: { propertyBreakdown, revenueByMonth: months, paymentStatus, maintStatus },
     });
   } catch (err) {
