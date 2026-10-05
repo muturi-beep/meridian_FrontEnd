@@ -10,10 +10,10 @@ const authLimiter = rateLimit({
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === "test",
   message: {
     message: "Too many attempts from this IP. Please try again in 15 minutes.",
   },
-  // On Vercel, req.ip needs the trust-proxy setting — already set in backend/app.js
 });
 
 // Slightly looser limiter for other authenticated actions (future use).
@@ -22,6 +22,7 @@ const apiLimiter = rateLimit({
   max: 120,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === "test",
   message: { message: "Too many requests. Please slow down." },
 });
 
