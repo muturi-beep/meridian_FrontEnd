@@ -373,6 +373,77 @@
                 </form>
               </div>
             </div>
+
+            <!-- ═══ INVITE CODE PANEL ═══ -->
+            <div
+              class="panel"
+              id="org-invite-panel"
+              style="margin-top: 18px; display: none"
+            >
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title">Invite Code</div>
+                  <div class="section-desc" style="margin-top: 3px">
+                    Share this with your team so they can join your agency.
+                  </div>
+                </div>
+              </div>
+              <div class="panel-body">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    flex-wrap: wrap;
+                  "
+                >
+                  <div
+                    id="org-invite-code"
+                    style="
+                      font-family: var(--font-serif);
+                      font-size: 26px;
+                      font-weight: 700;
+                      letter-spacing: 0.14em;
+                      color: var(--copper-l);
+                      background: var(--ink-3);
+                      border: 1px solid var(--border);
+                      border-radius: var(--rs);
+                      padding: 12px 20px;
+                      min-width: 200px;
+                      text-align: center;
+                    "
+                  >
+                    ————-————
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    id="org-invite-copy"
+                  >
+                    Copy
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-outline"
+                    id="org-invite-regen"
+                  >
+                    Regenerate
+                  </button>
+                </div>
+                <div
+                  style="
+                    font-size: 11.5px;
+                    color: var(--t2);
+                    margin-top: 12px;
+                    line-height: 1.5;
+                  "
+                >
+                  ⚠️ Regenerating invalidates the current code instantly. Anyone
+                  with the old code will not be able to join until you share the
+                  new one.
+                </div>
+              </div>
+            </div>
           </section>
 
           <section class="view" id="view-profile">
