@@ -606,3 +606,130 @@ async function deletePayment(id) {
     toast(err.message, "error");
   }
 }
+/* ══════════════════════════════════════════════════════
+   CSV EXPORT
+   ─────────────────────────────────────────────────────
+   Exports the currently visible payment records (respects
+   the search filter). Manager and tenant views use the
+   same writer — the tenant view just omits the tenant column.
+══════════════════════════════════════════════════════ */
+
+/**
+ * Escape a value for CSV: wrap in quotes, double internal quotes.
+ * Empty / null values become empty strings.
+ */
+function csvCell(v) {
+  const s = String(v ?? "");
+  return '"' + s.replace(/"/g, '""') + '"';
+}
+
+function csvRow(values) {
+  return values.map(csvCell).join(",");
+}
+
+function downloadCsv(filename, rows) {
+  // UTF-8 BOM so Excel opens accented characters correctly
+  const csv = "\uFEFF" + rows.join("\r\n") + "\r\n";
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+function todayStamp() {
+  const d = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+function exportPaymentsCsv() {
+  const term = paymentsSearchTerm.trim().toLowerCase();
+
+  if (IS_TENANT) {
+    const summary = state.tenantSummary;
+    if (!summary || !summary.unit) {
+      toast("Nothing to export yet.", "error");
+      return;
+    }
+    const all = summary.payments || [];
+    const list = term ? all.filter((p) => matchesPayment(p, term)) : all;
+
+    if (!list.length) {
+      toast("No payments to export.", "error");
+      return;
+    }
+
+    const rows = [
+      csvRow(["Date", "Amount (KES)", "Type", "Method", "Reference", "Status"]),
+      ...list.map((p) =>
+        csvRow([
+          p.date ? new Date(p.date).toISOString().slice(0, 10) : "",
+          Number(p.amount) || 0,
+          p.type || "Rent",
+          p.method || "",
+          p.reference || "",
+          p.status || "",
+        ]),
+      ),
+    ];
+
+    downloadCsv(`my-payments-${todayStamp()}.csv`, rows);
+    toast(
+      `Exported ${list.length} payment${list.length === 1 ? "" : "s"} to CSV`,
+      "success",
+    );
+    return;
+  }
+
+  /* Manager view */
+  const all = state.payments || [];
+  const list = term ? all.filter((p) => matchesPayment(p, term)) : all;
+
+  if (!list.length) {
+    toast("No payments to export.", "error");
+    return;
+  }
+
+  const rows = [
+    csvRow([
+      "Date",
+      "Tenant",
+      "Property",
+      "Unit",
+      "Amount (KES)",
+      "Type",
+      "Method",
+      "Status",
+      "Reference",
+    ]),
+    ...list.map((p) =>
+      csvRow([
+        p.date ? new Date(p.date).toISOString().slice(0, 10) : "",
+        p.tenant || "",
+        p.property || "",
+        p.unit || "",
+        Number(p.amount) || 0,
+        p.type || "Rent",
+        p.method || "",
+        p.status || "",
+        p.reference || "",
+      ]),
+    ),
+  ];
+
+  downloadCsv(`payments-${todayStamp()}.csv`, rows);
+  toast(
+    `Exported ${list.length} payment${list.length === 1 ? "" : "s"} to CSV`,
+    "success",
+  );
+}
+
+// Wire the button once.
+document
+  .getElementById("exportPaymentsCsv")
+  ?.addEventListener("click", exportPaymentsCsv);
