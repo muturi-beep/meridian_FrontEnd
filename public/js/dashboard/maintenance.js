@@ -26,13 +26,23 @@ function renderMaintenanceList() {
   const list = term ? all.filter((m) => matchesMaintenance(m, term)) : all;
 
   if (!all.length) {
-    el.innerHTML = `<div class="empty" style="border:none"><div class="empty-ico"></div><div class="empty-title">No maintenance requests</div><div class="empty-desc">${IS_TENANT ? "You haven't submitted any maintenance requests yet." : "When tenants report issues they'll appear here."}</div><button class="btn btn-primary" onclick="openMaintenanceModal()">${IS_TENANT ? "+ Report an Issue" : "+ New Request"}</button></div>`;
-    return;
+    el.innerHTML = emptyState({
+      icon: "wrench",
+      title: "No maintenance requests",
+      desc: IS_TENANT
+        ? "You haven't submitted any maintenance requests yet."
+        : "When tenants report issues they'll appear here.",
+      actionLabel: IS_TENANT ? "+ Report an Issue" : "+ New Request",
+      actionHandler: "openMaintenanceModal()",
+    });
   }
 
   if (!list.length) {
-    el.innerHTML = `<div class="empty" style="border:none"><div class="empty-ico"></div><div class="empty-title">No matches</div><div class="empty-desc">No maintenance requests match "${esc(maintSearchTerm)}".</div></div>`;
-    return;
+    el.innerHTML = emptyState({
+      icon: "search",
+      title: "No matches",
+      desc: `No maintenance requests match "${maintSearchTerm}".`,
+    });
   }
 
   const actionsHeader = CAN_MANAGE_MAINT

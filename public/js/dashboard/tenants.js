@@ -31,8 +31,13 @@ function renderTenantsList() {
   const list = term ? all.filter((t) => matchesTenant(t, term)) : all;
 
   if (!props.length) {
-    el.innerHTML = `<div class="empty"><div class="empty-ico">▤</div><div class="empty-title">Add a property first</div><div class="empty-desc">You need at least one property (with units) before you can onboard tenants.</div><button class="btn btn-primary" onclick="switchView('properties'); openPropertyModal();">+ Add Property</button></div>`;
-    return;
+    el.innerHTML = emptyState({
+      icon: "building",
+      title: "Add a property first",
+      desc: "You need at least one property (with units) before you can onboard tenants.",
+      actionLabel: "+ Add Property",
+      actionHandler: "switchView('properties'); openPropertyModal();",
+    });
   }
 
   const byProp = {};
@@ -92,8 +97,11 @@ function renderTenantsList() {
 
   const noMatches = term && !list.length;
   if (noMatches) {
-    el.innerHTML = `<div class="empty"><div class="empty-ico">🔍</div><div class="empty-title">No matches</div><div class="empty-desc">No tenants match "${esc(tenantsSearchTerm)}".</div></div>`;
-    return;
+    el.innerHTML = emptyState({
+      icon: "search",
+      title: "No matches",
+      desc: `No tenants match "${tenantsSearchTerm}".`,
+    });
   }
 
   el.innerHTML = `<div class="prop-grid">${propCards}</div>${unassignedBlock}${allBlock}`;

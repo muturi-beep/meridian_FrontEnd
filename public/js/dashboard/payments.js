@@ -1,5 +1,5 @@
 // public/js/dashboard/payments.js
-// Payments view — balances, records, add/edit modal with allocation preview, delete.
+// Payments view - balances, records, add/edit modal with allocation preview, delete.
 
 function computeTenantBalances(tenants, payments) {
   return (tenants || [])
@@ -18,7 +18,7 @@ function computeTenantBalances(tenants, payments) {
 
       return {
         id: t._id,
-        name: `${t.firstName || ""} ${t.lastName || ""}`.trim() || "—",
+        name: `${t.firstName || ""} ${t.lastName || ""}`.trim() || "-",
         property: t.property || "",
         unit: t.unitName || "",
         phone: t.phone || "",
@@ -46,12 +46,13 @@ function renderBalancesPanel() {
   const rows = state.tenantBalances || [];
 
   if (!rows.length) {
-    return `<div class="empty">
-      <div class="empty-ico">☺</div>
-      <div class="empty-title">No tenants to track yet</div>
-      <div class="empty-desc">Add tenants to a property and their rent balances will appear here — who has paid, who hasn't, and exactly how much is outstanding.</div>
-      <button class="btn btn-primary" onclick="switchView('tenants')">Go to Tenants</button>
-    </div>`;
+    return emptyState({
+      icon: "person",
+      title: "No tenants to track yet",
+      desc: "Add tenants to a property and their rent balances will appear here - who has paid, who hasn't, and exactly how much is outstanding.",
+      actionLabel: "Go to Tenants",
+      actionHandler: "switchView('tenants')",
+    });
   }
 
   const unpaid = rows.filter((r) => r.balance > 0);
@@ -89,22 +90,22 @@ function renderBalancesPanel() {
             ${r.phone ? `<div style="font-size:11px;color:var(--t2)">${esc(r.phone)}</div>` : ""}
           </td>
           <td>
-            <div>${esc(r.property || "—")}</div>
-            <div style="font-size:11px;color:var(--t2)">Unit ${esc(r.unit || "—")}</div>
+            <div>${esc(r.property || "-")}</div>
+            <div style="font-size:11px;color:var(--t2)">Unit ${esc(r.unit || "-")}</div>
           </td>
-          <td>${r.rent ? fmtMoney(r.rent) : "—"}</td>
+          <td>${r.rent ? fmtMoney(r.rent) : "-"}</td>
           <td>
             ${fmtMoney(r.currentPaid)}
-            ${r.currentBalance > 0 ? `<div style="font-size:10.5px;color:var(--amber);font-weight:600">−${fmtMoney(r.currentBalance)} left</div>` : `<div style="font-size:10.5px;color:var(--green);font-weight:600">✓ Paid</div>`}
+            ${r.currentBalance > 0 ? `<div style="font-size:10.5px;color:var(--amber);font-weight:600">Owed: ${fmtMoney(r.currentBalance)}</div>` : `<div style="font-size:10.5px;color:var(--green);font-weight:600">&#10003; Paid</div>`}
           </td>
-          <td>${r.arrears > 0 ? `<span style="color:var(--red);font-weight:600">${fmtMoney(r.arrears)}</span>` : "—"}</td>
+          <td>${r.arrears > 0 ? `<span style="color:var(--red);font-weight:600">${fmtMoney(r.arrears)}</span>` : "-"}</td>
           <td>
             ${
               r.depositDue > 0
                 ? r.depositBalance > 0
                   ? `<span style="color:var(--blue);font-weight:600">${fmtMoney(r.depositPaid)}</span><div style="font-size:10.5px;color:var(--t2)">of ${fmtMoney(r.depositDue)}</div>`
-                  : `<span style="color:var(--green);font-weight:600">✓ Paid</span>`
-                : "—"
+                  : `<span style="color:var(--green);font-weight:600">&#10003; Paid</span>`
+                : "-"
             }
           </td>
           <td style="font-weight:700;color:${r.balance > 0 ? "var(--amber)" : "var(--green)"}">
@@ -120,12 +121,11 @@ function renderBalancesPanel() {
         )
         .join("")}</tbody>
     </table></div>`
-    : `
-    <div class="empty" style="border:none">
-      <div class="empty-ico">✓</div>
-      <div class="empty-title">Everyone is fully paid up</div>
-      <div class="empty-desc">All ${rows.length} tenant${rows.length === 1 ? "" : "s"} have cleared their rent for ${esc(monthLabel)}. Nothing outstanding.</div>
-    </div>`;
+    : emptyState({
+        icon: "check",
+        title: "Everyone is fully paid up",
+        desc: `All ${rows.length} tenant${rows.length === 1 ? "" : "s"} have cleared their rent for ${monthLabel}. Nothing outstanding.`,
+      });
 
   return `
     <div class="stats-grid" style="margin-bottom:18px">
@@ -142,7 +142,7 @@ function renderBalancesPanel() {
       <div class="stat-card">
         <div class="stat-lbl">Outstanding</div>
         <div class="stat-val money" style="color:${totalOutstanding > 0 ? "var(--amber)" : "var(--green)"}">${fmtMoney(totalOutstanding)}</div>
-        <div class="stat-sub">${unpaid.length} tenant(s) owing${totalArrears > 0 ? ` · ${fmtMoney(totalArrears)} arrears` : ""}</div>
+        <div class="stat-sub">${unpaid.length} tenant(s) owing${totalArrears > 0 ? ` &middot; ${fmtMoney(totalArrears)} arrears` : ""}</div>
       </div>
       <div class="stat-card">
         <div class="stat-lbl">Collection Rate</div>
@@ -154,7 +154,7 @@ function renderBalancesPanel() {
     <div class="panel">
       <div class="panel-head">
         <div>
-          <div class="panel-title">Account Balances${state.showAllBalances ? " — All Tenants" : ` (${unpaid.length})`}</div>
+          <div class="panel-title">Account Balances${state.showAllBalances ? " - All Tenants" : ` (${unpaid.length})`}</div>
           <div class="section-desc" style="margin-top:3px">
             ${
               state.showAllBalances
@@ -225,7 +225,7 @@ function updatePaymentPreview() {
     <div class="pp-row"><span class="k">Current balance</span><span class="v ${beforeClass}">${fmtMoney(before)}</span></div>
     <div class="pp-row"><span class="k">Rent outstanding</span><span class="v">${fmtMoney(ledger.rentBalance)}</span></div>
     <div class="pp-row"><span class="k">Deposit outstanding</span><span class="v">${fmtMoney(ledger.depositBalance)}</span></div>
-    <div class="pp-arrow">↓</div>
+    <div class="pp-arrow">&#8595;</div>
     <div class="pp-after">
       <div class="pp-row"><span class="k">After this payment</span><span class="v ${afterClass}">${fmtMoney(after)}</span></div>
     </div>
@@ -266,14 +266,18 @@ async function loadPayments() {
       state.payLoaded = true;
 
       if (!summary.unit) {
-        el.innerHTML = `<div class="empty"><div class="empty-ico"></div><div class="empty-title">No unit assigned</div><div class="empty-desc">You are not yet assigned to a unit. Contact your property manager.</div></div>`;
+        el.innerHTML = emptyState({
+          icon: "door",
+          title: "No unit assigned",
+          desc: "You are not yet assigned to a unit. Contact your property manager.",
+        });
         return;
       }
       renderTenantPayments();
       return;
     }
 
-    /* ── MANAGER VIEW ─────────────────────────────────── */
+    /* MANAGER VIEW */
     const [list, tenants] = await Promise.all([
       api("/payments"),
       api("/api/tenants").catch(() => state.tenants || []),
@@ -344,9 +348,19 @@ function renderManagerPayments() {
 
   let tableHTML;
   if (!all.length) {
-    tableHTML = `<div class="empty" style="border:none"><div class="empty-ico"></div><div class="empty-title">No payments recorded</div><div class="empty-desc">Log rent payments here as they come in.</div><button class="btn btn-primary" onclick="openPaymentModal()">+ Record Payment</button></div>`;
+    tableHTML = emptyState({
+      icon: "dollar",
+      title: "No payments recorded",
+      desc: "Log rent payments here as they come in.",
+      actionLabel: "+ Record Payment",
+      actionHandler: "openPaymentModal()",
+    });
   } else if (!list.length) {
-    tableHTML = `<div class="empty" style="border:none"><div class="empty-ico"></div><div class="empty-title">No matches</div><div class="empty-desc">No payments match "${esc(paymentsSearchTerm)}".</div></div>`;
+    tableHTML = emptyState({
+      icon: "search",
+      title: "No matches",
+      desc: `No payments match "${paymentsSearchTerm}".`,
+    });
   } else {
     tableHTML = `<div class="table-wrap"><table>
       <thead><tr><th>Tenant</th><th>Property</th><th>Unit</th><th>Amount</th><th>Date</th><th>Method</th><th>Status</th><th class="actions">Actions</th></tr></thead>
@@ -381,9 +395,17 @@ function renderTenantPayments() {
 
   let historyHTML;
   if (!all.length) {
-    historyHTML = `<div class="empty" style="border:none"><div class="empty-ico"></div><div class="empty-title">No payments yet</div><div class="empty-desc">Your payment history will appear here once payments are recorded.</div></div>`;
+    historyHTML = emptyState({
+      icon: "dollar",
+      title: "No payments yet",
+      desc: "Your payment history will appear here once payments are recorded.",
+    });
   } else if (!list.length) {
-    historyHTML = `<div class="empty" style="border:none"><div class="empty-ico"></div><div class="empty-title">No matches</div><div class="empty-desc">No payments match "${esc(paymentsSearchTerm)}".</div></div>`;
+    historyHTML = emptyState({
+      icon: "search",
+      title: "No matches",
+      desc: `No payments match "${paymentsSearchTerm}".`,
+    });
   } else {
     historyHTML = `<div class="table-wrap"><table>
       <thead><tr><th>Date</th><th>Amount</th><th>Type</th><th>Method</th><th>Reference</th><th>Status</th><th class="actions">Receipt</th></tr></thead>
@@ -508,7 +530,7 @@ async function openPaymentModal(payment = null, preset = null) {
 
     <div class="field"><label>Tenant *</label>
       <select name="tenantId" required onchange="autoFillAmount(this)">
-        <option value="">— Select tenant —</option>
+        <option value="">- Select tenant -</option>
         ${tenants.map((t) => `<option value="${t._id}" ${selectedTenantId === String(t._id) ? "selected" : ""}>${esc(t.firstName + " " + t.lastName)}</option>`).join("")}
       </select>
     </div>
@@ -537,13 +559,13 @@ async function openPaymentModal(payment = null, preset = null) {
     <div class="frow">
       <div class="field"><label>Property</label>
         <select name="property">
-          <option value="">— Optional —</option>
+          <option value="">- Optional -</option>
           ${props.map((p) => `<option ${selectedProperty === p.name ? "selected" : ""}>${esc(p.name)}</option>`).join("")}
         </select>
       </div>
       <div class="field"><label>Unit</label>
         <select name="unit">
-          <option value="">— Optional —</option>
+          <option value="">- Optional -</option>
           ${units.map((u) => `<option ${selectedUnit === u.name ? "selected" : ""}>${esc(u.name)}</option>`).join("")}
         </select>
       </div>
@@ -606,18 +628,12 @@ async function deletePayment(id) {
     toast(err.message, "error");
   }
 }
-/* ══════════════════════════════════════════════════════
-   CSV EXPORT
-   ─────────────────────────────────────────────────────
+
+/* CSV EXPORT
    Exports the currently visible payment records (respects
    the search filter). Manager and tenant views use the
-   same writer — the tenant view just omits the tenant column.
-══════════════════════════════════════════════════════ */
-
-/**
- * Escape a value for CSV: wrap in quotes, double internal quotes.
- * Empty / null values become empty strings.
- */
+   same writer - the tenant view just omits the tenant column.
+*/
 function csvCell(v) {
   const s = String(v ?? "");
   return '"' + s.replace(/"/g, '""') + '"';

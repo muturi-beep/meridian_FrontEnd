@@ -31,13 +31,21 @@ function renderUnitsList() {
   const list = term ? all.filter((u) => matchesUnit(u, term)) : all;
 
   if (!all.length) {
-    el.innerHTML = `<div class="empty"><div class="empty-ico">⌂</div><div class="empty-title">No units yet</div><div class="empty-desc">Add units to a property — you can also create them in bulk when adding a property.</div><button class="btn btn-primary" onclick="openUnitModal()">+ Add Unit</button></div>`;
-    return;
+    el.innerHTML = emptyState({
+      icon: "door",
+      title: "No units yet",
+      desc: "Add units to a property. You can also create them in bulk when adding a property.",
+      actionLabel: "+ Add Unit",
+      actionHandler: "openUnitModal()",
+    });
   }
 
   if (!list.length) {
-    el.innerHTML = `<div class="empty"><div class="empty-ico">🔍</div><div class="empty-title">No matches</div><div class="empty-desc">No units match "${esc(unitsSearchTerm)}".</div></div>`;
-    return;
+    el.innerHTML = emptyState({
+      icon: "search",
+      title: "No matches",
+      desc: `No units match "${unitsSearchTerm}".`,
+    });
   }
 
   const grouped = {};

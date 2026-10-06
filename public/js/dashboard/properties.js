@@ -24,13 +24,21 @@ function renderPropertiesList() {
   const list = term ? all.filter((p) => matchesProperty(p, term)) : all;
 
   if (!all.length) {
-    el.innerHTML = `<div class="empty"><div class="empty-ico">▤</div><div class="empty-title">No properties yet</div><div class="empty-desc">Add your first property to get started.</div><button class="btn btn-primary" onclick="openPropertyModal()">+ Add Property</button></div>`;
-    return;
+    el.innerHTML = emptyState({
+      icon: "building",
+      title: "No properties yet",
+      desc: "Add your first property to get started. You can create units for it in the same step.",
+      actionLabel: "+ Add Property",
+      actionHandler: "openPropertyModal()",
+    });
   }
 
   if (!list.length) {
-    el.innerHTML = `<div class="empty"><div class="empty-ico">🔍</div><div class="empty-title">No matches</div><div class="empty-desc">No properties match "${esc(propsSearchTerm)}".</div></div>`;
-    return;
+    el.innerHTML = emptyState({
+      icon: "search",
+      title: "No matches",
+      desc: `No properties match "${propsSearchTerm}".`,
+    });
   }
 
   el.innerHTML = `<div class="prop-grid">${list
