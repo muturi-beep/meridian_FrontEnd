@@ -1659,3 +1659,44 @@ td.actions {
   stroke-linejoin: round;
   display: block;
 }
+/* ═══ Search tools ═══ */
+.search-tools {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.search-input {
+  background: var(--ink-3);
+  border: 1px solid var(--border);
+  border-radius: var(--rs);
+  padding: 9px 14px 9px 34px;
+  font-size: 13px;
+  color: var(--t1);
+  font-family: var(--font-sans);
+  outline: none;
+  min-width: 220px;
+  transition:
+    border-color 0.18s,
+    box-shadow 0.18s;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237a83a0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='8'/><path d='M21 21l-4.35-4.35'/></svg>");
+  background-repeat: no-repeat;
+  background-position: 12px center;
+  background-size: 14px;
+}
+.search-input::placeholder {
+  color: var(--t3);
+}
+.search-input:focus {
+  border-color: var(--copper);
+  box-shadow: 0 0 0 3px var(--copper-dim);
+}
+@media (max-width: 640px) {
+  .search-tools {
+    width: 100%;
+  }
+  .search-input {
+    flex: 1;
+    min-width: 0;
+  }
+}

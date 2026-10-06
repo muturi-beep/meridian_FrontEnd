@@ -3,11 +3,11 @@
 // The actual receipt rendering/PDF lives in receipt.js (loaded separately).
 
 async function loadManagerDocuments() {
-  const el = document.getElementById('documentsList');
+  const el = document.getElementById("documentsList");
   if (!el) return;
   el.innerHTML = `<div class="empty" style="border-style:solid"><div class="empty-desc">Loading payment records…</div></div>`;
   try {
-    const payments = await api('/payments');
+    const payments = await api("/payments");
     state.payments = payments;
 
     if (!payments.length) {
@@ -27,19 +27,23 @@ async function loadManagerDocuments() {
             <th>Date</th><th>Receipt No.</th><th>Tenant</th><th>Amount</th>
             <th>Type</th><th>Method</th><th>Status</th><th class="actions">Actions</th>
           </tr></thead>
-          <tbody>${payments.map(p => `<tr>
-            <td>${p.date ? new Date(p.date).toLocaleDateString() : '—'}</td>
+          <tbody>${payments
+            .map(
+              (p) => `<tr>
+            <td>${p.date ? new Date(p.date).toLocaleDateString() : "—"}</td>
             <td>${esc(p.reference || String(p._id).slice(-8).toUpperCase())}</td>
-            <td>${esc(p.tenant || '—')}</td>
+            <td>${esc(p.tenant || "—")}</td>
             <td>${fmtMoney(p.amount)}</td>
-            <td>${esc(p.type || 'Rent')}</td>
-            <td>${esc(p.method || '—')}</td>
+            <td>${esc(p.type || "Rent")}</td>
+            <td>${esc(p.method || "—")}</td>
             <td><span class="pill ${pillForStatus(p.status)}">${esc(p.status)}</span></td>
             <td class="actions">
               <button class="btn btn-outline btn-sm" onclick='openReceiptModal(${JSON.stringify(p).replace(/'/g, "&#39;")})'>View</button>
               <button class="btn btn-primary btn-sm" onclick='downloadReceiptPDF(${JSON.stringify(p).replace(/'/g, "&#39;")})'>PDF</button>
             </td>
-          </tr>`).join('')}</tbody>
+          </tr>`,
+            )
+            .join("")}</tbody>
         </table></div>
       </div>`;
   } catch (err) {
@@ -48,11 +52,11 @@ async function loadManagerDocuments() {
 }
 
 async function loadTenantDocuments() {
-  const el = document.getElementById('documentsList');
+  const el = document.getElementById("documentsList");
   if (!el) return;
   el.innerHTML = `<div class="empty" style="border-style:solid"><div class="empty-desc">Loading your receipts…</div></div>`;
   try {
-    const receipts = await api('/api/tenant/receipts');
+    const receipts = await api("/api/tenant/receipts");
 
     if (!receipts.length) {
       el.innerHTML = `<div class="empty">
@@ -71,17 +75,21 @@ async function loadTenantDocuments() {
             <th>Date</th><th>Receipt No.</th><th>Amount</th>
             <th>Type</th><th>Method</th><th class="actions">Actions</th>
           </tr></thead>
-          <tbody>${receipts.map(r => `<tr>
-            <td>${r.date ? new Date(r.date).toLocaleDateString() : '—'}</td>
+          <tbody>${receipts
+            .map(
+              (r) => `<tr>
+            <td>${r.date ? new Date(r.date).toLocaleDateString() : "—"}</td>
             <td>${esc(r.reference || String(r._id).slice(-8).toUpperCase())}</td>
             <td>${fmtMoney(r.amount)}</td>
-            <td>${esc(r.type || 'Rent')}</td>
-            <td>${esc(r.method || '—')}</td>
+            <td>${esc(r.type || "Rent")}</td>
+            <td>${esc(r.method || "—")}</td>
             <td class="actions">
               <button class="btn btn-outline btn-sm" onclick='openReceiptModal(${JSON.stringify(r).replace(/'/g, "&#39;")})'>View</button>
               <button class="btn btn-primary btn-sm" onclick='downloadReceiptPDF(${JSON.stringify(r).replace(/'/g, "&#39;")})'>PDF</button>
             </td>
-          </tr>`).join('')}</tbody>
+          </tr>`,
+            )
+            .join("")}</tbody>
         </table></div>
       </div>`;
   } catch (err) {

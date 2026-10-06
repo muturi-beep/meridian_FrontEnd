@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#0c0f18"/>
   <link rel="icon" href="icon-192.png"/>
   <link rel="apple-touch-icon" href="icon-192.png"/>
-  <title>Meridian Properties — Sign In</title>
+  <title>Meridian Properties  Sign In</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="css/auth.css" />
 </head>
@@ -31,7 +31,7 @@
     <div class="left-hero">
       <div class="left-tag"><div class="left-tag-dot"></div>Nairobi's Premier Agency</div>
       <h1 class="left-title">Manage Every<br>Property with<br><em>Precision</em></h1>
-      <p class="left-desc">The Meridian Properties platform gives your team full control over units, tenants, payments and maintenance — all in one place.</p>
+      <p class="left-desc">The Meridian Properties platform gives your team full control over units, tenants, payments and maintenance  all in one place.</p>
       <div class="left-stats">
         <div class="left-stat"><div class="ls-val">6</div><div class="ls-lbl">Properties</div></div>
         <div class="left-stat"><div class="ls-val">280+</div><div class="ls-lbl">Residents</div></div>
@@ -67,21 +67,21 @@
         <label>Password <span class="req">*</span></label>
         <div class="pwd-wrap">
           <input type="password" id="l-password" placeholder="Your password" autocomplete="current-password"/>
-          <button type="button" class="pwd-toggle" onclick="togglePwd('l-password',this)">👁</button>
+          <button type="button" class="pwd-toggle" onclick="togglePwd('l-password',this)"></button>
         </div>
       </div>
       <div class="afield">
         <label>Role <span class="req">*</span></label>
         <div class="role-select-wrap">
           <select id="l-role" onchange="updateRolePreview('l','login')">
-            <option value="">— Select your role —</option>
-            <option value="agency-director">🏢 Agency Director</option>
-            <option value="property-manager">🗝 Property Manager</option>
-            <option value="finance-officer">💰 Finance Officer</option>
-            <option value="maintenance-staff">🔧 Maintenance Staff</option>
-            <option value="leasing-agent">📋 Leasing Agent</option>
-            <option value="tenant">🏠 Tenant</option>
-            <option value="auditor">📊 Auditor / Viewer</option>
+            <option value=""> Select your role </option>
+            <option value="agency-director"> Agency Director</option>
+            <option value="property-manager"> Property Manager</option>
+            <option value="finance-officer"> Finance Officer</option>
+            <option value="maintenance-staff"> Maintenance Staff</option>
+            <option value="leasing-agent"> Leasing Agent</option>
+            <option value="tenant"> Tenant</option>
+            <option value="auditor"> Auditor / Viewer</option>
           </select>
         </div>
         <div class="role-preview" id="l-role-preview">
@@ -90,7 +90,7 @@
         </div>
       </div>
 
-      <button class="auth-submit" id="login-btn" onclick="handleLogin()">Sign In →</button>
+      <button class="auth-submit" id="login-btn" onclick="handleLogin()">Sign In </button>
       <div class="auth-msg" id="login-msg"></div>
       <div class="auth-switch">Don't have an account? <a onclick="switchTab('signup')">Create one</a></div>
     </div>
@@ -128,14 +128,14 @@
         <label>Role <span class="req">*</span></label>
         <div class="role-select-wrap">
           <select id="s-role" onchange="updateRolePreview('s','signup')">
-            <option value="">— Select your role —</option>
-            <option value="agency-director">🏢 Agency Director</option>
-            <option value="property-manager">🗝 Property Manager</option>
-            <option value="finance-officer">💰 Finance Officer</option>
-            <option value="maintenance-staff">🔧 Maintenance Staff</option>
-            <option value="leasing-agent">📋 Leasing Agent</option>
-            <option value="tenant">🏠 Tenant</option>
-            <option value="auditor">📊 Auditor / Viewer</option>
+            <option value=""> Select your role </option>
+            <option value="agency-director"> Agency Director</option>
+            <option value="property-manager"> Property Manager</option>
+            <option value="finance-officer"> Finance Officer</option>
+            <option value="maintenance-staff"> Maintenance Staff</option>
+            <option value="leasing-agent"> Leasing Agent</option>
+            <option value="tenant"> Tenant</option>
+            <option value="auditor"> Auditor / Viewer</option>
           </select>
         </div>
         <div class="role-preview" id="s-role-preview">
@@ -145,25 +145,25 @@
       </div>
       <div class="afield" id="org-field-role-locked" style="display:none">
         <label>Role</label>
-        <div class="role-preview show"><div class="role-preview-dot" style="background:#d4a46a"></div><span>🏢 Agency Director — you'll own this new agency and can invite your team after signing up.</span></div>
+        <div class="role-preview show"><div class="role-preview-dot" style="background:#d4a46a"></div><span> Agency Director  you'll own this new agency and can invite your team after signing up.</span></div>
       </div>
 
       <div class="afield">
         <label>Password <span class="req">*</span></label>
         <div class="pwd-wrap">
           <input type="password" id="s-password" placeholder="Min. 8 characters"/>
-          <button type="button" class="pwd-toggle" onclick="togglePwd('s-password',this)">👁</button>
+          <button type="button" class="pwd-toggle" onclick="togglePwd('s-password',this)"></button>
         </div>
       </div>
       <div class="afield">
         <label>Confirm Password <span class="req">*</span></label>
         <div class="pwd-wrap">
           <input type="password" id="s-confirm" placeholder="Repeat your password"/>
-          <button type="button" class="pwd-toggle" onclick="togglePwd('s-confirm',this)">👁</button>
+          <button type="button" class="pwd-toggle" onclick="togglePwd('s-confirm',this)"></button>
         </div>
       </div>
 
-      <button class="auth-submit" id="signup-btn" onclick="handleSignup()">Create Account →</button>
+      <button class="auth-submit" id="signup-btn" onclick="handleSignup()">Create Account </button>
       <div class="auth-msg" id="signup-msg"></div>
       <div class="auth-terms">By creating an account you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</div>
       <div class="auth-switch">Already have an account? <a onclick="switchTab('login')">Sign in</a></div>
@@ -174,11 +174,11 @@
   <!-- Payment Modal -->
   <div class="payment-modal" id="paymentModal">
     <div class="payment-modal-content">
-      <div class="icon">📱</div>
+      <div class="icon"></div>
       <h3>M-Pesa Payment Required</h3>
       <p>Please check your phone for an M-Pesa prompt to complete your registration.</p>
       <div class="amount" id="paymentAmount">KES 2,500</div>
-      <div class="phone-number" id="paymentPhone">📞 0712345678</div>
+      <div class="phone-number" id="paymentPhone"> 0712345678</div>
       <div id="paymentLoaderContainer">
         <div class="payment-loader"></div>
         <p style="color: var(--t2); font-size: 13px; margin-top: 12px;">Waiting for payment confirmation...</p>

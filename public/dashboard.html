@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <title>Dashboard â€” Meridian Properties</title>
+    <title>Dashboard - Meridian Properties</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
@@ -38,7 +38,7 @@
 
         <div class="sb-org">
           <div class="sb-org-lbl">Organization</div>
-          <div class="sb-org-name" id="sbOrgName">â€”</div>
+          <div class="sb-org-name" id="sbOrgName"></div>
         </div>
 
         <nav class="sb-nav" id="sbNav">
@@ -147,24 +147,23 @@
 
       <main class="main">
         <header class="topbar">
-          <button class="hamburger" id="hamburger" aria-label="Menu">
-            â˜°
-          </button>
+          <button class="hamburger" id="hamburger" aria-label="Menu"></button>
           <div class="tb-greeting">
-            <div class="tb-title" id="tbTitle">Loadingâ€¦</div>
+            <div class="tb-title" id="tbTitle">Loading...</div>
             <div class="tb-sub" id="tbSub">
               Here's what's happening with your property portfolio today.
             </div>
           </div>
           <div class="tb-actions">
             <button class="tb-icon-btn" aria-label="Notifications">
-              ðŸ””<span class="tb-dot"></span>
+              🔔
+              <span class="tb-dot"></span>
             </button>
             <button class="avatar-btn" id="avatarBtn">
-              <div class="avatar" id="avatar">â€”</div>
+              <div class="avatar" id="avatar"></div>
               <div class="av-txt">
-                <div class="av-name" id="avName">â€”</div>
-                <div class="av-role" id="avRole">â€”</div>
+                <div class="av-name" id="avName"></div>
+                <div class="av-role" id="avRole"></div>
               </div>
             </button>
           </div>
@@ -172,13 +171,13 @@
 
         <div class="dropdown" id="dropdown">
           <div class="dropdown-head">
-            <div class="dd-name" id="ddName">â€”</div>
-            <div class="dd-email" id="ddEmail">â€”</div>
+            <div class="dd-name" id="ddName"></div>
+            <div class="dd-email" id="ddEmail"></div>
           </div>
-          <button class="dd-item" data-view="profile">â—‰ My Profile</button>
-          <button class="dd-item" data-view="settings">âš™ Settings</button>
+          <button class="dd-item" data-view="profile">My Profile</button>
+          <button class="dd-item" data-view="settings">Settings</button>
           <div class="dd-sep"></div>
-          <button class="dd-item danger" id="dropdownLogout">âŽ‹ Logout</button>
+          <button class="dd-item danger" id="dropdownLogout">Logout</button>
         </div>
 
         <div class="content">
@@ -226,9 +225,17 @@
                   Buildings and apartments you manage.
                 </div>
               </div>
-              <button class="btn btn-primary" onclick="openPropertyModal()">
-                + Add Property
-              </button>
+              <div class="search-tools">
+                <input
+                  type="text"
+                  id="searchProps"
+                  class="search-input"
+                  placeholder="Search properties..."
+                />
+                <button class="btn btn-primary" onclick="openPropertyModal()">
+                  + Add Property
+                </button>
+              </div>
             </div>
             <div id="propertiesList"></div>
           </section>
@@ -242,9 +249,17 @@
                   immediately.
                 </div>
               </div>
-              <button class="btn btn-primary" onclick="openUnitModal()">
-                + Add Unit
-              </button>
+              <div class="search-tools">
+                <input
+                  type="text"
+                  id="searchUnits"
+                  class="search-input"
+                  placeholder="Search units..."
+                />
+                <button class="btn btn-primary" onclick="openUnitModal()">
+                  + Add Unit
+                </button>
+              </div>
             </div>
             <div id="unitsList"></div>
           </section>
@@ -258,6 +273,14 @@
                   they'll occupy.
                 </div>
               </div>
+              <div class="search-tools">
+                <input
+                  type="text"
+                  id="searchTenants"
+                  class="search-input"
+                  placeholder="Search tenants..."
+                />
+              </div>
             </div>
             <div id="tenantsList"></div>
           </section>
@@ -268,9 +291,20 @@
                 <div class="section-title">Maintenance</div>
                 <div class="section-desc">Work orders and repair requests.</div>
               </div>
-              <button class="btn btn-primary" onclick="openMaintenanceModal()">
-                + New Request
-              </button>
+              <div class="search-tools">
+                <input
+                  type="text"
+                  id="searchMaint"
+                  class="search-input"
+                  placeholder="Search maintenance..."
+                />
+                <button
+                  class="btn btn-primary"
+                  onclick="openMaintenanceModal()"
+                >
+                  + New Request
+                </button>
+              </div>
             </div>
             <div class="panel"><div id="maintenanceList"></div></div>
           </section>
@@ -283,9 +317,17 @@
                   Rent records across your portfolio.
                 </div>
               </div>
-              <button class="btn btn-primary" onclick="openPaymentModal()">
-                + Record Payment
-              </button>
+              <div class="search-tools">
+                <input
+                  type="text"
+                  id="searchPayments"
+                  class="search-input"
+                  placeholder="Search payments..."
+                />
+                <button class="btn btn-primary" onclick="openPaymentModal()">
+                  + Record Payment
+                </button>
+              </div>
             </div>
             <div class="panel"><div id="paymentsList"></div></div>
           </section>
@@ -295,19 +337,19 @@
               <div>
                 <div class="section-title">Documents</div>
                 <div class="section-desc">
-                  Payment receipts â€” view or download as PDF.
+                  Payment receipts view or download as PDF.
                 </div>
               </div>
-            </div>
-            <div id="documentsList">
-              <div class="empty">
-                <div class="empty-ico">â–¦</div>
-                <div class="empty-title">Documents coming soon</div>
-                <div class="empty-desc">
-                  Receipts will appear here once payments are recorded.
-                </div>
+              <div class="search-tools">
+                <input
+                  type="text"
+                  id="searchDocs"
+                  class="search-input"
+                  placeholder="Search receipts..."
+                />
               </div>
             </div>
+            <div id="documentsList"></div>
           </section>
 
           <section class="view" id="view-settings">
@@ -374,7 +416,7 @@
               </div>
             </div>
 
-            <!-- ═══ INVITE CODE PANEL ═══ -->
+            <!-- === INVITE CODE PANEL === -->
             <div
               class="panel"
               id="org-invite-panel"
@@ -412,9 +454,7 @@
                       min-width: 200px;
                       text-align: center;
                     "
-                  >
-                    ————-————
-                  </div>
+                  ></div>
                   <button
                     type="button"
                     class="btn btn-primary"
@@ -438,7 +478,7 @@
                     line-height: 1.5;
                   "
                 >
-                  ⚠️ Regenerating invalidates the current code instantly. Anyone
+                  ! Regenerating invalidates the current code instantly. Anyone
                   with the old code will not be able to join until you share the
                   new one.
                 </div>
@@ -469,9 +509,7 @@
                   class="avatar"
                   id="profileAvatar"
                   style="width: 64px; height: 64px; font-size: 22px"
-                >
-                  â€”
-                </div>
+                ></div>
                 <div>
                   <div
                     id="profileName"
@@ -481,15 +519,11 @@
                       font-weight: 700;
                       color: var(--white);
                     "
-                  >
-                    â€”
-                  </div>
+                  ></div>
                   <div
                     id="profileRole"
                     style="font-size: 13px; color: var(--t2); margin-top: 2px"
-                  >
-                    â€”
-                  </div>
+                  ></div>
                 </div>
               </div>
             </div>
@@ -590,10 +624,12 @@
     <div class="modal" id="modal">
       <form class="modal-box" id="modalForm" onsubmit="submitModal(event)">
         <div class="modal-head">
-          <div class="modal-title" id="modalTitle">â€”</div>
-          <button type="button" class="modal-close" onclick="closeModal()">
-            Ã—
-          </button>
+          <div class="modal-title" id="modalTitle"></div>
+          <button
+            type="button"
+            class="modal-close"
+            onclick="closeModal()"
+          ></button>
         </div>
         <div class="modal-body" id="modalBody"></div>
         <div class="modal-foot">
@@ -616,9 +652,7 @@
             type="button"
             class="modal-close"
             onclick="closeReceiptModal()"
-          >
-            Ã—
-          </button>
+          ></button>
         </div>
         <div class="modal-body" id="receiptModalBody"></div>
         <div class="modal-foot">
