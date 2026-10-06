@@ -1,199 +1,329 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="manifest" href="manifest.json"/>
-  <meta name="theme-color" content="#0c0f18"/>
-  <link rel="icon" href="icon-192.png"/>
-  <link rel="apple-touch-icon" href="icon-192.png"/>
-  <title>Meridian Properties  Sign In</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="css/auth.css" />
-</head>
-<body>
-
-  <!-- LEFT PANEL -->
-  <div class="auth-left">
-    <div class="left-brand">
-      <div class="brand-icon">
-        <svg viewBox="0 0 20 20" fill="none">
-          <path d="M10 2L18 6.5V13.5L10 18L2 13.5V6.5Z" stroke="#0c0f18" stroke-width="1.5"/>
-          <path d="M10 5.5L15 8.5V12.5L10 15.5L5 12.5V8.5Z" fill="#0c0f18" opacity=".4"/>
-        </svg>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#0c0f18" />
+    <link rel="icon" href="icon-192.png" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
+    <title>Meridian Properties Sign In</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/auth.css" />
+  </head>
+  <body>
+    <!-- LEFT PANEL -->
+    <div class="auth-left">
+      <div class="left-brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 20 20" fill="none">
+            <path
+              d="M10 2L18 6.5V13.5L10 18L2 13.5V6.5Z"
+              stroke="#0c0f18"
+              stroke-width="1.5"
+            />
+            <path
+              d="M10 5.5L15 8.5V12.5L10 15.5L5 12.5V8.5Z"
+              fill="#0c0f18"
+              opacity=".4"
+            />
+          </svg>
+        </div>
+        <div>
+          <div class="brand-name">Meridian<br />Properties</div>
+          <div class="brand-sub">Agency Management</div>
+        </div>
       </div>
-      <div>
-        <div class="brand-name">Meridian<br>Properties</div>
-        <div class="brand-sub">Agency Management</div>
+
+      <div class="left-hero">
+        <div class="left-tag">
+          <div class="left-tag-dot"></div>
+          Nairobi's Premier Agency
+        </div>
+        <h1 class="left-title">
+          Manage Every<br />Property with<br /><em>Precision</em>
+        </h1>
+        <p class="left-desc">
+          The Meridian Properties platform gives your team full control over
+          units, tenants, payments and maintenance all in one place.
+        </p>
+        <div class="left-stats">
+          <div class="left-stat">
+            <div class="ls-val">6</div>
+            <div class="ls-lbl">Properties</div>
+          </div>
+          <div class="left-stat">
+            <div class="ls-val">280+</div>
+            <div class="ls-lbl">Residents</div>
+          </div>
+          <div class="left-stat">
+            <div class="ls-val">98%</div>
+            <div class="ls-lbl">Satisfaction</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="left-website">
+        <a href="index.html" class="ws-link">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle
+              cx="7"
+              cy="7"
+              r="6"
+              stroke="currentColor"
+              stroke-width="1.3"
+            />
+            <path
+              d="M7 1C5.5 3 5 5 5 7s.5 4 2 6M7 1c1.5 2 2 4 2 6s-.5 4-2 6M1 7h12"
+              stroke="currentColor"
+              stroke-width="1.3"
+            />
+          </svg>
+          Visit Meridian Properties Website
+        </a>
       </div>
     </div>
 
-    <div class="left-hero">
-      <div class="left-tag"><div class="left-tag-dot"></div>Nairobi's Premier Agency</div>
-      <h1 class="left-title">Manage Every<br>Property with<br><em>Precision</em></h1>
-      <p class="left-desc">The Meridian Properties platform gives your team full control over units, tenants, payments and maintenance  all in one place.</p>
-      <div class="left-stats">
-        <div class="left-stat"><div class="ls-val">6</div><div class="ls-lbl">Properties</div></div>
-        <div class="left-stat"><div class="ls-val">280+</div><div class="ls-lbl">Residents</div></div>
-        <div class="left-stat"><div class="ls-val">98%</div><div class="ls-lbl">Satisfaction</div></div>
+    <!-- RIGHT PANEL -->
+    <div class="auth-right">
+      <div class="auth-tab-row">
+        <button
+          class="auth-tab active"
+          id="tab-login"
+          onclick="switchTab('login')"
+        >
+          Sign In
+        </button>
+        <button class="auth-tab" id="tab-signup" onclick="switchTab('signup')">
+          Create Account
+        </button>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="panel-login" class="auth-panel">
+        <div class="auth-title">Welcome back</div>
+        <div class="auth-sub">Sign in to your Meridian Properties account.</div>
+
+        <div class="afield">
+          <label>Email Address <span class="req">*</span></label>
+          <input
+            type="email"
+            id="l-email"
+            placeholder="you@meridian.com"
+            autocomplete="email"
+          />
+        </div>
+        <div class="afield">
+          <label>Password <span class="req">*</span></label>
+          <div class="pwd-wrap">
+            <input
+              type="password"
+              id="l-password"
+              placeholder="Your password"
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              class="pwd-toggle"
+              onclick="togglePwd('l-password', this)"
+            ></button>
+          </div>
+        </div>
+        <div class="afield">
+          <label>Role <span class="req">*</span></label>
+          <div class="role-select-wrap">
+            <select id="l-role" onchange="updateRolePreview('l', 'login')">
+              <option value="">Select your role</option>
+              <option value="agency-director">Agency Director</option>
+              <option value="property-manager">Property Manager</option>
+              <option value="finance-officer">Finance Officer</option>
+              <option value="maintenance-staff">Maintenance Staff</option>
+              <option value="leasing-agent">Leasing Agent</option>
+              <option value="tenant">Tenant</option>
+              <option value="auditor">Auditor / Viewer</option>
+            </select>
+          </div>
+          <div class="role-preview" id="l-role-preview">
+            <div class="role-preview-dot" id="l-role-dot"></div>
+            <span id="l-role-desc"></span>
+          </div>
+        </div>
+
+        <button class="auth-submit" id="login-btn" onclick="handleLogin()">
+          Sign In
+        </button>
+        <div class="auth-msg" id="login-msg"></div>
+        <div class="auth-switch">
+          Don't have an account? <a onclick="switchTab('signup')">Create one</a>
+        </div>
+      </div>
+
+      <!-- SIGNUP -->
+      <div id="panel-signup" class="auth-panel" style="display: none">
+        <div class="auth-title">Create account</div>
+        <div class="auth-sub">
+          All fields marked <span style="color: var(--copper)">*</span> are
+          required.
+        </div>
+
+        <div class="afield">
+          <label>Agency <span class="req">*</span></label>
+          <div class="auth-tab-row" style="margin-bottom: 0">
+            <button
+              type="button"
+              class="auth-tab active"
+              id="org-tab-create"
+              onclick="switchOrgMode('create')"
+            >
+              Start a new agency
+            </button>
+            <button
+              type="button"
+              class="auth-tab"
+              id="org-tab-join"
+              onclick="switchOrgMode('join')"
+            >
+              Join an existing agency
+            </button>
+          </div>
+        </div>
+
+        <div class="afield" id="org-field-create">
+          <label>Agency Name <span class="req">*</span></label>
+          <input
+            type="text"
+            id="s-org-name"
+            placeholder="e.g. Meridian Properties"
+          />
+        </div>
+        <div class="afield" id="org-field-join" style="display: none">
+          <label>Invite Code <span class="req">*</span></label>
+          <input
+            type="text"
+            id="s-invite-code"
+            placeholder="e.g. 7F3K-9QXZ"
+            style="text-transform: uppercase"
+          />
+        </div>
+
+        <div class="arow">
+          <div class="afield">
+            <label>First Name <span class="req">*</span></label
+            ><input type="text" id="s-first" placeholder="James" />
+          </div>
+          <div class="afield">
+            <label>Last Name <span class="req">*</span></label
+            ><input type="text" id="s-last" placeholder="Kariuki" />
+          </div>
+        </div>
+        <div class="afield">
+          <label>Email Address <span class="req">*</span></label
+          ><input type="email" id="s-email" placeholder="you@meridian.com" />
+        </div>
+        <div class="afield">
+          <label>Phone Number <span class="req">*</span></label
+          ><input type="tel" id="s-phone" placeholder="+254 7xx xxx xxx" />
+        </div>
+
+        <div class="afield" id="org-field-role">
+          <label>Role <span class="req">*</span></label>
+          <div class="role-select-wrap">
+            <select id="s-role" onchange="updateRolePreview('s', 'signup')">
+              <option value="">Select your role</option>
+              <option value="agency-director">Agency Director</option>
+              <option value="property-manager">Property Manager</option>
+              <option value="finance-officer">Finance Officer</option>
+              <option value="maintenance-staff">Maintenance Staff</option>
+              <option value="leasing-agent">Leasing Agent</option>
+              <option value="tenant">Tenant</option>
+              <option value="auditor">Auditor / Viewer</option>
+            </select>
+          </div>
+          <div class="role-preview" id="s-role-preview">
+            <div class="role-preview-dot" id="s-role-dot"></div>
+            <span id="s-role-desc"></span>
+          </div>
+        </div>
+        <div class="afield" id="org-field-role-locked" style="display: none">
+          <label>Role</label>
+          <div class="role-preview show">
+            <div class="role-preview-dot" style="background: #d4a46a"></div>
+            <span>
+              Agency Director you'll own this new agency and can invite your
+              team after signing up.</span
+            >
+          </div>
+        </div>
+
+        <div class="afield">
+          <label>Password <span class="req">*</span></label>
+          <div class="pwd-wrap">
+            <input
+              type="password"
+              id="s-password"
+              placeholder="Min. 8 characters"
+            />
+            <button
+              type="button"
+              class="pwd-toggle"
+              onclick="togglePwd('s-password', this)"
+            ></button>
+          </div>
+        </div>
+        <div class="afield">
+          <label>Confirm Password <span class="req">*</span></label>
+          <div class="pwd-wrap">
+            <input
+              type="password"
+              id="s-confirm"
+              placeholder="Repeat your password"
+            />
+            <button
+              type="button"
+              class="pwd-toggle"
+              onclick="togglePwd('s-confirm', this)"
+            ></button>
+          </div>
+        </div>
+
+        <button class="auth-submit" id="signup-btn" onclick="handleSignup()">
+          Create Account
+        </button>
+        <div class="auth-msg" id="signup-msg"></div>
+        <div class="auth-terms">
+          By creating an account you agree to our
+          <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+        </div>
+        <div class="auth-switch">
+          Already have an account? <a onclick="switchTab('login')">Sign in</a>
+        </div>
       </div>
     </div>
 
-    <div class="left-website">
-      <a href="index.html" class="ws-link">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M7 1C5.5 3 5 5 5 7s.5 4 2 6M7 1c1.5 2 2 4 2 6s-.5 4-2 6M1 7h12" stroke="currentColor" stroke-width="1.3"/></svg>
-        Visit Meridian Properties Website
-      </a>
-    </div>
-  </div>
-
-  <!-- RIGHT PANEL -->
-  <div class="auth-right">
-    <div class="auth-tab-row">
-      <button class="auth-tab active" id="tab-login"  onclick="switchTab('login')">Sign In</button>
-      <button class="auth-tab"        id="tab-signup" onclick="switchTab('signup')">Create Account</button>
-    </div>
-
-    <!-- LOGIN -->
-    <div id="panel-login" class="auth-panel">
-      <div class="auth-title">Welcome back</div>
-      <div class="auth-sub">Sign in to your Meridian Properties account.</div>
-
-      <div class="afield">
-        <label>Email Address <span class="req">*</span></label>
-        <input type="email" id="l-email" placeholder="you@meridian.com" autocomplete="email"/>
-      </div>
-      <div class="afield">
-        <label>Password <span class="req">*</span></label>
-        <div class="pwd-wrap">
-          <input type="password" id="l-password" placeholder="Your password" autocomplete="current-password"/>
-          <button type="button" class="pwd-toggle" onclick="togglePwd('l-password',this)"></button>
+    <!-- Payment Modal -->
+    <div class="payment-modal" id="paymentModal">
+      <div class="payment-modal-content">
+        <div class="icon"></div>
+        <h3>M-Pesa Payment Required</h3>
+        <p>
+          Please check your phone for an M-Pesa prompt to complete your
+          registration.
+        </p>
+        <div class="amount" id="paymentAmount">KES 2,500</div>
+        <div class="phone-number" id="paymentPhone">0712345678</div>
+        <div id="paymentLoaderContainer">
+          <div class="payment-loader"></div>
+          <p style="color: var(--t2); font-size: 13px; margin-top: 12px">
+            Waiting for payment confirmation...
+          </p>
         </div>
+        <button class="btn-close-modal" id="closePaymentModal">Close</button>
       </div>
-      <div class="afield">
-        <label>Role <span class="req">*</span></label>
-        <div class="role-select-wrap">
-          <select id="l-role" onchange="updateRolePreview('l','login')">
-            <option value=""> Select your role </option>
-            <option value="agency-director"> Agency Director</option>
-            <option value="property-manager"> Property Manager</option>
-            <option value="finance-officer"> Finance Officer</option>
-            <option value="maintenance-staff"> Maintenance Staff</option>
-            <option value="leasing-agent"> Leasing Agent</option>
-            <option value="tenant"> Tenant</option>
-            <option value="auditor"> Auditor / Viewer</option>
-          </select>
-        </div>
-        <div class="role-preview" id="l-role-preview">
-          <div class="role-preview-dot" id="l-role-dot"></div>
-          <span id="l-role-desc"></span>
-        </div>
-      </div>
-
-      <button class="auth-submit" id="login-btn" onclick="handleLogin()">Sign In </button>
-      <div class="auth-msg" id="login-msg"></div>
-      <div class="auth-switch">Don't have an account? <a onclick="switchTab('signup')">Create one</a></div>
     </div>
 
-    <!-- SIGNUP -->
-    <div id="panel-signup" class="auth-panel" style="display:none">
-      <div class="auth-title">Create account</div>
-      <div class="auth-sub">All fields marked <span style="color:var(--copper)">*</span> are required.</div>
-
-      <div class="afield">
-        <label>Agency <span class="req">*</span></label>
-        <div class="auth-tab-row" style="margin-bottom:0">
-          <button type="button" class="auth-tab active" id="org-tab-create" onclick="switchOrgMode('create')">Start a new agency</button>
-          <button type="button" class="auth-tab" id="org-tab-join" onclick="switchOrgMode('join')">Join an existing agency</button>
-        </div>
-      </div>
-
-      <div class="afield" id="org-field-create">
-        <label>Agency Name <span class="req">*</span></label>
-        <input type="text" id="s-org-name" placeholder="e.g. Meridian Properties"/>
-      </div>
-      <div class="afield" id="org-field-join" style="display:none">
-        <label>Invite Code <span class="req">*</span></label>
-        <input type="text" id="s-invite-code" placeholder="e.g. 7F3K-9QXZ" style="text-transform:uppercase"/>
-      </div>
-
-      <div class="arow">
-        <div class="afield"><label>First Name <span class="req">*</span></label><input type="text" id="s-first" placeholder="James"/></div>
-        <div class="afield"><label>Last Name <span class="req">*</span></label><input type="text" id="s-last" placeholder="Kariuki"/></div>
-      </div>
-      <div class="afield"><label>Email Address <span class="req">*</span></label><input type="email" id="s-email" placeholder="you@meridian.com"/></div>
-      <div class="afield"><label>Phone Number <span class="req">*</span></label><input type="tel" id="s-phone" placeholder="+254 7xx xxx xxx"/></div>
-
-      <div class="afield" id="org-field-role">
-        <label>Role <span class="req">*</span></label>
-        <div class="role-select-wrap">
-          <select id="s-role" onchange="updateRolePreview('s','signup')">
-            <option value=""> Select your role </option>
-            <option value="agency-director"> Agency Director</option>
-            <option value="property-manager"> Property Manager</option>
-            <option value="finance-officer"> Finance Officer</option>
-            <option value="maintenance-staff"> Maintenance Staff</option>
-            <option value="leasing-agent"> Leasing Agent</option>
-            <option value="tenant"> Tenant</option>
-            <option value="auditor"> Auditor / Viewer</option>
-          </select>
-        </div>
-        <div class="role-preview" id="s-role-preview">
-          <div class="role-preview-dot" id="s-role-dot"></div>
-          <span id="s-role-desc"></span>
-        </div>
-      </div>
-      <div class="afield" id="org-field-role-locked" style="display:none">
-        <label>Role</label>
-        <div class="role-preview show"><div class="role-preview-dot" style="background:#d4a46a"></div><span> Agency Director  you'll own this new agency and can invite your team after signing up.</span></div>
-      </div>
-
-      <div class="afield">
-        <label>Password <span class="req">*</span></label>
-        <div class="pwd-wrap">
-          <input type="password" id="s-password" placeholder="Min. 8 characters"/>
-          <button type="button" class="pwd-toggle" onclick="togglePwd('s-password',this)"></button>
-        </div>
-      </div>
-      <div class="afield">
-        <label>Confirm Password <span class="req">*</span></label>
-        <div class="pwd-wrap">
-          <input type="password" id="s-confirm" placeholder="Repeat your password"/>
-          <button type="button" class="pwd-toggle" onclick="togglePwd('s-confirm',this)"></button>
-        </div>
-      </div>
-
-      <button class="auth-submit" id="signup-btn" onclick="handleSignup()">Create Account </button>
-      <div class="auth-msg" id="signup-msg"></div>
-      <div class="auth-terms">By creating an account you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</div>
-      <div class="auth-switch">Already have an account? <a onclick="switchTab('login')">Sign in</a></div>
-    </div>
-
-  </div>
-
-  <!-- Payment Modal -->
-  <div class="payment-modal" id="paymentModal">
-    <div class="payment-modal-content">
-      <div class="icon"></div>
-      <h3>M-Pesa Payment Required</h3>
-      <p>Please check your phone for an M-Pesa prompt to complete your registration.</p>
-      <div class="amount" id="paymentAmount">KES 2,500</div>
-      <div class="phone-number" id="paymentPhone"> 0712345678</div>
-      <div id="paymentLoaderContainer">
-        <div class="payment-loader"></div>
-        <p style="color: var(--t2); font-size: 13px; margin-top: 12px;">Waiting for payment confirmation...</p>
-      </div>
-      <button class="btn-close-modal" id="closePaymentModal">Close</button>
-    </div>
-  </div>
-
-  <script src="js/auth.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js').catch(() => {});
-      });
-    }
-  </script>
-</body>
+    <script src="js/auth.js"></script>
+  </body>
 </html>

@@ -30,7 +30,7 @@ document.getElementById("modal").addEventListener("click", (e) => {
   if (e.target.id === "modal") closeModal();
 });
 
-// Esc closes the active modal (or the mobile sidebar if one is open)
+// Esc closes whatever is open — modal, receipt, payment prompt, or mobile sidebar.
 document.addEventListener("keydown", (e) => {
   if (e.key !== "Escape") return;
 
