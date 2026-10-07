@@ -408,7 +408,7 @@ function renderTenantPayments() {
     });
   } else {
     historyHTML = `<div class="table-wrap"><table>
-      <thead><tr><th>Date</th><th>Amount</th><th>Type</th><th>Method</th><th>Reference</th><th>Status</th><th class="actions">Receipt</th></tr></thead>
+            <thead><tr><th>Date</th><th>Amount</th><th>Type</th><th>Method</th><th>Reference</th><th>Status</th><th class="actions">Actions</th></tr></thead>
       <tbody>${list
         .map(
           (p) => `<tr>
@@ -417,8 +417,11 @@ function renderTenantPayments() {
         <td>${esc(p.type || "Rent")}</td>
         <td>${esc(p.method || "-")}</td>
         <td>${esc(p.reference || "-")}</td>
-        <td><span class="pill ${pillForStatus(p.status)}">${esc(p.status)}</span></td>
-        <td class="actions"><button class="btn btn-outline btn-sm" onclick='openReceiptModal(${JSON.stringify(p).replace(/'/g, "&#39;")})'>View</button></td>
+                <td><span class="pill ${pillForStatus(p.status)}">${esc(p.status)}</span></td>
+        <td class="actions">
+          <button class="btn btn-outline btn-sm" onclick='openReceiptModal(${JSON.stringify(p).replace(/'/g, "&#39;")})'>View</button>
+          <button class="btn btn-primary btn-sm" onclick='downloadReceiptPDF(${JSON.stringify(p).replace(/'/g, "&#39;")})'>PDF</button>
+        </td>
       </tr>`,
         )
         .join("")}</tbody>
