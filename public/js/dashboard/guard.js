@@ -51,6 +51,10 @@ if (IS_TENANT) {
   );
   if (maintBtn) maintBtn.textContent = "+ Report an Issue";
 
+  // Remove the maintenance search input for tenants — not useful.
+  const maintSearch = document.getElementById("searchMaint");
+  if (maintSearch) maintSearch.style.display = "none";
+
   const payDesc = document.querySelector("#view-payments .section-desc");
   if (payDesc)
     payDesc.textContent = "Your rent history and current payment status.";
