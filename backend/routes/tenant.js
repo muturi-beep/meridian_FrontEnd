@@ -1,76 +1,286 @@
-// backend/routes/tenant.js
-const express = require('express');
+// backend/routes/tenants.js
+const express = require("express");
+const bcrypt = require("bcryptjs");
 
-const User = require('../models/User');
-const Unit = require('../models/Unit');
-const Payment = require('../models/Payment');
-const Maintenance = require('../models/Maintenance');
-const { requireAuth, requireRole, orgScope } = require('../middleware/auth');
+const User = require("../models/User");
+const Unit = require("../models/Unit");
+const Property = require("../models/Property");
+const { requireAuth, requireRole, orgScope } = require("../middleware/auth");
+const { MANAGEMENT } = require("../utils/roles");
 
 const router = express.Router();
 
-router.get(['/api/tenant/summary', '/tenant/summary'], requireAuth, requireRole('tenant'), async (req, res) => {
+router.get(["/api/tenants", "/tenants"], requireAuth, async (req, res) => {
   try {
-    const me = await User.findById(req.user.id).select('-password');
-    if (!me) return res.status(404).json({ message: 'User not found' });
-
-    const fullName = `${me.firstName} ${me.lastName}`.trim();
-    const unit = await Unit.findOne(orgScope(req, { tenantId: me._id }));
-
-    if (!unit) {
-      return res.json({ user: me, unit: null, property: null, rent: 0, deposit: me.deposit || 0, currentMonth: { monthLabel: '', due: 0, paid: 0, balance: 0, status: 'No Unit' }, payments: [], maintenance: { open: 0, total: 0 }, charts: { paymentsByMonth: [], maintByStatus: { Open: 0, 'In Progress': 0, Resolved: 0, Closed: 0 } } });
-    }
-
-    const payments = await Payment.find(orgScope(req, { $or: [{ tenantId: me._id }, { tenantId: null, tenant: fullName }] })).sort({ date: -1, createdAt: -1 });
-
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const monthEnd   = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-
-    const thisMonthPaid = payments.filter(p => { const d = p.date ? new Date(p.date) : new Date(p.createdAt); return d >= monthStart && d < monthEnd && p.status === 'Paid' && (p.type === 'Rent' || !p.type); }).reduce((s, p) => s + (p.amount || 0), 0);
-
-    const storedRent = Number(me.rent);
-    const due = Number.isFinite(storedRent) && storedRent > 0 ? storedRent : (Number(unit.price) || 0);
-    const balance = Math.max(0, due - thisMonthPaid);
-    let status = 'Unpaid';
-    if (due === 0) status = 'No Rent Due';
-    else if (thisMonthPaid >= due) status = 'Fully Paid';
-    else if (thisMonthPaid > 0) status = 'Partial';
-
-    const maint = await Maintenance.find(orgScope(req, { $or: [{ requestedById: me._id }, { property: unit.property, unit: unit.name }] }));
-    const openMaint = maint.filter(m => m.status === 'Open' || m.status === 'In Progress').length;
-
-    const paymentsByMonth = [];
-    for (let i = 5; i >= 0; i--) { const d = new Date(now.getFullYear(), now.getMonth() - i, 1); paymentsByMonth.push({ label: d.toLocaleString('en', { month: 'short' }), year: d.getFullYear(), month: d.getMonth(), paid: 0, pending: 0 }); }
-    payments.forEach(p => { const pd = p.date ? new Date(p.date) : new Date(p.createdAt); if (!pd) return; const m = paymentsByMonth.find(x => x.year === pd.getFullYear() && x.month === pd.getMonth()); if (!m) return; if (p.status === 'Paid') m.paid += (p.amount || 0); else if (p.status === 'Pending' || p.status === 'Overdue') m.pending += (p.amount || 0); });
-
-    const maintByStatus = { Open: 0, 'In Progress': 0, Resolved: 0, Closed: 0 };
-    maint.forEach(m => { if (maintByStatus[m.status] !== undefined) maintByStatus[m.status] += 1; });
-
-    res.json({
-      user: me,
-      unit: { id: unit._id, name: unit.name, floor: unit.floor, status: unit.status },
-      property: unit.property,
-      rent: due,
-      deposit: Number(me.deposit) || 0,
-      currentMonth: { monthLabel: now.toLocaleString('en', { month: 'long', year: 'numeric' }), due, paid: thisMonthPaid, balance, status },
-      payments,
-      maintenance: { open: openMaint, total: maint.length },
-      charts: { paymentsByMonth, maintByStatus },
-    });
+    const tenants = await User.find(orgScope(req, { role: "tenant" }))
+      .select("-password")
+      .sort({ createdAt: -1 });
+    const enriched = await Promise.all(
+      tenants.map(async (t) => {
+        const unit = await Unit.findOne(orgScope(req, { tenantId: t._id }));
+        const storedRent = Number(t.rent);
+        const storedDeposit = Number(t.deposit);
+        return {
+          ...t.toObject(),
+          unitName: unit?.name || "",
+          property: unit?.property || "",
+          rent:
+            Number.isFinite(storedRent) && storedRent > 0
+              ? storedRent
+              : unit?.price || 0,
+          deposit:
+            Number.isFinite(storedDeposit) && storedDeposit > 0
+              ? storedDeposit
+              : 0,
+        };
+      }),
+    );
+    res.json(enriched);
   } catch (err) {
-    console.error('Tenant summary error:', err);
-    res.status(500).json({ message: 'Unable to load your dashboard.' });
+    res.status(500).json({ message: "Unable to load tenants." });
   }
 });
 
-router.get(['/api/tenant/receipts', '/tenant/receipts'], requireAuth, requireRole('tenant'), async (req, res) => {
-  try {
-    const me = await User.findById(req.user.id);
-    if (!me) return res.status(404).json({ message: 'User not found' });
-    const fullName = `${me.firstName} ${me.lastName}`.trim();
-    res.json(await Payment.find(orgScope(req, { status: 'Paid', $or: [{ tenantId: me._id }, { tenantId: null, tenant: fullName }] })).sort({ date: -1 }));
-  } catch (err) { res.status(500).json({ message: err.message }); }
-});
+router.post(
+  ["/api/tenants", "/tenants"],
+  requireAuth,
+  requireRole(...MANAGEMENT, "leasing-agent"),
+  async (req, res) => {
+    try {
+      const {
+        firstName,
+        lastName,
+        email,
+        phone,
+        password,
+        propertyId,
+        unitId,
+        rent,
+        deposit,
+      } = req.body;
+      if (!firstName || !lastName || !email || !password)
+        return res
+          .status(400)
+          .json({
+            message: "First name, last name, email and password are required.",
+          });
+      if (password.length < 8)
+        return res
+          .status(400)
+          .json({ message: "Password must be at least 8 characters." });
+
+      const existing = await User.findOne({
+        email: email.toLowerCase().trim(),
+      });
+      if (existing)
+        return res
+          .status(409)
+          .json({ message: "An account with this email already exists." });
+
+      let property = null;
+      if (propertyId) {
+        property = await Property.findOne(orgScope(req, { _id: propertyId }));
+        if (!property)
+          return res
+            .status(400)
+            .json({ message: "Selected property was not found." });
+      }
+
+      let unit = null;
+      if (unitId) {
+        unit = await Unit.findOne(orgScope(req, { _id: unitId }));
+        if (!unit)
+          return res
+            .status(400)
+            .json({ message: "Selected unit was not found." });
+        if (property && unit.property && unit.property !== property.name)
+          return res
+            .status(400)
+            .json({
+              message: "Selected unit does not belong to the chosen property.",
+            });
+        if (unit.tenantId)
+          return res
+            .status(409)
+            .json({ message: `Unit ${unit.name} is already occupied.` });
+      }
+
+      const parsedRent = Number(rent);
+      const parsedDeposit = Number(deposit);
+      const rentValue =
+        Number.isFinite(parsedRent) && parsedRent > 0
+          ? parsedRent
+          : unit?.price || null;
+      const depositValue =
+        Number.isFinite(parsedDeposit) && parsedDeposit > 0
+          ? parsedDeposit
+          : null;
+
+      const tenant = new User({
+        organization: req.user.organizationId,
+        firstName,
+        lastName,
+        email: email.toLowerCase().trim(),
+        phone: phone || "",
+        role: "tenant",
+        password: await bcrypt.hash(password, 10),
+        rent: rentValue,
+        deposit: depositValue,
+      });
+      await tenant.save();
+
+      let assignedUnit = null;
+      if (unit) {
+        unit.tenantId = tenant._id;
+        unit.tenant = `${firstName} ${lastName}`.trim();
+        unit.status = "Occupied";
+        await unit.save();
+        assignedUnit = unit;
+      }
+
+      const safe = tenant.toObject();
+      delete safe.password;
+      res.status(201).json({
+        message: assignedUnit
+          ? `Tenant added and assigned to unit ${assignedUnit.name}.`
+          : "Tenant added successfully.",
+        tenant: safe,
+        unit: assignedUnit,
+      });
+    } catch (err) {
+      res.status(500).json({ message: "Unable to add tenant." });
+    }
+  },
+);
+
+// EDIT TENANT
+router.put(
+  ["/api/tenants/:id", "/tenants/:id"],
+  requireAuth,
+  requireRole(...MANAGEMENT, "leasing-agent"),
+  async (req, res) => {
+    try {
+      const tenant = await User.findOne(
+        orgScope(req, { _id: req.params.id, role: "tenant" }),
+      );
+      if (!tenant)
+        return res.status(404).json({ message: "Tenant not found." });
+
+      const { firstName, lastName, email, phone, rent, deposit, unitId } =
+        req.body;
+
+      if (firstName) tenant.firstName = firstName.trim();
+      if (lastName) tenant.lastName = lastName.trim();
+      if (phone !== undefined) tenant.phone = phone || "";
+
+      if (email && email.toLowerCase().trim() !== tenant.email) {
+        const clash = await User.findOne({
+          email: email.toLowerCase().trim(),
+          _id: { $ne: tenant._id },
+        });
+        if (clash)
+          return res
+            .status(409)
+            .json({ message: "Another account already uses that email." });
+        tenant.email = email.toLowerCase().trim();
+      }
+
+      const parsedRent = Number(rent);
+      const parsedDeposit = Number(deposit);
+      if (Number.isFinite(parsedRent) && parsedRent > 0)
+        tenant.rent = parsedRent;
+      if (Number.isFinite(parsedDeposit) && parsedDeposit > 0)
+        tenant.deposit = parsedDeposit;
+
+      if (unitId !== undefined) {
+        const currentUnit = await Unit.findOne(
+          orgScope(req, { tenantId: tenant._id }),
+        );
+        const desiredUnit = unitId
+          ? await Unit.findOne(orgScope(req, { _id: unitId }))
+          : null;
+
+        const currentUnitId = currentUnit ? String(currentUnit._id) : null;
+        const desiredUnitId = desiredUnit ? String(desiredUnit._id) : null;
+
+        if (currentUnitId !== desiredUnitId) {
+          if (currentUnit) {
+            currentUnit.tenantId = null;
+            currentUnit.tenant = "-";
+            currentUnit.status = "Vacant";
+            await currentUnit.save();
+          }
+
+          if (desiredUnit) {
+            if (
+              desiredUnit.tenantId &&
+              String(desiredUnit.tenantId) !== String(tenant._id)
+            ) {
+              return res
+                .status(409)
+                .json({
+                  message: `Unit ${desiredUnit.name} is already occupied.`,
+                });
+            }
+            desiredUnit.tenantId = tenant._id;
+            desiredUnit.tenant =
+              `${tenant.firstName} ${tenant.lastName}`.trim();
+            desiredUnit.status = "Occupied";
+            await desiredUnit.save();
+          }
+        } else if (currentUnit) {
+          currentUnit.tenant = `${tenant.firstName} ${tenant.lastName}`.trim();
+          await currentUnit.save();
+        }
+      } else {
+        const u = await Unit.findOne(orgScope(req, { tenantId: tenant._id }));
+        if (u) {
+          u.tenant = `${tenant.firstName} ${tenant.lastName}`.trim();
+          await u.save();
+        }
+      }
+
+      await tenant.save();
+      const safe = tenant.toObject();
+      delete safe.password;
+      res.json({ message: "Tenant updated.", tenant: safe });
+    } catch (err) {
+      console.error("Edit tenant error:", err);
+      res.status(500).json({ message: "Unable to update tenant." });
+    }
+  },
+);
+
+// DELETE TENANT
+router.delete(
+  ["/api/tenants/:id", "/tenants/:id"],
+  requireAuth,
+  requireRole(...MANAGEMENT),
+  async (req, res) => {
+    try {
+      const tenant = await User.findOne(
+        orgScope(req, { _id: req.params.id, role: "tenant" }),
+      );
+      if (!tenant)
+        return res.status(404).json({ message: "Tenant not found." });
+
+      const unit = await Unit.findOne(orgScope(req, { tenantId: tenant._id }));
+      if (unit) {
+        unit.tenantId = null;
+        unit.tenant = "-";
+        unit.status = "Vacant";
+        await unit.save();
+      }
+
+      await User.findByIdAndDelete(tenant._id);
+      res.json({
+        message: `Tenant deleted${unit ? ` and unit ${unit.name} freed` : ""}.`,
+      });
+    } catch (err) {
+      console.error("Delete tenant error:", err);
+      res.status(500).json({ message: "Unable to delete tenant." });
+    }
+  },
+);
 
 module.exports = router;

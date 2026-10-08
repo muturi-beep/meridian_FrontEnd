@@ -99,12 +99,15 @@ function renderBalancesPanel() {
             ${r.currentBalance > 0 ? `<div style="font-size:10.5px;color:var(--amber);font-weight:600">Owed: ${fmtMoney(r.currentBalance)}</div>` : `<div style="font-size:10.5px;color:var(--green);font-weight:600">&#10003; Paid</div>`}
           </td>
           <td>${r.arrears > 0 ? `<span style="color:var(--red);font-weight:600">${fmtMoney(r.arrears)}</span>` : "-"}</td>
-          <td>
+                    <td>
             ${
               r.depositDue > 0
-                ? r.depositBalance > 0
-                  ? `<span style="color:var(--blue);font-weight:600">${fmtMoney(r.depositPaid)}</span><div style="font-size:10.5px;color:var(--t2)">of ${fmtMoney(r.depositDue)}</div>`
-                  : `<span style="color:var(--green);font-weight:600">&#10003; Paid</span>`
+                ? `${fmtMoney(r.depositPaid)}
+                   ${
+                     r.depositBalance > 0
+                       ? `<div style="font-size:10.5px;color:var(--amber);font-weight:600">Owed: ${fmtMoney(r.depositBalance)}</div>`
+                       : `<div style="font-size:10.5px;color:var(--green);font-weight:600">&#10003; Paid</div>`
+                   }`
                 : "-"
             }
           </td>
