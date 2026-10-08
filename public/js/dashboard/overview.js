@@ -1,5 +1,22 @@
 // public/js/dashboard/overview.js
-// Overview view — dashboard loader + charts (manager and tenant variants).
+// Overview view - dashboard loader + charts (manager and tenant variants).
+
+/**
+ * Build a tenant ledger from the tenant summary data.
+ * The summary doesn't return the ledger directly, so we reconstruct
+ * the tenant object the ledger expects and compute.
+ */
+function computeTenantOverviewLedger(summary) {
+  if (!summary || !summary.user) return null;
+  const tenantForLedger = {
+    _id: summary.user._id,
+    firstName: summary.user.firstName,
+    lastName: summary.user.lastName,
+    rent: summary.rent,
+    deposit: summary.deposit,
+  };
+  return buildTenantLedger(tenantForLedger, summary.payments || []);
+}
 
 function paintIdentity({
   firstName,
@@ -8,15 +25,15 @@ function paintIdentity({
   organizationName,
   avatar,
 }) {
-  document.getElementById("sbOrgName").textContent = organizationName || "—";
+  document.getElementById("sbOrgName").textContent = organizationName || "-";
   document.getElementById("avName").textContent = firstName
     ? `${firstName} ${lastName || ""}`.trim()
-    : "—";
-  document.getElementById("avRole").textContent = role || "—";
+    : "-";
+  document.getElementById("avRole").textContent = role || "-";
   document.getElementById("ddName").textContent = firstName
     ? `${firstName} ${lastName || ""}`.trim()
-    : "—";
-  document.getElementById("ddEmail").textContent = SESSION.email || "—";
+    : "-";
+  document.getElementById("ddEmail").textContent = SESSION.email || "-";
   document.getElementById("tbTitle").textContent =
     `${greeting()}, ${firstName || "there"}`;
   document.getElementById("tbSub").textContent = organizationName
@@ -47,7 +64,7 @@ async function loadDashboard() {
     const data = await api("/api/dashboard");
     state.dashboard = data;
 
-    // Update all sidebar badges from the dashboard stats — no extra API calls needed.
+    // Update all sidebar badges from the dashboard stats - no extra API calls needed.
     const badgeProps = document.getElementById("badgeProps");
     const badgeUnits = document.getElementById("badgeUnits");
     const badgeTenants = document.getElementById("badgeTenants");
@@ -92,7 +109,7 @@ async function loadDashboard() {
   } catch (err) {
     toast(err.message || "Unable to load your dashboard.", "error");
     document.getElementById("overviewLoading").innerHTML =
-      `<div class="empty"><div class="empty-ico">⚠</div><div class="empty-title">Couldn't load your dashboard</div><div class="empty-desc">${esc(err.message)}</div><button class="btn btn-primary" onclick="loadDashboard()">Retry</button></div>`;
+      `<div class="empty"><div class="empty-ico"></div><div class="empty-title">Couldn't load your dashboard</div><div class="empty-desc">${esc(err.message)}</div><button class="btn btn-primary" onclick="loadDashboard()">Retry</button></div>`;
   }
 }
 
@@ -104,7 +121,7 @@ function renderTenantOverview(data) {
   if (!data.unit) {
     c.innerHTML = `
       <div class="empty">
-        <div class="empty-ico">⌂</div>
+        <div class="empty-ico"></div>
         <div class="empty-title">No unit assigned yet</div>
         <div class="empty-desc">You haven't been assigned to a unit yet. Please contact your property manager to get set up.</div>
       </div>`;
@@ -120,18 +137,29 @@ function renderTenantOverview(data) {
     cm.due > 0 ? Math.min(100, Math.round((cm.paid / cm.due) * 100)) : 0;
   const recentPayments = (data.payments || []).slice(0, 5);
 
+  // Compute total balance + deposit info from the ledger
+  const ledger = computeTenantOverviewLedger(data);
+  const totalBalance = ledger ? ledger.balance : 0;
+  const depositRequired = ledger
+    ? ledger.depositDue
+    : Number(data.deposit) || 0;
+  const depositPaid = ledger ? ledger.depositPaid : 0;
+  const depositBalance = ledger ? ledger.depositBalance : 0;
+
   c.innerHTML = `
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-lbl">My Property</div><div class="stat-val" style="font-size:20px">${esc(data.property || "—")}</div><div class="stat-sub">Assigned property</div></div>
-      <div class="stat-card"><div class="stat-lbl">My Unit</div><div class="stat-val" style="font-size:20px">${esc(data.unit.name)}</div><div class="stat-sub">${data.unit.floor && data.unit.floor !== "—" ? `Floor ${esc(data.unit.floor)}` : "Floor not set"}</div></div>
+        <div class="stats-grid">
+      <div class="stat-card"><div class="stat-lbl">My Property</div><div class="stat-val" style="font-size:20px">${esc(data.property || "-")}</div><div class="stat-sub">Assigned property</div></div>
+      <div class="stat-card"><div class="stat-lbl">My Unit</div><div class="stat-val" style="font-size:20px">${esc(data.unit.name)}</div><div class="stat-sub">${data.unit.floor && data.unit.floor !== "-" ? `Floor ${esc(data.unit.floor)}` : "Floor not set"}</div></div>
       <div class="stat-card"><div class="stat-lbl">Monthly Rent</div><div class="stat-val money">${fmtMoney(data.rent)}</div><div class="stat-sub">Due each month</div></div>
+      <div class="stat-card"><div class="stat-lbl">Balance Due</div><div class="stat-val money" style="color:${totalBalance > 0 ? "var(--amber)" : "var(--green)"}">${fmtMoney(totalBalance)}</div><div class="stat-sub">${totalBalance > 0 ? "Outstanding across all months" : "Fully settled"}</div></div>
+      <div class="stat-card"><div class="stat-lbl">Security Deposit</div><div class="stat-val money">${fmtMoney(depositRequired)}</div><div class="stat-sub">${depositRequired > 0 ? (depositBalance > 0 ? `${fmtMoney(depositPaid)} paid of ${fmtMoney(depositRequired)}` : "Paid in full") : "No deposit required"}</div></div>
       <div class="stat-card"><div class="stat-lbl">Payment Status</div><div class="stat-val" style="font-size:16px;padding-top:8px"><span class="pill ${statusPill}">${esc(cm.status)}</span></div><div class="stat-sub">${esc(cm.monthLabel || "This month")}</div></div>
       <div class="stat-card"><div class="stat-lbl">Open Requests</div><div class="stat-val">${data.maintenance.open}</div><div class="stat-sub">Maintenance issues in progress</div></div>
     </div>
 
     <div class="panel" style="margin-bottom:24px">
       <div class="panel-head">
-        <div class="panel-title">Rent Status — ${esc(cm.monthLabel || "This Month")}</div>
+        <div class="panel-title">Rent Status - ${esc(cm.monthLabel || "This Month")}</div>
         <span class="pill ${statusPill}">${esc(cm.status)}</span>
       </div>
       <div class="panel-body">
@@ -147,7 +175,7 @@ function renderTenantOverview(data) {
 
     <div class="charts-grid">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">My Payments — Last 6 Months</div><div class="chart-sub">Paid vs outstanding, in KES</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">My Payments - Last 6 Months</div><div class="chart-sub">Paid vs outstanding, in KES</div></div></div>
         <div class="chart-body"><canvas id="tenant-chart-payments"></canvas></div>
       </div>
       <div class="chart-card">
@@ -161,8 +189,8 @@ function renderTenantOverview(data) {
       <div class="panel-body">
         <div class="quick-grid" style="margin-top:0">
           <div class="quick-card" onclick="openMaintenanceModal()"><div class="quick-num">+</div><h4>Report an issue</h4><p>Submit a maintenance request for your unit.</p></div>
-          <div class="quick-card" onclick="switchView('payments')"><div class="quick-num">₭</div><h4>View payments</h4><p>See your rent history and current balance.</p></div>
-          <div class="quick-card" onclick="switchView('documents')"><div class="quick-num">▦</div><h4>My receipts</h4><p>Download receipts for payments you've made.</p></div>
+          <div class="quick-card" onclick="switchView('payments')"><div class="quick-num"></div><h4>View payments</h4><p>See your rent history and current balance.</p></div>
+          <div class="quick-card" onclick="switchView('documents')"><div class="quick-num"></div><h4>My receipts</h4><p>Download receipts for payments you've made.</p></div>
         </div>
       </div>
     </div>
@@ -178,10 +206,10 @@ function renderTenantOverview(data) {
           .map(
             (p) => `
           <tr>
-            <td>${p.date ? new Date(p.date).toLocaleDateString() : "—"}</td>
+            <td>${p.date ? new Date(p.date).toLocaleDateString() : "-"}</td>
             <td>${fmtMoney(p.amount)}</td>
-            <td>${esc(p.method || "—")}</td>
-            <td>${esc(p.reference || "—")}</td>
+            <td>${esc(p.method || "-")}</td>
+            <td>${esc(p.reference || "-")}</td>
             <td><span class="pill ${pillForStatus(p.status)}">${esc(p.status)}</span></td>
           </tr>`,
           )
@@ -358,7 +386,7 @@ function renderTenantCharts(data) {
         },
       });
     } else {
-      maintEl.parentElement.innerHTML = `<div class="chart-empty">No maintenance requests yet — you're all clear.</div>`;
+      maintEl.parentElement.innerHTML = `<div class="chart-empty">No maintenance requests yet - you're all clear.</div>`;
     }
   }
 }
@@ -373,9 +401,9 @@ function renderOverview(data) {
   if (s.totalProperties === 0 && s.totalUnits === 0) {
     c.innerHTML = `
       <div class="empty">
-        <div class="empty-ico">◎</div>
+        <div class="empty-ico"></div>
         <div class="empty-title">Welcome to Meridian Properties, ${esc(data.user.firstName)}.</div>
-        <div class="empty-desc">Your property management workspace is ready. Start by adding your first property — you can add units and tenants after that.</div>
+        <div class="empty-desc">Your property management workspace is ready. Start by adding your first property - you can add units and tenants after that.</div>
         <button class="btn btn-primary" onclick="openPropertyModal()">+ Add Your First Property</button>
       </div>
       <div class="quick-grid">
@@ -390,7 +418,7 @@ function renderOverview(data) {
   c.innerHTML = `
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-lbl">Total Properties</div><div class="stat-val">${s.totalProperties}</div><div class="stat-sub">Across your portfolio</div></div>
-      <div class="stat-card"><div class="stat-lbl">Total Units</div><div class="stat-val">${s.totalUnits}</div><div class="stat-sub">${s.occupiedUnits} occupied · ${s.vacantUnits} vacant</div></div>
+      <div class="stat-card"><div class="stat-lbl">Total Units</div><div class="stat-val">${s.totalUnits}</div><div class="stat-sub">${s.occupiedUnits} occupied &middot; ${s.vacantUnits} vacant</div></div>
       <div class="stat-card"><div class="stat-lbl">Occupied Units</div><div class="stat-val">${s.occupiedUnits}</div><div class="stat-sub">${s.vacantUnits} vacant units</div></div>
       <div class="stat-card"><div class="stat-lbl">Occupancy Rate</div><div class="stat-val">${s.occupancyRate}%</div><div class="stat-sub">Of your total units</div></div>
       <div class="stat-card"><div class="stat-lbl">Monthly Revenue</div><div class="stat-val money">${fmtMoney(s.monthlyRevenue)}</div><div class="stat-sub">Recorded this month</div></div>
@@ -400,7 +428,7 @@ function renderOverview(data) {
 
     <div class="charts-grid">
       <div class="chart-card">
-        <div class="chart-head"><div><div class="chart-title">Revenue &amp; Pending Rent — Last 6 Months</div><div class="chart-sub">Paid vs outstanding, in KES</div></div></div>
+        <div class="chart-head"><div><div class="chart-title">Revenue &amp; Pending Rent - Last 6 Months</div><div class="chart-sub">Paid vs outstanding, in KES</div></div></div>
         <div class="chart-body"><canvas id="chart-revenue"></canvas></div>
       </div>
       <div class="chart-card">
@@ -602,7 +630,7 @@ function renderOverviewCharts(data) {
         },
       });
     } else {
-      occEl.parentElement.innerHTML = `<div class="chart-empty">No units yet — add units to see this chart.</div>`;
+      occEl.parentElement.innerHTML = `<div class="chart-empty">No units yet - add units to see this chart.</div>`;
     }
   }
 
@@ -713,7 +741,7 @@ function renderOverviewCharts(data) {
         },
       });
     } else {
-      payEl.parentElement.innerHTML = `<div class="chart-empty">No payment records yet — record a payment to see this chart.</div>`;
+      payEl.parentElement.innerHTML = `<div class="chart-empty">No payment records yet - record a payment to see this chart.</div>`;
     }
   }
 }

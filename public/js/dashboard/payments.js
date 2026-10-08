@@ -390,8 +390,19 @@ function renderTenantPayments() {
   else if (cm.status === "Unpaid") statusPill = "pill-red";
 
   const all = summary.payments || [];
-  const term = paymentsSearchTerm.trim().toLowerCase();
-  const list = term ? all.filter((p) => matchesPayment(p, term)) : all;
+  let list = all;
+  if (paymentsMonthFilter) {
+    list = all.filter((p) => {
+      const d = p.date
+        ? new Date(p.date)
+        : p.createdAt
+          ? new Date(p.createdAt)
+          : null;
+      if (!d || isNaN(d)) return false;
+      const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      return ym === paymentsMonthFilter;
+    });
+  }
 
   let historyHTML;
   if (!all.length) {
@@ -458,8 +469,8 @@ function renderTenantPayments() {
     </div>
 
     <div class="panel">
-      <div class="panel-head"><div class="panel-title">Payment History (${list.length}${term ? ` of ${all.length}` : ""})</div></div>
-      ${historyHTML}
+                  <div class="panel-head"><div class="panel-title">Payment History (${list.length}${paymentsMonthFilter ? ` of ${all.length}` : ""})</div></div>
+            ${historyHTML}
     </div>`;
 }
 
@@ -479,12 +490,28 @@ function matchesPayment(p, term) {
   );
 }
 
-document.getElementById("searchPayments")?.addEventListener("input", (e) => {
-  paymentsSearchTerm = e.target.value;
-  if (!state.payLoaded) return;
-  if (IS_TENANT) renderTenantPayments();
-  else renderManagerPayments();
-});
+let paymentsMonthFilter = "";
+
+if (IS_TENANT) {
+  // Tenants filter by month, not text.
+  const textSearch = document.getElementById("searchPayments");
+  if (textSearch) textSearch.style.display = "none";
+
+  const monthSearch = document.getElementById("monthPayments");
+  if (monthSearch) {
+    monthSearch.style.display = "";
+    monthSearch.addEventListener("input", (e) => {
+      paymentsMonthFilter = e.target.value; // "YYYY-MM" or ""
+      if (state.payLoaded) renderTenantPayments();
+    });
+  }
+} else {
+  document.getElementById("searchPayments")?.addEventListener("input", (e) => {
+    paymentsSearchTerm = e.target.value;
+    if (!state.payLoaded) return;
+    renderManagerPayments();
+  });
+}
 
 async function openPaymentModal(payment = null, preset = null) {
   const isEdit = !!payment;
