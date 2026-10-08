@@ -19,30 +19,37 @@ console.log("[auth] API base =", API || "(same-origin)");
 const ROLES = {
   "agency-director": {
     color: "#d4a46a",
-    desc: "Full access — all properties, users and financials.",
+    emoji: "&#127970;",
+    desc: "Full access - all properties, users and financials.",
   },
   "property-manager": {
     color: "#2eb8c5",
+    emoji: "&#128273;",
     desc: "Manage units, tenants and maintenance requests.",
   },
   "finance-officer": {
     color: "#3ecf8e",
+    emoji: "&#128176;",
     desc: "Access payments, invoices and financial reports.",
   },
   "maintenance-staff": {
     color: "#f5a623",
+    emoji: "&#128295;",
     desc: "View and update maintenance work orders.",
   },
   "leasing-agent": {
     color: "#8b8ff5",
+    emoji: "&#128203;",
     desc: "Handle viewings, applications and leases.",
   },
   tenant: {
     color: "#48c78e",
+    emoji: "&#127968;",
     desc: "View your unit details and raise maintenance requests.",
   },
   auditor: {
     color: "#7a83a0",
+    emoji: "&#128202;",
     desc: "Read-only access to reports and dashboards.",
   },
 };
@@ -95,7 +102,8 @@ function updateRolePreview(prefix) {
   }
   document.getElementById(`${prefix}-role-dot`).style.background =
     ROLES[val].color;
-  document.getElementById(`${prefix}-role-desc`).textContent = ROLES[val].desc;
+  document.getElementById(`${prefix}-role-desc`).innerHTML =
+    `${ROLES[val].emoji} ${ROLES[val].desc}`;
   preview.classList.add("show");
 }
 
