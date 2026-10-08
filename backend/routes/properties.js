@@ -16,7 +16,15 @@ router.get(
       const props = await Property.find(orgScope(req)).sort({ createdAt: -1 });
       const enriched = await Promise.all(
         props.map(async (p) => {
-          const units = await Unit.find(orgScope(req, { property: p.name }));
+          const units = await Unit.find(
+            orgScope(req, {
+              $or: [
+                { propertyId: p._id },
+                { propertyId: null, property: p.name },
+              ],
+            }),
+          );
+
           return {
             ...p.toObject(),
             unitCount: units.length,
@@ -109,9 +117,14 @@ router.get(
       if (!property)
         return res.status(404).json({ message: "Property not found." });
       res.json(
-        await Unit.find(orgScope(req, { property: property.name })).sort({
-          name: 1,
-        }),
+        await Unit.find(
+          orgScope(req, {
+            $or: [
+              { propertyId: property._id },
+              { propertyId: null, property: property.name },
+            ],
+          }),
+        ).sort({ name: 1 }),
       );
     } catch (err) {
       res.status(500).json({ message: "Unable to load units." });

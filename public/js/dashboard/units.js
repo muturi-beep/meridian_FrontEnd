@@ -1,23 +1,38 @@
 // public/js/dashboard/units.js
-// Units view — grouped list, add/edit modal, delete.
+// Units view - grouped list, add/edit modal, delete.
+// Grouping prefers propertyId (rename-proof); falls back to name for orphans.
 
 async function loadUnits() {
   const el = document.getElementById("unitsList");
-  el.innerHTML = `<div class="empty" style="border-style:solid"><div class="empty-desc">Loading units…</div></div>`;
+  el.innerHTML = `<div class="empty" style="border-style:solid"><div class="empty-desc">Loading units...</div></div>`;
   try {
     const [props, list] = await Promise.all([
       api("/api/properties"),
       api("/products"),
     ]);
+
+    // Lookup: propertyId (string) -> Property
+    const propById = new Map();
+    props.forEach((p) => propById.set(String(p._id), p));
+
+    // Enrich each unit with the resolved propertyName
+    const enriched = list.map((u) => {
+      const p = u.propertyId ? propById.get(String(u.propertyId)) : null;
+      return {
+        ...u,
+        propertyName: p ? p.name : u.property || "",
+      };
+    });
+
     state.properties = props;
     state.propsLoaded = true;
-    state.units = list;
+    state.units = enriched;
     state.unitsLoaded = true;
     document.getElementById("badgeProps").textContent = props.length;
     document.getElementById("badgeUnits").textContent = list.length;
     renderUnitsList();
   } catch (err) {
-    el.innerHTML = `<div class="empty"><div class="empty-ico">⚠</div><div class="empty-title">Couldn't load units</div><div class="empty-desc">${esc(err.message)}</div><button class="btn btn-primary" onclick="loadUnits()">Retry</button></div>`;
+    el.innerHTML = `<div class="empty"><div class="empty-ico"></div><div class="empty-title">Couldn't load units</div><div class="empty-desc">${esc(err.message)}</div><button class="btn btn-primary" onclick="loadUnits()">Retry</button></div>`;
   }
 }
 
@@ -38,6 +53,7 @@ function renderUnitsList() {
       actionLabel: "+ Add Unit",
       actionHandler: "openUnitModal()",
     });
+    return;
   }
 
   if (!list.length) {
@@ -46,22 +62,27 @@ function renderUnitsList() {
       title: "No matches",
       desc: `No units match "${unitsSearchTerm}".`,
     });
+    return;
   }
 
+  // Group by resolved propertyName
   const grouped = {};
   list.forEach((u) => {
-    const key = u.property || "__unassigned__";
+    const key = u.propertyName || "__unassigned__";
     (grouped[key] = grouped[key] || []).push(u);
   });
 
   const sections = [];
+  const knownNames = new Set(props.map((p) => p.name));
+
+  // One section per registered property (in the order they came from the API)
   props.forEach((p) => {
     const unitsInProp = grouped[p.name];
     if (!unitsInProp || !unitsInProp.length) return;
     sections.push(
       renderUnitGroup({
         title: p.name,
-        subtitle: `${p.location || "No location set"} · ${unitsInProp.length} unit${unitsInProp.length === 1 ? "" : "s"}`,
+        subtitle: `${p.location || "No location set"} - ${unitsInProp.length} unit${unitsInProp.length === 1 ? "" : "s"}`,
         units: unitsInProp,
         propertyId: p._id,
         propertyName: p.name,
@@ -69,15 +90,15 @@ function renderUnitsList() {
     );
   });
 
-  const knownNames = new Set(props.map((p) => p.name));
+  // Anything left over that doesn't match a real property = orphans
   const orphanUnits = list.filter(
-    (u) => !u.property || !knownNames.has(u.property),
+    (u) => !u.propertyName || !knownNames.has(u.propertyName),
   );
   if (orphanUnits.length) {
     sections.push(
       renderUnitGroup({
         title: "Unassigned Units",
-        subtitle: `Not linked to any registered property · ${orphanUnits.length} unit${orphanUnits.length === 1 ? "" : "s"}`,
+        subtitle: `Not linked to any registered property - ${orphanUnits.length} unit${orphanUnits.length === 1 ? "" : "s"} - click Fix to assign`,
         units: orphanUnits,
         propertyId: null,
         propertyName: null,
@@ -96,10 +117,11 @@ function renderUnitsList() {
 }
 
 function matchesUnit(u, term) {
-  return [u.name, u.property, u.floor, u.tenant, u.status].some((v) =>
-    String(v || "")
-      .toLowerCase()
-      .includes(term),
+  return [u.name, u.propertyName, u.property, u.floor, u.tenant, u.status].some(
+    (v) =>
+      String(v || "")
+        .toLowerCase()
+        .includes(term),
   );
 }
 
@@ -122,10 +144,10 @@ function renderUnitGroup({ title, subtitle, units, propertyId, propertyName }) {
       (u) => `
     <tr>
       <td>${esc(u.name)}</td>
-      <td>${esc(u.property || "—")}</td>
-      <td>${esc(u.floor || "—")}</td>
+      <td>${esc(u.propertyName || u.property || "-")}</td>
+      <td>${esc(u.floor || "-")}</td>
       <td>${fmtMoney(u.price)}</td>
-      <td>${esc(u.tenant && u.tenant !== "—" ? u.tenant : "—")}</td>
+      <td>${esc(u.tenant && u.tenant !== "-" ? u.tenant : "-")}</td>
       <td><span class="pill ${pillForStatus(u.status)}">${esc(u.status)}</span></td>
       <td class="actions">
         <button class="btn btn-outline btn-sm" onclick='openUnitModal(${JSON.stringify(u).replace(/'/g, "&#39;")})'>Edit</button>
@@ -173,20 +195,35 @@ async function openUnitModal(u = null, presetProperty = null) {
 
   const props = state.properties || [];
   const tenants = state.tenants || [];
-  const selectedProperty =
-    (u && u.property) || presetProperty || props[0]?.name || "";
+
+  // Prefer propertyId for preselect; fall back to the string name for orphans
+  let selectedPropertyId = "";
+  if (
+    u &&
+    u.propertyId &&
+    props.find((p) => String(p._id) === String(u.propertyId))
+  ) {
+    selectedPropertyId = String(u.propertyId);
+  } else if (u && u.property) {
+    const match = props.find((p) => p.name === u.property);
+    if (match) selectedPropertyId = String(match._id);
+  } else if (presetProperty) {
+    const match = props.find((p) => p.name === presetProperty);
+    if (match) selectedPropertyId = String(match._id);
+  } else if (props[0]) {
+    selectedPropertyId = String(props[0]._id);
+  }
 
   document.getElementById("modalBody").innerHTML = `
     <div class="field"><label>Unit Name / Number *</label><input type="text" name="name" required value="${esc(u?.name || "")}" placeholder="e.g. A-101"/></div>
     <div class="frow">
       <div class="field"><label>Property</label>
-        <select name="property">
-          <option value="">— Select property —</option>
-          ${props.map((p) => `<option value="${esc(p.name)}" ${selectedProperty === p.name ? "selected" : ""}>${esc(p.name)}</option>`).join("")}
-          ${selectedProperty && !props.find((p) => p.name === selectedProperty) ? `<option selected>${esc(selectedProperty)}</option>` : ""}
+        <select name="propertyId">
+          <option value="">- Unassigned -</option>
+          ${props.map((p) => `<option value="${p._id}" ${selectedPropertyId === String(p._id) ? "selected" : ""}>${esc(p.name)}</option>`).join("")}
         </select>
       </div>
-      <div class="field"><label>Floor</label><input type="text" name="floor" value="${esc(u?.floor && u.floor !== "—" ? u.floor : "")}"/></div>
+      <div class="field"><label>Floor</label><input type="text" name="floor" value="${esc(u?.floor && u.floor !== "-" ? u.floor : "")}"/></div>
     </div>
     <div class="frow">
       <div class="field"><label>Monthly Rent (KES) *</label><input type="number" name="price" required min="0" value="${u?.price ?? ""}"/></div>
@@ -197,10 +234,10 @@ async function openUnitModal(u = null, presetProperty = null) {
     <div class="field">
       <label>Assign Tenant</label>
       <select name="tenantId">
-        <option value="">— Unassigned —</option>
+        <option value="">- Unassigned -</option>
         ${tenants
           .map((t) => {
-            const label = `${esc(t.firstName)} ${esc(t.lastName)}${t.email ? ` · ${esc(t.email)}` : ""}`;
+            const label = `${esc(t.firstName)} ${esc(t.lastName)}${t.email ? ` - ${esc(t.email)}` : ""}`;
             return `<option value="${t._id}" ${String(u?.tenantId || "") === String(t._id) ? "selected" : ""}>${label}</option>`;
           })
           .join("")}
@@ -210,9 +247,15 @@ async function openUnitModal(u = null, presetProperty = null) {
 
   modalHandler = async () => {
     const form = document.getElementById("modalForm");
+    const propId = form.querySelector('[name="propertyId"]').value;
+    const propName = propId
+      ? props.find((p) => String(p._id) === propId)?.name || ""
+      : "";
+
     const payload = {
       name: form.querySelector('[name="name"]').value.trim(),
-      property: form.querySelector('[name="property"]').value,
+      property: propName,
+      propertyId: propId || null,
       floor: form.querySelector('[name="floor"]').value.trim(),
       price: Number(form.querySelector('[name="price"]').value) || 0,
       status: form.querySelector('[name="status"]').value,
