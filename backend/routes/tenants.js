@@ -1,4 +1,5 @@
 // backend/routes/tenants.js
+// Manager routes: list, add, edit, delete tenants.
 const express = require("express");
 const bcrypt = require("bcryptjs");
 

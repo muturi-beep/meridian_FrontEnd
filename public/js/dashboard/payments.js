@@ -23,6 +23,8 @@ function computeTenantBalances(tenants, payments) {
         unit: t.unitName || "",
         phone: t.phone || "",
         rent: ledger.monthlyRent,
+        rentDue: ledger.rentDue,
+        rentPaid: ledger.rentPaid,
         currentPaid: ledger.currentMonth.paid,
         currentBalance: ledger.currentMonth.balance,
         arrears: ledger.arrears,
@@ -40,6 +42,58 @@ function computeTenantBalances(tenants, payments) {
       };
     })
     .sort((a, b) => b.balance - a.balance || a.name.localeCompare(b.name));
+}
+
+/**
+ * Shared 9-column account balances table.
+ * Used by both the manager view (multiple rows + actions) and the
+ * tenant view (one row, no actions).
+ */
+function renderAccountBalancesTable(rows, opts = {}) {
+  const hideActions = !!opts.hideActions;
+  const actionsHeader = hideActions ? "" : '<th class="actions">Actions</th>';
+
+  const rowsHTML = rows
+    .map(
+      (r) => `
+    <tr>
+      <td>${esc(r.name)}</td>
+      <td>${esc(r.property || "-")}</td>
+      <td>${esc(r.unit || "-")}</td>
+      <td>${fmtMoney(r.rentDue || 0)}</td>
+      <td>${fmtMoney(r.depositDue || 0)}</td>
+      <td style="color:var(--green)">${fmtMoney(r.rentPaid || 0)}</td>
+      <td style="color:var(--green)">${fmtMoney(r.depositPaid || 0)}</td>
+      <td style="font-weight:700;color:${r.balance > 0 ? "var(--amber)" : "var(--green)"}">${fmtMoney(r.balance || 0)}</td>
+      <td><span class="pill ${pillForStatus(r.status)}">${esc(r.status)}</span></td>
+      ${
+        hideActions
+          ? ""
+          : `
+        <td class="actions">
+          <button class="btn btn-primary btn-sm" onclick='recordForTenant(${JSON.stringify({ tenantId: r.id, amount: r.balance || r.rent, property: r.property, unit: r.unit }).replace(/'/g, "&#39;")})'>Record Payment</button>
+        </td>`
+      }
+    </tr>`,
+    )
+    .join("");
+
+  return `
+    <div class="table-wrap"><table>
+      <thead><tr>
+        <th>Tenant</th>
+        <th>Property</th>
+        <th>Unit</th>
+        <th>Rent Due</th>
+        <th>Deposit Due</th>
+        <th>Rent Paid</th>
+        <th>Deposit Paid</th>
+        <th>Total Bal</th>
+        <th>Status</th>
+        ${actionsHeader}
+      </tr></thead>
+      <tbody>${rowsHTML}</tbody>
+    </table></div>`;
 }
 
 function renderBalancesPanel() {
@@ -75,55 +129,7 @@ function renderBalancesPanel() {
   const visible = state.showAllBalances ? rows : unpaid;
 
   const body = visible.length
-    ? `
-    <div class="table-wrap"><table>
-      <thead><tr>
-        <th>Tenant</th><th>Property / Unit</th><th>Rent Due</th>
-        <th>This Month</th><th>Arrears</th><th>Deposit</th><th>Total Balance</th><th>Status</th><th class="actions">Actions</th>
-      </tr></thead>
-      <tbody>${visible
-        .map(
-          (r) => `
-        <tr>
-          <td>
-            <div style="font-weight:600">${esc(r.name)}</div>
-            ${r.phone ? `<div style="font-size:11px;color:var(--t2)">${esc(r.phone)}</div>` : ""}
-          </td>
-          <td>
-            <div>${esc(r.property || "-")}</div>
-            <div style="font-size:11px;color:var(--t2)">Unit ${esc(r.unit || "-")}</div>
-          </td>
-          <td>${r.rent ? fmtMoney(r.rent) : "-"}</td>
-          <td>
-            ${fmtMoney(r.currentPaid)}
-            ${r.currentBalance > 0 ? `<div style="font-size:10.5px;color:var(--amber);font-weight:600">Owed: ${fmtMoney(r.currentBalance)}</div>` : `<div style="font-size:10.5px;color:var(--green);font-weight:600">&#10003; Paid</div>`}
-          </td>
-          <td>${r.arrears > 0 ? `<span style="color:var(--red);font-weight:600">${fmtMoney(r.arrears)}</span>` : "-"}</td>
-                    <td>
-            ${
-              r.depositDue > 0
-                ? `${fmtMoney(r.depositPaid)}
-                   ${
-                     r.depositBalance > 0
-                       ? `<div style="font-size:10.5px;color:var(--amber);font-weight:600">Owed: ${fmtMoney(r.depositBalance)}</div>`
-                       : `<div style="font-size:10.5px;color:var(--green);font-weight:600">&#10003; Paid</div>`
-                   }`
-                : "-"
-            }
-          </td>
-          <td style="font-weight:700;color:${r.balance > 0 ? "var(--amber)" : "var(--green)"}">
-            ${fmtMoney(r.balance)}
-          </td>
-          <td><span class="pill ${pillForStatus(r.status)}">${esc(r.status)}</span></td>
-          <td class="actions">
-            <div class="bal-actions">
-              <button class="btn btn-primary btn-sm" onclick='recordForTenant(${JSON.stringify({ tenantId: r.id, amount: r.balance || r.rent, property: r.property, unit: r.unit }).replace(/'/g, "&#39;")})'>Record Payment</button>
-            </div>
-          </td>
-        </tr>`,
-        )
-        .join("")}</tbody>
-    </table></div>`
+    ? renderAccountBalancesTable(visible)
     : emptyState({
         icon: "check",
         title: "Everyone is fully paid up",
@@ -366,7 +372,7 @@ function renderManagerPayments() {
     });
   } else {
     tableHTML = `<div class="table-wrap"><table>
-      <thead><tr><th>Tenant</th><th>Property</th><th>Unit</th><th>Amount</th><th>Date</th><th>Method</th><th>Status</th><th class="actions">Actions</th></tr></thead>
+          <thead><tr><th>Tenant</th><th>Property</th><th>Unit</th><th>Amount</th><th>Date</th><th>Method</th><th>Status</th><th class="actions">Actions</th></tr></thead>
       <tbody>${list.map(paymentRow).join("")}</tbody>
     </table></div>`;
   }
@@ -422,11 +428,13 @@ function renderTenantPayments() {
     });
   } else {
     historyHTML = `<div class="table-wrap"><table>
-            <thead><tr><th>Date</th><th>Amount</th><th>Type</th><th>Method</th><th>Reference</th><th>Status</th><th class="actions">Actions</th></tr></thead>
-      <tbody>${list
-        .map(
-          (p) => `<tr>
+                <thead><tr><th>Date</th><th>Property</th><th>Unit</th><th>Amount</th><th>Type</th><th>Method</th><th>Reference</th><th>Status</th><th class="actions">Actions</th></tr></thead>
+            <tbody>${list
+              .map(
+                (p) => `<tr>
         <td>${p.date ? new Date(p.date).toLocaleDateString() : "-"}</td>
+        <td>${esc(p.property || summary.property || "-")}</td>
+        <td>${esc(p.unit || summary.unit?.name || "-")}</td>
         <td>${fmtMoney(p.amount)}</td>
         <td>${esc(p.type || "Rent")}</td>
         <td>${esc(p.method || "-")}</td>
@@ -437,8 +445,8 @@ function renderTenantPayments() {
           <button class="btn btn-primary btn-sm" onclick='downloadReceiptPDF(${JSON.stringify(p).replace(/'/g, "&#39;")})'>PDF</button>
         </td>
       </tr>`,
-        )
-        .join("")}</tbody>
+              )
+              .join("")}</tbody>
     </table></div>`;
   }
 
@@ -466,15 +474,39 @@ function renderTenantPayments() {
           <div><div style="font-size:10.5px;color:var(--t2);text-transform:uppercase;letter-spacing:.09em;margin-bottom:4px">Paid</div><div style="font-family:var(--font-serif);font-size:22px;font-weight:700;color:var(--green)">${fmtMoney(cm.paid)}</div></div>
           <div><div style="font-size:10.5px;color:var(--t2);text-transform:uppercase;letter-spacing:.09em;margin-bottom:4px">Balance</div><div style="font-family:var(--font-serif);font-size:22px;font-weight:700;color:${cm.balance > 0 ? "var(--amber)" : "var(--green)"}">${fmtMoney(cm.balance)}</div></div>
         </div>
-        <div style="height:10px;background:var(--ink-3);border-radius:6px;overflow:hidden"><div style="height:100%;width:${pctPaid}%;background:linear-gradient(90deg,var(--copper),var(--copper-l))"></div></div>
+                <div style="height:10px;background:var(--ink-3);border-radius:6px;overflow:hidden"><div style="height:100%;width:${pctPaid}%;background:linear-gradient(90deg,var(--copper),var(--copper-l))"></div></div>
         <div style="font-size:11.5px;color:var(--t2);margin-top:8px">${pctPaid}% paid this month</div>
       </div>
     </div>
 
+    <div class="panel" style="margin-bottom:18px">
+      <div class="panel-head"><div class="panel-title">My Account Summary</div></div>
+      ${renderAccountBalancesTable([computeTenantSelfRow(summary)], { hideActions: true })}
+    </div>
+
     <div class="panel">
-                  <div class="panel-head"><div class="panel-title">Payment History (${list.length}${paymentsMonthFilter ? ` of ${all.length}` : ""})</div></div>
-            ${historyHTML}
+          <div class="panel-head"><div class="panel-title">Payment History (${list.length}${paymentsMonthFilter ? ` of ${all.length}` : ""})</div></div>
+      ${historyHTML}
     </div>`;
+}
+
+/**
+ * Build a single balance row for the logged-in tenant,
+ * shaped like what computeTenantBalances() returns.
+ */
+function computeTenantSelfRow(summary) {
+  const tenantLike = {
+    _id: summary.user._id,
+    firstName: summary.user.firstName,
+    lastName: summary.user.lastName,
+    phone: summary.user.phone || "",
+    rent: summary.rent,
+    deposit: summary.deposit,
+    property: summary.property || "",
+    unitName: summary.unit?.name || "",
+  };
+  const [row] = computeTenantBalances([tenantLike], summary.payments || []);
+  return row;
 }
 
 function matchesPayment(p, term) {
