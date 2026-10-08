@@ -174,7 +174,7 @@ async function handleLogin() {
     const data = await res.json().catch(() => ({}));
 
     if (res.ok) {
-      sessionStorage.setItem(
+      localStorage.setItem(
         "mp_session",
         JSON.stringify({
           ...data.user,
@@ -331,7 +331,7 @@ async function handleSignup() {
     const data = await res.json().catch(() => ({}));
 
     if (res.ok) {
-      sessionStorage.setItem(
+      localStorage.setItem(
         "mp_session",
         JSON.stringify({
           ...data.user,
@@ -440,7 +440,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 /* ════ AUTO-REDIRECT IF ALREADY LOGGED IN ════ */
-const sess = JSON.parse(sessionStorage.getItem("mp_session") || "{}");
+const sess = JSON.parse(localStorage.getItem("mp_session") || "{}");
 if (sess.loggedIn) window.location.href = "dashboard.html";
 
 paymentModal.addEventListener("click", function (e) {
