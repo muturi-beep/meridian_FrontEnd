@@ -100,7 +100,7 @@ function renderTenantDocs(el) {
           .map(
             (r) => `<tr>
           <td>${r.date ? new Date(r.date).toLocaleDateString() : "-"}</td>
-          <td>${esc(r.reference || String(r._id).slice(-8).toUpperCase())}</td>
+          <td>${esc(r.receiptNumber || r.reference || String(r._id).slice(-8).toUpperCase())}</td>
           <td>${fmtMoney(r.amount)}</td>
           <td>${esc(r.type || "Rent")}</td>
           <td>${esc(r.method || "-")}</td>
@@ -150,7 +150,7 @@ function renderManagerDocs(el) {
           .map(
             (p) => `<tr>
           <td>${p.date ? new Date(p.date).toLocaleDateString() : "-"}</td>
-          <td>${esc(p.reference || String(p._id).slice(-8).toUpperCase())}</td>
+          <td>${esc(p.receiptNumber || p.reference || String(p._id).slice(-8).toUpperCase())}</td>
           <td>${esc(p.tenant || "-")}</td>
           <td>${fmtMoney(p.amount)}</td>
           <td>${esc(p.type || "Rent")}</td>

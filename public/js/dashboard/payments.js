@@ -343,7 +343,11 @@ function renderManagerPayments() {
       <td>${esc(p.tenant)}</td>
       <td>${esc(p.property || "-")}</td>
       <td>${esc(p.unit || "-")}</td>
-      <td>${fmtMoney(p.amount)}${balanceNote}</td>
+            <td>
+        ${fmtMoney(p.amount)}
+        ${p.receiptNumber ? `<div style="font-size:10.5px;color:var(--t2);margin-top:3px">${esc(p.receiptNumber)}</div>` : ""}
+        ${balanceNote}
+      </td>
       <td>${p.date ? new Date(p.date).toLocaleDateString() : "-"}</td>
       <td>${esc(p.method)}</td>
       <td><span class="pill ${pillForStatus(p.status)}">${esc(p.status)}</span></td>

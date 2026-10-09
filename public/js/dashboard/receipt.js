@@ -76,6 +76,7 @@ function buildReceiptHTML(payment) {
   const { tenant, ledger, snapshot } = resolveReceiptContext(payment);
   const org = SESSION.organizationName || "Meridian Properties";
   const receiptNo =
+    payment.receiptNumber ||
     payment.reference ||
     String(payment._id || "")
       .slice(-8)
@@ -242,6 +243,7 @@ function downloadReceiptPDF(payment) {
   const { ledger, snapshot } = resolveReceiptContext(payment);
   const org = SESSION.organizationName || "Meridian Properties";
   const receiptNo =
+    payment.receiptNumber ||
     payment.reference ||
     String(payment._id || "")
       .slice(-8)
