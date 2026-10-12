@@ -23,6 +23,7 @@ const dashboardRoutes = require("./routes/dashboard");
 const maintenanceRoutes = require("./routes/maintenance");
 const paymentsRoutes = require("./routes/payments");
 const tenantRoutes = require("./routes/tenant");
+const mpesaRoutes = require("./routes/mpesa");
 
 const app = express();
 
@@ -106,6 +107,7 @@ app.use(dashboardRoutes);
 app.use(maintenanceRoutes);
 app.use(paymentsRoutes);
 app.use(tenantRoutes);
+app.use(mpesaRoutes);
 
 /* ══════════════════════════════════════════════════════
    CATCH-ALL 404 (API paths only)

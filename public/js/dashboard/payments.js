@@ -488,8 +488,11 @@ function renderTenantPayments() {
       ${renderAccountBalancesTable([computeTenantSelfRow(summary)], { hideActions: true })}
     </div>
 
-    <div class="panel">
-          <div class="panel-head"><div class="panel-title">Payment History (${list.length}${paymentsMonthFilter ? ` of ${all.length}` : ""})</div></div>
+        <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">Payment History (${list.length}${paymentsMonthFilter ? ` of ${all.length}` : ""})</div>
+        <button class="btn btn-primary btn-sm" onclick="openMpesaPaymentModal()">Pay with M-Pesa</button>
+      </div>
       ${historyHTML}
     </div>`;
 }
@@ -818,3 +821,79 @@ function exportPaymentsCsv() {
 document
   .getElementById("exportPaymentsCsv")
   ?.addEventListener("click", exportPaymentsCsv);
+
+/* ══════════════════════════════════════════════════════
+   M-PESA — STK PUSH
+   Tenant-initiated payment via Safaricom.
+══════════════════════════════════════════════════════════ */
+
+function openMpesaPaymentModal() {
+  const summary = state.tenantSummary;
+  if (!summary || !summary.unit) {
+    toast("You need an assigned unit to make a payment.", "error");
+    return;
+  }
+
+  const amountOwed = summary.currentMonth?.balance || summary.rent || 0;
+
+  document.getElementById("modalTitle").textContent = "Pay with M-Pesa";
+
+  document.getElementById("modalBody").innerHTML = `
+    <div class="payment-preview" style="margin-bottom:16px">
+      <div class="pp-head">
+        <span>Payment Summary</span>
+        <span>${esc(summary.unit.name)} &middot; ${esc(summary.property || "")}</span>
+      </div>
+      <div class="pp-row"><span class="k">Rent due this month</span><span class="v">${fmtMoney(summary.rent)}</span></div>
+      <div class="pp-row"><span class="k">Already paid</span><span class="v ok">${fmtMoney(summary.currentMonth?.paid || 0)}</span></div>
+      <div class="pp-after">
+        <div class="pp-row"><span class="k">Balance remaining</span><span class="v ${amountOwed > 0 ? "warn" : "ok"}">${fmtMoney(amountOwed)}</span></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>M-Pesa Phone Number *</label>
+      <input type="tel" name="phone" required placeholder="254712345678" />
+      <div style="font-size:11px;color:var(--t2);margin-top:4px">
+        Enter the Safaricom number that will receive the payment prompt.
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Amount to Pay (KES) *</label>
+      <input type="number" name="amount" min="1" required value="${amountOwed || ""}" />
+    </div>
+
+    <div style="background:var(--ink-3);border:1px solid var(--border);border-radius:var(--rs);padding:12px 14px;margin-top:12px;font-size:12px;color:var(--t2);line-height:1.5">
+      You will receive an M-Pesa prompt on your phone. Enter your M-Pesa PIN to complete the payment.
+      A receipt will appear here once the payment is confirmed.
+    </div>`;
+
+  modalHandler = async () => {
+    const form = document.getElementById("modalForm");
+    const phone = form.querySelector('[name="phone"]').value.trim();
+    const amount = Number(form.querySelector('[name="amount"]').value);
+
+    if (!phone) throw new Error("Please enter your M-Pesa phone number.");
+    if (!amount || amount <= 0) throw new Error("Please enter a valid amount.");
+
+    const res = await api("/api/mpesa/stkpush", {
+      method: "POST",
+      body: JSON.stringify({ phone, amount }),
+    });
+
+    toast("Check your phone for the M-Pesa prompt...", "info");
+    closeModal();
+
+    // Refresh the payments list after a delay so the pending record shows up
+    setTimeout(() => {
+      state.payLoaded = false;
+      loadPayments();
+    }, 2000);
+
+    // Return the checkout ID so submitModal's caller can use it if needed
+    return res;
+  };
+
+  document.getElementById("modal").classList.add("open");
+}
