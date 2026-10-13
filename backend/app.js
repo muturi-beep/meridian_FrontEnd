@@ -24,6 +24,7 @@ const maintenanceRoutes = require("./routes/maintenance");
 const paymentsRoutes = require("./routes/payments");
 const tenantRoutes = require("./routes/tenant");
 const mpesaRoutes = require("./routes/mpesa");
+const subscriptionRoutes = require("./routes/subscription");
 
 const app = express();
 
@@ -108,6 +109,7 @@ app.use(maintenanceRoutes);
 app.use(paymentsRoutes);
 app.use(tenantRoutes);
 app.use(mpesaRoutes);
+app.use(subscriptionRoutes);
 
 /* ══════════════════════════════════════════════════════
    CATCH-ALL 404 (API paths only)

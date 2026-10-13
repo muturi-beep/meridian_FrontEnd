@@ -10,6 +10,8 @@ const { initiateSTKPush } = require("../services/mpesa");
 const { nextReceiptNumber } = require("../utils/receiptNumber");
 
 const router = express.Router();
+const Subscription = require("../models/Subscription");
+const Organization = require("../models/Organization");
 
 // ══════════════════════════════════════════════════════
 // POST /api/mpesa/stkpush
@@ -70,22 +72,18 @@ router.post(
         // Safaricom call failed - clean up the pending record so we don't leave ghosts
         await Payment.findByIdAndDelete(pending._id);
         console.error("STK Push failed:", err.response?.data || err.message);
-        return res
-          .status(400)
-          .json({
-            message: err.message || "Failed to initiate M-Pesa payment.",
-          });
+        return res.status(400).json({
+          message: err.message || "Failed to initiate M-Pesa payment.",
+        });
       }
 
       if (stkResponse.ResponseCode !== "0") {
         await Payment.findByIdAndDelete(pending._id);
-        return res
-          .status(400)
-          .json({
-            message:
-              stkResponse.ResponseDescription ||
-              "Safaricom rejected the request.",
-          });
+        return res.status(400).json({
+          message:
+            stkResponse.ResponseDescription ||
+            "Safaricom rejected the request.",
+        });
       }
 
       pending.mpesaCheckoutRequestId = stkResponse.CheckoutRequestID;
@@ -128,48 +126,107 @@ router.post("/api/mpesa/callback/:secret", async (req, res) => {
 
     const { CheckoutRequestID, ResultCode, ResultDesc, CallbackMetadata } = stk;
 
+    // ── 1. Try rent payment first ─────────────────────
     const payment = await Payment.findOne({
       mpesaCheckoutRequestId: CheckoutRequestID,
     });
-    if (!payment) {
-      console.warn(
-        `⚠️  No payment matches CheckoutRequestID ${CheckoutRequestID}`,
-      );
+    if (payment) {
+      if (payment.status === "Paid") {
+        console.log(`↻ Callback ignored — payment ${payment._id} already Paid`);
+        return;
+      }
+
+      if (Number(ResultCode) === 0) {
+        const items = CallbackMetadata?.Item || [];
+        const get = (name) => items.find((i) => i.Name === name)?.Value;
+
+        const mpesaReceipt = get("MpesaReceiptNumber") || "";
+        const paidAmount = Number(get("Amount")) || payment.amount;
+
+        payment.amount = paidAmount;
+        payment.status = "Paid";
+        payment.mpesaReceiptNumber = mpesaReceipt;
+        payment.reference = mpesaReceipt;
+        payment.mpesaResultDesc = ResultDesc || "Success";
+        payment.date = new Date();
+        payment.receiptNumber = await nextReceiptNumber(payment.organization);
+        await payment.save();
+
+        console.log(
+          `✅ M-Pesa rent paid: ${mpesaReceipt} — KES ${paidAmount} (${payment._id})`,
+        );
+      } else {
+        payment.status = "Failed";
+        payment.mpesaResultDesc = ResultDesc || "Failed";
+        await payment.save();
+        console.log(`❌ M-Pesa rent failed: ${ResultDesc} (${payment._id})`);
+      }
       return;
     }
 
-    // Idempotency: Safaricom may POST the same callback multiple times
-    if (payment.status === "Paid") {
-      console.log(`↻ Callback ignored — payment ${payment._id} already Paid`);
+    // ── 2. Try subscription ───────────────────────────
+    const subscription = await Subscription.findOne({
+      mpesaCheckoutRequestId: CheckoutRequestID,
+    });
+    if (subscription) {
+      if (subscription.status === "active") {
+        console.log(
+          `↻ Callback ignored — subscription ${subscription._id} already active`,
+        );
+        return;
+      }
+
+      const org = await Organization.findById(subscription.organization);
+
+      if (Number(ResultCode) === 0) {
+        const items = CallbackMetadata?.Item || [];
+        const get = (name) => items.find((i) => i.Name === name)?.Value;
+
+        const mpesaReceipt = get("MpesaReceiptNumber") || "";
+        const now = new Date();
+        const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+        subscription.status = "active";
+        subscription.startsAt = now;
+        subscription.expiresAt = expiresAt;
+        subscription.mpesaReceiptNumber = mpesaReceipt;
+        subscription.mpesaResultDesc = ResultDesc || "Success";
+        await subscription.save();
+
+        if (org) {
+          org.subscriptionStatus = "active";
+          org.subscriptionExpiresAt = expiresAt;
+          await org.save();
+        }
+
+        console.log(
+          `✅ Subscription activated: ${subscription.plan} for ${org?.name || subscription.organization} — KES ${subscription.amount}`,
+        );
+      } else {
+        subscription.status = "failed";
+        subscription.mpesaResultDesc = ResultDesc || "Failed";
+        await subscription.save();
+
+        if (
+          org &&
+          org.currentSubscription &&
+          String(org.currentSubscription) === String(subscription._id)
+        ) {
+          org.subscriptionStatus = "pending";
+          await org.save();
+        }
+
+        console.log(
+          `❌ Subscription failed: ${ResultDesc} (${subscription._id})`,
+        );
+      }
       return;
     }
 
-    if (Number(ResultCode) === 0) {
-      const items = CallbackMetadata?.Item || [];
-      const get = (name) => items.find((i) => i.Name === name)?.Value;
-
-      const mpesaReceipt = get("MpesaReceiptNumber") || "";
-      const paidAmount = Number(get("Amount")) || payment.amount;
-
-      payment.amount = paidAmount;
-      payment.status = "Paid";
-      payment.mpesaReceiptNumber = mpesaReceipt;
-      payment.reference = mpesaReceipt;
-      payment.mpesaResultDesc = ResultDesc || "Success";
-      payment.date = new Date();
-      payment.receiptNumber = await nextReceiptNumber(payment.organization);
-      await payment.save();
-
-      console.log(
-        `✅ M-Pesa paid: ${mpesaReceipt} — KES ${paidAmount} (${payment._id})`,
-      );
-    } else {
-      payment.status = "Failed";
-      payment.mpesaResultDesc = ResultDesc || "Failed";
-      await payment.save();
-
-      console.log(`❌ M-Pesa failed: ${ResultDesc} (${payment._id})`);
-    }
+    // ── 3. Neither matched ────────────────────────────
+    console.warn(
+      `⚠️  No payment or subscription matches CheckoutRequestID ${CheckoutRequestID}`,
+    );
   } catch (err) {
     console.error("Callback processing error:", err);
   }
