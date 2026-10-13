@@ -209,46 +209,6 @@ async function handleLogin() {
   }
 }
 
-/* ════ PAYMENT MODAL ════ */
-const paymentModal = document.getElementById("paymentModal");
-const closePaymentModal = document.getElementById("closePaymentModal");
-
-function showPaymentModal(amount, phone) {
-  document.getElementById("paymentAmount").textContent =
-    `KES ${amount.toLocaleString()}`;
-  document.getElementById("paymentPhone").textContent = `📞 ${phone}`;
-
-  const loaderContainer = document.getElementById("paymentLoaderContainer");
-  loaderContainer.innerHTML = `
-      <div class="payment-loader"></div>
-      <p style="color: var(--t2); font-size: 13px; margin-top: 12px;">Waiting for payment confirmation...</p>
-    `;
-
-  closePaymentModal.textContent = "Close";
-  closePaymentModal.onclick = function () {
-    paymentModal.classList.remove("open");
-  };
-
-  paymentModal.classList.add("open");
-
-  setTimeout(() => {
-    setTimeout(() => {
-      loaderContainer.innerHTML = `
-          <div style="font-size: 48px; margin: 10px 0;">✅</div>
-          <h3 style="color: var(--green);">Payment Successful!</h3>
-          <p style="color: var(--t1);">Your account has been created successfully.</p>
-          <p style="color: var(--t2); font-size: 13px; margin-top: 8px;">
-            Welcome! You're now on the selected plan.
-          </p>
-        `;
-      closePaymentModal.textContent = "Go to Dashboard";
-      closePaymentModal.onclick = function () {
-        window.location.href = "dashboard.html";
-      };
-    }, 5000);
-  }, 1000);
-}
-
 /* ════ SIGNUP ════ */
 async function handleSignup() {
   const first = document.getElementById("s-first").value.trim();
@@ -428,12 +388,3 @@ document.addEventListener("keydown", (e) => {
 /* ════ AUTO-REDIRECT IF ALREADY LOGGED IN ════ */
 const sess = JSON.parse(localStorage.getItem("mp_session") || "{}");
 if (sess.loggedIn) window.location.href = "dashboard.html";
-
-paymentModal.addEventListener("click", function (e) {
-  if (e.target === this) paymentModal.classList.remove("open");
-});
-document
-  .querySelector(".payment-modal-content")
-  .addEventListener("click", function (e) {
-    e.stopPropagation();
-  });

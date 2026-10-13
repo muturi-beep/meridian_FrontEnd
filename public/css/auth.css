@@ -496,101 +496,6 @@ body::before {
   }
 }
 
-/* ── Payment Modal ── */
-.payment-modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(8px);
-  z-index: 1000;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-.payment-modal.open {
-  display: flex;
-}
-.payment-modal-content {
-  max-width: 440px;
-  width: 100%;
-  background: var(--ink-2);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 40px 32px;
-  text-align: center;
-  animation: panelIn 0.4s ease;
-  position: relative;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
-}
-.payment-modal-content .icon {
-  font-size: 64px;
-  margin-bottom: 16px;
-}
-.payment-modal-content h3 {
-  font-family: var(--font-serif);
-  font-size: 24px;
-  color: var(--white);
-  margin-bottom: 8px;
-}
-.payment-modal-content p {
-  color: var(--t2);
-  font-size: 14px;
-  line-height: 1.6;
-  margin-bottom: 20px;
-}
-.payment-modal-content .amount {
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--copper);
-  margin: 10px 0;
-}
-.payment-modal-content .phone-number {
-  background: var(--ink-3);
-  padding: 12px;
-  border-radius: 10px;
-  color: var(--t1);
-  font-size: 16px;
-  font-weight: 600;
-  margin: 10px 0 20px;
-  border: 1px solid var(--border);
-}
-.payment-loader {
-  display: inline-block;
-  width: 40px;
-  height: 40px;
-  border: 4px solid var(--border);
-  border-top: 4px solid var(--copper);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin: 10px auto;
-}
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-.btn-close-modal {
-  background: var(--copper);
-  color: var(--ink);
-  padding: 12px 32px;
-  border: none;
-  border-radius: 40px;
-  font-family: var(--font-sans);
-  font-weight: 700;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 8px;
-}
-.btn-close-modal:hover {
-  background: var(--copper-l);
-  transform: translateY(-2px);
-}
-
 @media (max-width: 900px) {
   .auth-left {
     display: none;
@@ -607,8 +512,5 @@ body::before {
   }
   .arow {
     grid-template-columns: 1fr;
-  }
-  .payment-modal-content {
-    padding: 30px 20px;
   }
 }
