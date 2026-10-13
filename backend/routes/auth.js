@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 
 const User = require("../models/User");
 const Organization = require("../models/Organization");
+const Subscription = require("../models/Subscription");
 const { requireAuth, requireRole, orgScope } = require("../middleware/auth");
 const { signToken, safeUserWithOrg } = require("../utils/tokens");
 const { MANAGEMENT } = require("../utils/roles");
@@ -65,6 +66,47 @@ router.post(
           slug,
           inviteCode: code,
         }).save();
+
+        // ── Subscription bootstrap ─────────────────────────────
+        // Only for the org-creator. Joiners inherit the org's plan.
+        const packageChoice = String(req.body.package || "free").toLowerCase();
+
+        if (["free", "starter", "none", ""].includes(packageChoice)) {
+          // Free trial: 30 days from now
+          const now = new Date();
+          const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+          const sub = await new Subscription({
+            organization: organization._id,
+            plan: "free",
+            amount: 0,
+            status: "trial",
+            startsAt: now,
+            expiresAt,
+            note: "initial trial",
+          }).save();
+
+          organization.currentSubscription = sub._id;
+          organization.subscriptionStatus = "trial";
+          organization.subscriptionExpiresAt = expiresAt;
+          await organization.save();
+        } else if (
+          ["basic", "professional", "enterprise"].includes(packageChoice)
+        ) {
+          // Paid plan: subscription exists but pending payment (Phase 3)
+          const amounts = { basic: 2500, professional: 5000, enterprise: 7500 };
+          const sub = await new Subscription({
+            organization: organization._id,
+            plan: packageChoice,
+            amount: amounts[packageChoice],
+            status: "pending",
+            note: "initial signup - awaiting payment",
+          }).save();
+
+          organization.currentSubscription = sub._id;
+          organization.subscriptionStatus = "pending";
+          await organization.save();
+        }
+
         effectiveRole = "agency-director";
       } else {
         if (!inviteCode || !inviteCode.trim())

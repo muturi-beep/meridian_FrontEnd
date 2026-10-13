@@ -1742,3 +1742,312 @@ td.actions {
   margin: 0 auto 22px;
   line-height: 1.6;
 }
+/* ═══ Paywall overlay ═══ */
+#paywallOverlay {
+  position: fixed;
+  inset: 0;
+  background: var(--ink);
+  z-index: 500;
+  display: none;
+  overflow-y: auto;
+  padding: 40px 20px;
+}
+.paywall-shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+.paywall-head {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.paywall-logo {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 24px;
+}
+.paywall-logo em {
+  font-style: normal;
+  color: var(--copper-l);
+}
+.paywall-title {
+  font-family: var(--font-serif);
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 10px;
+  letter-spacing: -0.02em;
+}
+.paywall-sub {
+  font-size: 15px;
+  color: var(--t2);
+  max-width: 500px;
+  margin: 0 auto;
+}
+.paywall-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+  margin-bottom: 40px;
+}
+.paywall-card {
+  background: var(--ink-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 26px 22px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.paywall-card.popular {
+  border-color: var(--copper);
+  box-shadow:
+    0 0 0 1px var(--copper),
+    0 12px 40px rgba(184, 131, 74, 0.15);
+}
+.paywall-pop {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--copper);
+  color: var(--ink);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 14px;
+  border-radius: 40px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.paywall-plan-name {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 6px;
+}
+.paywall-price {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--copper-l);
+  margin-bottom: 10px;
+}
+.paywall-desc {
+  font-size: 12.5px;
+  color: var(--t2);
+  margin-bottom: 16px;
+  min-height: 34px;
+  line-height: 1.5;
+}
+.paywall-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+  flex-grow: 1;
+}
+.paywall-features li {
+  font-size: 12.5px;
+  color: var(--t1);
+  padding: 5px 0;
+  padding-left: 20px;
+  position: relative;
+}
+.paywall-features li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--green);
+  font-weight: 700;
+}
+.paywall-btn {
+  width: 100%;
+  justify-content: center;
+}
+.paywall-foot {
+  text-align: center;
+}
+.renewal-banner {
+  background: linear-gradient(
+    135deg,
+    rgba(245, 166, 35, 0.12),
+    rgba(245, 166, 35, 0.06)
+  );
+  border-bottom: 1px solid rgba(245, 166, 35, 0.25);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.renewal-banner span {
+  font-size: 13px;
+  color: var(--t1);
+}
+.renewal-banner strong {
+  color: var(--amber);
+}
+@media (max-width: 640px) {
+  .paywall-title {
+    font-size: 26px;
+  }
+  .paywall-grid {
+    grid-template-columns: 1fr;
+  }
+} /* ═══ Paywall overlay ═══ */
+#paywallOverlay {
+  position: fixed;
+  inset: 0;
+  background: var(--ink);
+  z-index: 500;
+  display: none;
+  overflow-y: auto;
+  padding: 40px 20px;
+}
+.paywall-shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+.paywall-head {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.paywall-logo {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 24px;
+}
+.paywall-logo em {
+  font-style: normal;
+  color: var(--copper-l);
+}
+.paywall-title {
+  font-family: var(--font-serif);
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 10px;
+  letter-spacing: -0.02em;
+}
+.paywall-sub {
+  font-size: 15px;
+  color: var(--t2);
+  max-width: 500px;
+  margin: 0 auto;
+}
+.paywall-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+  margin-bottom: 40px;
+}
+.paywall-card {
+  background: var(--ink-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 26px 22px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.paywall-card.popular {
+  border-color: var(--copper);
+  box-shadow:
+    0 0 0 1px var(--copper),
+    0 12px 40px rgba(184, 131, 74, 0.15);
+}
+.paywall-pop {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--copper);
+  color: var(--ink);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 14px;
+  border-radius: 40px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.paywall-plan-name {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 6px;
+}
+.paywall-price {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--copper-l);
+  margin-bottom: 10px;
+}
+.paywall-desc {
+  font-size: 12.5px;
+  color: var(--t2);
+  margin-bottom: 16px;
+  min-height: 34px;
+  line-height: 1.5;
+}
+.paywall-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+  flex-grow: 1;
+}
+.paywall-features li {
+  font-size: 12.5px;
+  color: var(--t1);
+  padding: 5px 0;
+  padding-left: 20px;
+  position: relative;
+}
+.paywall-features li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--green);
+  font-weight: 700;
+}
+.paywall-btn {
+  width: 100%;
+  justify-content: center;
+}
+.paywall-foot {
+  text-align: center;
+}
+.renewal-banner {
+  background: linear-gradient(
+    135deg,
+    rgba(245, 166, 35, 0.12),
+    rgba(245, 166, 35, 0.06)
+  );
+  border-bottom: 1px solid rgba(245, 166, 35, 0.25);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.renewal-banner span {
+  font-size: 13px;
+  color: var(--t1);
+}
+.renewal-banner strong {
+  color: var(--amber);
+}
+@media (max-width: 640px) {
+  .paywall-title {
+    font-size: 26px;
+  }
+  .paywall-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -355,28 +355,14 @@ async function handleSignup() {
         return;
       }
 
-      const cleanPhone = phone.replace(/[^0-9]/g, "");
-      let amount = 0;
-      switch (packageParam) {
-        case "basic":
-          amount = 2500;
-          break;
-        case "professional":
-          amount = 7500;
-          break;
-        case "enterprise":
-          amount = 15000;
-          break;
-        default:
-          amount = 2500;
-      }
-
+      // Paid package: create the account, then let the dashboard paywall
+      // handle the M-Pesa prompt. No more fake modal here.
       showMsg(
         "signup-msg",
-        `✅ ${data.message} — Please complete M-Pesa payment.`,
+        `✅ ${data.message} — Taking you to complete payment...`,
         "ok",
       );
-      showPaymentModal(amount, cleanPhone);
+      setTimeout(() => (window.location.href = "dashboard.html"), 1200);
       setLoading("signup-btn", false, "Create Account →");
     } else {
       showMsg(
@@ -401,11 +387,11 @@ if (packageParam) {
   switchTab("signup");
 
   const packageNames = {
-    free: "✨ Free Package (No payment required)",
-    starter: "✨ Free Package (No payment required)",
-    basic: "📦 Basic Package - KES 2,500/month",
-    professional: "📦 Professional Package - KES 7,500/month",
-    enterprise: "📦 Enterprise Package - KES 15,000/month",
+    free: "Free Package (No payment required)",
+    starter: "Free Package (No payment required)",
+    basic: "Basic Package - KES 2,500/month",
+    professional: "Professional Package - KES 5,000/month",
+    enterprise: "Enterprise Package - KES 7,500/month",
   };
 
   const packageMessage = packageNames[packageParam] || "Selected Package";

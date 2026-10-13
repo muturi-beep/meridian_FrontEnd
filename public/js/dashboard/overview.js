@@ -64,6 +64,20 @@ async function loadDashboard() {
     const data = await api("/api/dashboard");
     state.dashboard = data;
 
+    // ── Subscription gate ─────────────────────────────────
+    try {
+      const sub = await api("/api/subscription/status");
+      state.subscription = sub;
+      if (!sub.isActive) {
+        showPaywall(sub);
+        return; // skip rendering the dashboard until they pay
+      }
+      hidePaywall();
+      maybeShowRenewalBanner(sub);
+    } catch (e) {
+      console.warn("[dashboard] subscription check failed", e.message);
+    }
+
     // Update all sidebar badges from the dashboard stats - no extra API calls needed.
     const badgeProps = document.getElementById("badgeProps");
     const badgeUnits = document.getElementById("badgeUnits");

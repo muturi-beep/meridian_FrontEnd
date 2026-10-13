@@ -6,3 +6,8 @@ node_modules
 # Test artifacts
 .cache/
 coverage/
+
+# Local database backups (never commit these)
+backups/
+
+.env
