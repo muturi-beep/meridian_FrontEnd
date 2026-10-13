@@ -4,7 +4,7 @@
 async function api(path, opts = {}) {
   const s = getSession();
   const headers = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     ...(opts.headers || {}),
   };
   if (s?.token) headers.Authorization = `Bearer ${s.token}`;
@@ -19,15 +19,30 @@ async function api(path, opts = {}) {
 
   if (res.status === 401) {
     clearSession();
-    sessionStorage.setItem('mp_flash', 'Your session has expired. Please sign in again.');
-    window.location.replace('auth.html');
-    throw new Error('Unauthorized');
+    sessionStorage.setItem(
+      "mp_flash",
+      "Your session has expired. Please sign in again.",
+    );
+    window.location.replace("auth.html");
+    throw new Error("Unauthorized");
+  }
+
+  if (res.status === 402) {
+    // Subscription expired mid-session. Show the paywall.
+    try {
+      if (typeof showPaywall === "function") {
+        showPaywall({ status: "expired" });
+      }
+    } catch (e) {
+      console.warn("[api] could not show paywall:", e.message);
+    }
+    throw new Error("Subscription required");
   }
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     const msg = data.message || `HTTP ${res.status}`;
-    throw new Error(`${msg} — ${opts.method || 'GET'} ${fullUrl}`);
+    throw new Error(`${msg} — ${opts.method || "GET"} ${fullUrl}`);
   }
   return data;
 }

@@ -65,6 +65,10 @@ app.use(async (req, res, next) => {
   }
 });
 
+// Subscription gate — blocks management roles when subscription isn't active.
+const subscriptionGuard = require("./middleware/subscriptionGuard");
+app.use(subscriptionGuard);
+
 /* ══════════════════════════════════════════════════════
    DEBUG / HEALTH
 ══════════════════════════════════════════════════════ */
