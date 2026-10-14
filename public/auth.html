@@ -238,22 +238,18 @@
           ><input type="tel" id="s-phone" placeholder="+254 7xx xxx xxx" />
         </div>
 
-        <div class="afield" id="org-field-role">
+        <div class="afield" id="org-field-role" style="display: none">
           <label>Role <span class="req">*</span></label>
           <div class="role-select-wrap">
             <select id="s-role" onchange="updateRolePreview('s', 'signup')">
               <option value="">Select your role</option>
-              <option value="agency-director">&#127970; Agency Director</option>
-              <option value="property-manager">
-                &#128273; Property Manager
-              </option>
-              <option value="finance-officer">&#128176; Finance Officer</option>
-              <option value="maintenance-staff">
-                &#128295; Maintenance Staff
-              </option>
-              <option value="leasing-agent">&#128203; Leasing Agent</option>
-              <option value="tenant">&#127968; Tenant</option>
-              <option value="auditor">&#128202; Auditor / Viewer</option>
+              <option value="agency-director">Agency Director</option>
+              <option value="property-manager">Property Manager</option>
+              <option value="finance-officer">Finance Officer</option>
+              <option value="maintenance-staff">Maintenance Staff</option>
+              <option value="leasing-agent">Leasing Agent</option>
+              <option value="tenant">Tenant</option>
+              <option value="auditor">Auditor / Viewer</option>
             </select>
           </div>
           <div class="role-preview" id="s-role-preview">
@@ -261,13 +257,13 @@
             <span id="s-role-desc"></span>
           </div>
         </div>
-        <div class="afield" id="org-field-role-locked" style="display: none">
+        <div class="afield" id="org-field-role-locked">
           <label>Role</label>
           <div class="role-preview show">
             <div class="role-preview-dot" style="background: #d4a46a"></div>
             <span>
-              Agency Director you'll own this new agency and can invite your
-              team after signing up.</span
+              You'll be the Agency Director of this new agency. You can invite
+              your team after signing up.</span
             >
           </div>
         </div>

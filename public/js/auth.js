@@ -77,6 +77,13 @@ function switchOrgMode(mode) {
     mode === "create" ? "flex" : "none";
 }
 
+// Ensure initial state matches the default mode as soon as the DOM is ready
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => switchOrgMode("create"));
+} else {
+  switchOrgMode("create");
+}
+
 /* ════ TAB SWITCH ════ */
 function switchTab(tab) {
   ["login", "signup"].forEach((t) => {

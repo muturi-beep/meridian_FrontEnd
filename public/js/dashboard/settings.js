@@ -5,7 +5,7 @@ async function loadOrgSettings() {
   try {
     const org = await api("/api/organization");
     document.getElementById("org-name").value = org.name || "";
-    document.getElementById("org-type").value = org.type || "Property Manager";
+    document.getElementById("org-type").value = org.type || "Agency";
     document.getElementById("org-email").value = org.email || "";
     document.getElementById("org-phone").value = org.phone || "";
     document.getElementById("org-location").value = org.location || "";
