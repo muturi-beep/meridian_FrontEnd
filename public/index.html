@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=5.0"
     />
-    <title>Meridian Properties Premium Real Estate in Kenya</title>
+    <title>Meridian Properties | Premium Real Estate in Kenya</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="css/landing.css" />
   </head>
   <body>
-    <!--  HEADER  -->
+    <!-- HEADER -->
     <header class="header">
       <div class="container">
         <div class="logo">
@@ -38,7 +38,8 @@
           <a href="#home" class="active">Home</a>
           <a href="#features">Why Us</a>
           <a href="#packages">Packages</a>
-          <a href="#contact" class="nav-btn">Contact</a>
+          <a href="#contact">Contact</a>
+          <a href="auth.html" class="nav-btn">Sign In</a>
         </nav>
         <button class="hamburger" id="hamburger" aria-label="Menu">
           <span></span><span></span><span></span>
@@ -47,7 +48,7 @@
     </header>
     <div class="menu-overlay" id="menuOverlay"></div>
 
-    <!--  HERO  -->
+    <!-- HERO -->
     <section class="hero-section" id="home">
       <div class="container">
         <div class="hero">
@@ -62,7 +63,7 @@
             </p>
             <div class="hero-btns">
               <a href="auth.html" class="btn-primary">Sign In</a>
-              <a href="#contact" class="btn-secondary">Contact Us</a>
+              <a href="#packages" class="btn-secondary">View Packages</a>
             </div>
           </div>
           <div class="hero-image">
@@ -72,12 +73,36 @@
                 class="carousel-btn prev"
                 id="carouselPrev"
                 aria-label="Previous slide"
-              ></button>
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="width: 16px; height: 16px"
+                >
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
               <button
                 class="carousel-btn next"
                 id="carouselNext"
                 aria-label="Next slide"
-              ></button>
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="width: 16px; height: 16px"
+                >
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
               <div class="carousel-dots" id="carouselDots"></div>
             </div>
           </div>
@@ -105,7 +130,7 @@
       </div>
     </section>
 
-    <!--  FEATURES  -->
+    <!-- FEATURES -->
     <section class="section-dark" id="features">
       <div class="container">
         <h2 class="section-title">Why Meridian Properties</h2>
@@ -114,25 +139,81 @@
         </p>
         <div class="features-grid">
           <div class="feature">
-            <div class="icon"></div>
+            <div class="icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#d4a46a"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                style="width: 32px; height: 32px"
+              >
+                <line x1="18" y1="20" x2="18" y2="10" />
+                <line x1="12" y1="20" x2="12" y2="4" />
+                <line x1="6" y1="20" x2="6" y2="14" />
+              </svg>
+            </div>
             <h4>Smart Analytics</h4>
             <p>
-              Realtime portfolio performance, occupancy trends, and financial
+              Real-time portfolio performance, occupancy trends, and financial
               insights.
             </p>
           </div>
           <div class="feature">
-            <div class="icon"></div>
+            <div class="icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#d4a46a"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                style="width: 32px; height: 32px"
+              >
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </div>
             <h4>Secure Payments</h4>
             <p>Automated rent collection, invoicing, and payment tracking.</p>
           </div>
           <div class="feature">
-            <div class="icon"></div>
+            <div class="icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#d4a46a"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                style="width: 32px; height: 32px"
+              >
+                <path
+                  d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"
+                />
+              </svg>
+            </div>
             <h4>Maintenance Management</h4>
-            <p>Submit and track repair requests with realtime updates.</p>
+            <p>Submit and track repair requests with real-time updates.</p>
           </div>
           <div class="feature">
-            <div class="icon"></div>
+            <div class="icon">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#d4a46a"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                style="width: 32px; height: 32px"
+              >
+                <path d="M3 21h18M5 21V7l7-4 7 4v14" />
+                <path
+                  d="M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01M15 17h.01"
+                />
+              </svg>
+            </div>
             <h4>Tenant Portal</h4>
             <p>
               Tenants can view their lease, pay rent, and request services
@@ -143,7 +224,7 @@
       </div>
     </section>
 
-    <!--  PACKAGES  -->
+    <!-- PACKAGES -->
     <section class="section-light" id="packages">
       <div class="container">
         <h2 class="section-title">Choose Your Package</h2>
@@ -153,10 +234,10 @@
         </p>
 
         <div class="packages-grid">
-          <!-- STARTER FREE  auth.html?package=free -->
+          <!-- STARTER FREE → auth.html?package=free -->
           <div class="package-card free">
-            <span class="trial-badge"> Free Package</span>
-            <span class="duration-badge"> Valid for 7 Days</span>
+            <span class="trial-badge">Free Trial</span>
+            <span class="duration-badge">Valid for 30 Days</span>
             <h3>Starter Free</h3>
             <div class="price">KES 0</div>
             <p class="description">Perfect for trying out the platform.</p>
@@ -165,14 +246,14 @@
               <li>Basic portfolio overview</li>
               <li>Maintenance request tracking</li>
               <li>Email support</li>
-              <li><strong>Expires after 7 days</strong></li>
+              <li><strong>Trial runs for 30 days</strong></li>
             </ul>
             <a href="auth.html?package=free" class="btn-free"
-              >Claim Free Package
+              >Start Free Trial
             </a>
           </div>
 
-          <!-- BASIC  auth.html?package=basic -->
+          <!-- BASIC → auth.html?package=basic -->
           <div class="package-card">
             <h3>Basic</h3>
             <div class="price">KES 2,500 <span>/mo</span></div>
@@ -186,10 +267,10 @@
             <a href="auth.html?package=basic" class="btn-link">Choose Plan</a>
           </div>
 
-          <!-- PROFESSIONAL  auth.html?package=professional -->
+          <!-- PROFESSIONAL → auth.html?package=professional -->
           <div class="package-card popular">
             <h3>Professional</h3>
-            <div class="price">KES 7,500 <span>/mo</span></div>
+            <div class="price">KES 5,000 <span>/mo</span></div>
             <p class="description">
               For growing agencies and property managers.
             </p>
@@ -205,41 +286,41 @@
             >
           </div>
 
-          <!-- ENTERPRISE  auth.html?package=enterprise -->
+          <!-- ENTERPRISE → auth.html?package=enterprise -->
           <div class="package-card">
             <h3>Enterprise</h3>
-            <div class="price">KES 15,000 <span>/mo</span></div>
+            <div class="price">KES 7,500 <span>/mo</span></div>
             <p class="description">
-              For large portfolios and realestate firms.
+              For large portfolios and real-estate firms.
             </p>
             <ul>
               <li>Unlimited properties</li>
               <li>Custom integrations &amp; API</li>
               <li>Dedicated account manager</li>
               <li>24/7 premium support</li>
-              <li>Whitelabel options</li>
+              <li>White-label options</li>
             </ul>
             <a href="auth.html?package=enterprise" class="btn-outline"
-              >Contact Sales
+              >Choose Plan
             </a>
           </div>
         </div>
 
         <div class="disclaimer-box">
-          <strong> Important Disclaimer</strong>
+          <strong>Important Disclaimer</strong>
           <p>
             This portal and package selection is strictly for
             <span>Landlords, Agents, and Property Managers</span>.
             <br />
-            <strong>Tenants should not register here.</strong> If you are a
-            tenant, please contact your property manager for tenantspecific
-            access and services.
+            <strong>Tenants do not register here.</strong> If you are a tenant,
+            your property manager will give you an invite code to set up your
+            account from the same sign-in page.
           </p>
         </div>
       </div>
     </section>
 
-    <!--  CONTACT  -->
+    <!-- CONTACT -->
     <section class="section-contact-dark" id="contact">
       <div class="container">
         <h2 class="section-title">Get in Touch</h2>
@@ -255,14 +336,42 @@
               and investment opportunities.
             </p>
             <div class="contact-detail">
-              <div class="contact-icon"></div>
+              <div class="contact-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="width: 18px; height: 18px"
+                >
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+              </div>
               <div>
                 <strong>Visit Us</strong>
                 <p>Meridian Properties,<br />Westlands, Nairobi, Kenya</p>
               </div>
             </div>
             <div class="contact-detail">
-              <div class="contact-icon"></div>
+              <div class="contact-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="width: 18px; height: 18px"
+                >
+                  <path
+                    d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+                  />
+                  <polyline points="22,6 12,13 2,6" />
+                </svg>
+              </div>
               <div>
                 <strong>Email Us</strong>
                 <p>
@@ -273,23 +382,74 @@
               </div>
             </div>
             <div class="contact-detail">
-              <div class="contact-icon"></div>
+              <div class="contact-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="width: 18px; height: 18px"
+                >
+                  <path
+                    d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
+                  />
+                </svg>
+              </div>
               <div>
                 <strong>Call Us</strong>
                 <p><a href="tel:+254700123456">+254 700 123 456</a></p>
               </div>
             </div>
             <div class="contact-detail">
-              <div class="contact-icon"></div>
+              <div class="contact-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="width: 18px; height: 18px"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+              </div>
               <div>
                 <strong>Working Hours</strong>
-                <p>Mon Fri: 8:00 AM 6:00 PM<br />Sat: 9:00 AM 2:00 PM</p>
+                <p>Mon - Fri: 8:00 AM - 6:00 PM<br />Sat: 9:00 AM - 2:00 PM</p>
               </div>
             </div>
             <div class="contact-social">
               <a href="#" aria-label="Facebook">f</a>
-              <a href="#" aria-label="Twitter"></a>
-              <a href="#" aria-label="Instagram"></a>
+              <a href="#" aria-label="Twitter">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  style="width: 14px; height: 14px"
+                >
+                  <path
+                    d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+                  />
+                </svg>
+              </a>
+              <a href="#" aria-label="Instagram">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="width: 14px; height: 14px"
+                >
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                </svg>
+              </a>
               <a href="#" aria-label="LinkedIn">in</a>
             </div>
           </div>
@@ -348,7 +508,7 @@
       </div>
     </section>
 
-    <!--  FOOTER  -->
+    <!-- FOOTER -->
     <footer class="footer">
       <div class="container">
         <div class="footer-grid">
@@ -376,27 +536,50 @@
             </p>
             <div class="social-icons">
               <a href="#" aria-label="Facebook">f</a>
-              <a href="#" aria-label="Twitter"></a>
-              <a href="#" aria-label="Instagram"></a>
+              <a href="#" aria-label="Twitter">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  style="width: 13px; height: 13px"
+                >
+                  <path
+                    d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+                  />
+                </svg>
+              </a>
+              <a href="#" aria-label="Instagram">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="width: 13px; height: 13px"
+                >
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                </svg>
+              </a>
               <a href="#" aria-label="LinkedIn">in</a>
             </div>
           </div>
           <div>
             <h4>Quick Links</h4>
             <div class="footer-links">
-              <a href="#whyus">Why Us</a>
+              <a href="#features">Why Us</a>
               <a href="#packages">Packages</a>
               <a href="#contact">Contact</a>
-              <a href="#">About Us</a>
             </div>
           </div>
           <div>
-            <h4>Services</h4>
+            <h4>Get Started</h4>
             <div class="footer-links">
-              <a href="#">Property Management</a>
-              <a href="#">Leasing</a>
-              <a href="#">Maintenance</a>
-              <a href="#">Tenant Portal</a>
+              <a href="auth.html?package=free">Free Trial</a>
+              <a href="auth.html?package=basic">Basic Plan</a>
+              <a href="auth.html?package=professional">Professional</a>
+              <a href="auth.html?package=enterprise">Enterprise</a>
             </div>
           </div>
         </div>
@@ -413,12 +596,21 @@
       </div>
     </footer>
 
-    <!--  SCROLL TO TOP  -->
-    <button
-      class="scroll-top"
-      id="scrollTopBtn"
-      aria-label="Scroll to top"
-    ></button>
+    <!-- SCROLL TO TOP -->
+    <button class="scroll-top" id="scrollTopBtn" aria-label="Scroll to top">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        style="width: 18px; height: 18px"
+      >
+        <line x1="12" y1="19" x2="12" y2="5" />
+        <polyline points="5 12 12 5 19 12" />
+      </svg>
+    </button>
 
     <script src="js/landing.js"></script>
   </body>
