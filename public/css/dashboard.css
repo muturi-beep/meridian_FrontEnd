@@ -690,7 +690,8 @@ tbody tr:hover {
 tbody tr:last-child td {
   border-bottom: none;
 }
-td.actions {
+td.actions,
+th.actions {
   text-align: right;
   white-space: nowrap;
 }
