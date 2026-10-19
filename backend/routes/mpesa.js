@@ -23,13 +23,21 @@ router.post(
   requireRole("tenant"),
   async (req, res) => {
     try {
-      const { phone, amount } = req.body;
+      const { phone, amount, paymentType } = req.body;
       if (!phone)
         return res.status(400).json({ message: "Phone number is required." });
       if (!amount || Number(amount) <= 0)
         return res
           .status(400)
           .json({ message: "Amount must be greater than zero." });
+
+      // Validate payment type — must be Rent or Deposit
+      const type = String(paymentType || "Rent").trim();
+      if (!["Rent", "Deposit"].includes(type)) {
+        return res
+          .status(400)
+          .json({ message: "Payment type must be Rent or Deposit." });
+      }
 
       const me = await User.findById(req.user.id);
       if (!me) return res.status(404).json({ message: "User not found." });
@@ -53,7 +61,7 @@ router.post(
         property: unit.property || "",
         unit: unit.name || "",
         amount: Number(amount),
-        type: "Rent",
+        type: type,
         status: "Pending",
         method: "M-Pesa",
         date: new Date(),

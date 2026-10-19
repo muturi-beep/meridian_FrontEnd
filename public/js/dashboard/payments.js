@@ -834,7 +834,30 @@ function openMpesaPaymentModal() {
     return;
   }
 
-  const amountOwed = summary.currentMonth?.balance || summary.rent || 0;
+  // Compute deposit balance from paid payments
+  const depositPaid = (summary.payments || [])
+    .filter(
+      (p) =>
+        String(p.type || "").toLowerCase() === "deposit" &&
+        String(p.status).toLowerCase() === "paid",
+    )
+    .reduce((s, p) => s + (Number(p.amount) || 0), 0);
+  const depositBalance = Math.max(
+    0,
+    (Number(summary.deposit) || 0) - depositPaid,
+  );
+  const rentBalance = Number(summary.currentMonth?.balance) || 0;
+  const totalOutstanding = rentBalance + depositBalance;
+
+  if (totalOutstanding <= 0) {
+    toast("You have no outstanding balance to pay.", "info");
+    return;
+  }
+
+  // Choose default type based on what's still owed
+  let defaultType = "Rent";
+  if (rentBalance <= 0 && depositBalance > 0) defaultType = "Deposit";
+  const defaultAmount = defaultType === "Rent" ? rentBalance : depositBalance;
 
   document.getElementById("modalTitle").textContent = "Pay with M-Pesa";
 
@@ -844,11 +867,37 @@ function openMpesaPaymentModal() {
         <span>Payment Summary</span>
         <span>${esc(summary.unit.name)} &middot; ${esc(summary.property || "")}</span>
       </div>
-      <div class="pp-row"><span class="k">Rent due this month</span><span class="v">${fmtMoney(summary.rent)}</span></div>
-      <div class="pp-row"><span class="k">Already paid</span><span class="v ok">${fmtMoney(summary.currentMonth?.paid || 0)}</span></div>
-      <div class="pp-after">
-        <div class="pp-row"><span class="k">Balance remaining</span><span class="v ${amountOwed > 0 ? "warn" : "ok"}">${fmtMoney(amountOwed)}</span></div>
+      <div class="pp-row">
+        <span class="k">Rent balance</span>
+        <span class="v ${rentBalance > 0 ? "warn" : "ok"}">${fmtMoney(rentBalance)}</span>
       </div>
+      <div class="pp-row">
+        <span class="k">Deposit balance</span>
+        <span class="v ${depositBalance > 0 ? "warn" : "ok"}">${fmtMoney(depositBalance)}</span>
+      </div>
+      <div class="pp-after">
+        <div class="pp-row">
+          <span class="k">Total outstanding</span>
+          <span class="v ${totalOutstanding > 0 ? "warn" : "ok"}">${fmtMoney(totalOutstanding)}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Payment For *</label>
+      <select name="paymentType" onchange="setMpesaAmount(this, ${rentBalance}, ${depositBalance})">
+        <option value="Rent" ${defaultType === "Rent" ? "selected" : ""}>
+          Rent${rentBalance <= 0 ? " (fully paid)" : " - " + fmtMoney(rentBalance) + " owed"}
+        </option>
+        <option value="Deposit" ${defaultType === "Deposit" ? "selected" : ""}>
+          Deposit${depositBalance <= 0 ? " (fully paid)" : " - " + fmtMoney(depositBalance) + " owed"}
+        </option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Amount to Pay (KES) *</label>
+      <input type="number" name="amount" min="1" required value="${defaultAmount || ""}" />
     </div>
 
     <div class="field">
@@ -857,11 +906,6 @@ function openMpesaPaymentModal() {
       <div style="font-size:11px;color:var(--t2);margin-top:4px">
         Enter the Safaricom number that will receive the payment prompt.
       </div>
-    </div>
-
-    <div class="field">
-      <label>Amount to Pay (KES) *</label>
-      <input type="number" name="amount" min="1" required value="${amountOwed || ""}" />
     </div>
 
     <div style="background:var(--ink-3);border:1px solid var(--border);border-radius:var(--rs);padding:12px 14px;margin-top:12px;font-size:12px;color:var(--t2);line-height:1.5">
@@ -873,27 +917,32 @@ function openMpesaPaymentModal() {
     const form = document.getElementById("modalForm");
     const phone = form.querySelector('[name="phone"]').value.trim();
     const amount = Number(form.querySelector('[name="amount"]').value);
+    const paymentType = form.querySelector('[name="paymentType"]').value;
 
     if (!phone) throw new Error("Please enter your M-Pesa phone number.");
     if (!amount || amount <= 0) throw new Error("Please enter a valid amount.");
 
-    const res = await api("/api/mpesa/stkpush", {
+    await api("/api/mpesa/stkpush", {
       method: "POST",
-      body: JSON.stringify({ phone, amount }),
+      body: JSON.stringify({ phone, amount, paymentType }),
     });
 
     toast("Check your phone for the M-Pesa prompt...", "info");
     closeModal();
 
-    // Refresh the payments list after a delay so the pending record shows up
     setTimeout(() => {
       state.payLoaded = false;
       loadPayments();
     }, 2000);
-
-    // Return the checkout ID so submitModal's caller can use it if needed
-    return res;
   };
 
   document.getElementById("modal").classList.add("open");
+}
+
+// Auto-fill amount when Payment For changes
+function setMpesaAmount(sel, rentBal, depositBal) {
+  const amt = document.querySelector('#modalForm [name="amount"]');
+  if (!amt) return;
+  const val = sel.value === "Rent" ? rentBal : depositBal;
+  if (val > 0) amt.value = val;
 }
