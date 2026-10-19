@@ -646,6 +646,11 @@ a {
   font-size: 13px;
   margin-bottom: 12px;
 }
+.quick-num svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
 .quick-card h4 {
   font-size: 14px;
   font-weight: 600;
