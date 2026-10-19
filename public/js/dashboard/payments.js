@@ -294,7 +294,6 @@ async function loadPayments() {
 
     state.payments = list;
     state.tenants = Array.isArray(tenants) ? tenants : [];
-    state.tenantsLoaded = true;
     state.payLoaded = true;
     state.tenantBalances = computeTenantBalances(state.tenants, list);
 

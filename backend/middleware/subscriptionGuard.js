@@ -33,6 +33,10 @@ function shouldBypass(req) {
 
 module.exports = async function subscriptionGuard(req, res, next) {
   try {
+    // Read-only access is always allowed — the paywall gate is visual,
+    // the backend guard only enforces mutations.
+    if (req.method === "GET") return next();
+
     // No token → route's own guard will 401. Nothing for us to do.
     const header = req.headers.authorization || "";
     const token = header.startsWith("Bearer ") ? header.slice(7) : null;
