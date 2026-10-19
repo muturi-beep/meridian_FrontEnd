@@ -31,6 +31,7 @@ function renderPropertiesList() {
       actionLabel: "+ Add Property",
       actionHandler: "openPropertyModal()",
     });
+    return;
   }
 
   if (!list.length) {
@@ -39,6 +40,7 @@ function renderPropertiesList() {
       title: "No matches",
       desc: `No properties match "${propsSearchTerm}".`,
     });
+    return;
   }
 
   el.innerHTML = `<div class="prop-grid">${list

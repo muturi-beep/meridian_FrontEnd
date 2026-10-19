@@ -35,6 +35,7 @@ function renderMaintenanceList() {
       actionLabel: IS_TENANT ? "+ Report an Issue" : "+ New Request",
       actionHandler: "openMaintenanceModal()",
     });
+    return;
   }
 
   if (!list.length) {
@@ -43,6 +44,7 @@ function renderMaintenanceList() {
       title: "No matches",
       desc: `No maintenance requests match "${maintSearchTerm}".`,
     });
+    return;
   }
 
   const actionsHeader = CAN_MANAGE_MAINT
