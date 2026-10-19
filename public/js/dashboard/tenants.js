@@ -38,6 +38,7 @@ function renderTenantsList() {
       actionLabel: "+ Add Property",
       actionHandler: "switchView('properties'); openPropertyModal();",
     });
+    return;
   }
 
   const byProp = {};
@@ -49,7 +50,6 @@ function renderTenantsList() {
   const propCards = props
     .map((p) => {
       const list = byProp[p.name] || [];
-      // When searching, hide properties with zero matches
       if (term && !list.length) return "";
       return `
       <div class="prop-card">
@@ -67,7 +67,7 @@ function renderTenantsList() {
         <div class="prop-actions">
           <button class="btn btn-primary btn-sm" onclick="openTenantModalForProperty('${p._id}')">+ Add Tenant</button>
         </div>
-        ${!p.unitCount ? `<div style="margin-top:10px;font-size:11.5px;color:var(--amber)"> This property has no units yet - add units first to assign tenants.</div>` : ""}
+        ${!p.unitCount ? `<div style="margin-top:10px;font-size:11.5px;color:var(--amber)">This property has no units yet - add units first to assign tenants.</div>` : ""}
       </div>`;
     })
     .join("");
@@ -118,6 +118,7 @@ function renderTenantsList() {
       title: "No matches",
       desc: `No tenants match "${tenantsSearchTerm}".`,
     });
+    return;
   }
 
   el.innerHTML = `<div class="prop-grid">${propCards}</div>${unassignedBlock}${allBlock}`;
@@ -287,9 +288,9 @@ function openTenantModal() {
   openTenantModalForProperty(state.properties[0]._id);
 }
 
-// 
+//
 // EDIT TENANT MODAL
-// 
+//
 async function openEditTenantModal(tenant) {
   document.getElementById("modalTitle").textContent =
     `Edit Tenant - ${tenant.firstName} ${tenant.lastName}`;
@@ -383,9 +384,9 @@ async function openEditTenantModal(tenant) {
   document.getElementById("modal").classList.add("open");
 }
 
-// 
+//
 // DELETE TENANT
-// 
+//
 async function deleteTenant(id) {
   if (
     !confirm(
