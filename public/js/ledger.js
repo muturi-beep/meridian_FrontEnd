@@ -4,6 +4,9 @@
 
 const DEPOSIT_MONTHS = 0.5; // fallback: deposit = half of monthly rent
 
+// Types that are one-off services — they don't reduce rent or deposit balances.
+const NON_OBLIGATION_TYPES = ["water", "garbage", "service charge", "other"];
+
 function normPayType(t) {
   return String(t || "Rent")
     .trim()
@@ -105,6 +108,24 @@ function buildTenantLedger(tenant, allPayments) {
     const amt = Number(p.amount) || 0;
     const pDate = new Date(p.date || new Date());
     const pType = normPayType(p.type);
+
+    // Non-obligation types skip allocation entirely — they don't reduce rent/deposit.
+    if (NON_OBLIGATION_TYPES.includes(pType)) {
+      runningBalances.set(String(p._id), {
+        amount: amt,
+        dueUpTo: 0,
+        balanceBefore: 0,
+        balanceAfter: 0,
+        allocations: [
+          { label: p.type || "Other", amount: amt, type: p.type || "Other" },
+        ],
+        credit: 0,
+        type: p.type || "Other",
+        date: p.date,
+        reference: p.reference,
+      });
+      continue;
+    }
 
     const dueObls = obligations.filter((o) => new Date(o.date) <= pDate);
     const dueUpTo = dueObls.reduce((s, o) => s + o.amount, 0);
@@ -237,6 +258,21 @@ function simulateAllocation(ledger, amount, type) {
   const obligations = ledger.obligations.map((o) => ({ ...o }));
   const amt = Number(amount) || 0;
   const t = normPayType(type);
+
+  // Non-obligation types don't affect the simulated balance.
+  if (NON_OBLIGATION_TYPES.includes(t)) {
+    return {
+      allocations: [
+        { label: type || "Other", amount: amt, type: type || "Other" },
+      ],
+      newBalance: ledger.balance,
+      newDepositPaid: ledger.depositPaid,
+      newRentPaid: ledger.rentPaid,
+      newDepositBalance: ledger.depositBalance,
+      newRentBalance: ledger.rentBalance,
+      credit: 0,
+    };
+  }
 
   const rentObls = obligations.filter((o) => o.type === "Rent");
   const depositObl = obligations.find((o) => o.type === "Deposit");
