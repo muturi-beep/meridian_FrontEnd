@@ -8,6 +8,7 @@ const Unit = require("../models/Unit");
 const Property = require("../models/Property");
 const { requireAuth, requireRole, orgScope } = require("../middleware/auth");
 const { MANAGEMENT } = require("../utils/roles");
+const Payment = require("../models/Payment");
 
 const router = express.Router();
 
@@ -58,13 +59,12 @@ router.post(
         unitId,
         rent,
         deposit,
+        depositAlreadyPaid,
       } = req.body;
       if (!firstName || !lastName || !email || !password)
-        return res
-          .status(400)
-          .json({
-            message: "First name, last name, email and password are required.",
-          });
+        return res.status(400).json({
+          message: "First name, last name, email and password are required.",
+        });
       if (password.length < 8)
         return res
           .status(400)
@@ -95,11 +95,9 @@ router.post(
             .status(400)
             .json({ message: "Selected unit was not found." });
         if (property && unit.property && unit.property !== property.name)
-          return res
-            .status(400)
-            .json({
-              message: "Selected unit does not belong to the chosen property.",
-            });
+          return res.status(400).json({
+            message: "Selected unit does not belong to the chosen property.",
+          });
         if (unit.tenantId)
           return res
             .status(409)
@@ -116,7 +114,15 @@ router.post(
         Number.isFinite(parsedDeposit) && parsedDeposit > 0
           ? parsedDeposit
           : null;
-
+      // If the deposit was already paid before onboarding, record it as a historical
+      // Deposit payment so it shows in the ledger as "paid" and any refund history is intact.
+      const DEPOSIT_MONTHS = 0.5;
+      const effectiveRent = rentValue || 0;
+      const effectiveDeposit =
+        depositValue || Math.round(effectiveRent * DEPOSIT_MONTHS);
+      const shouldRecordHistoricalDeposit =
+        String(depositAlreadyPaid).toLowerCase() === "true" &&
+        effectiveDeposit > 0;
       const tenant = new User({
         organization: req.user.organizationId,
         firstName,
@@ -137,6 +143,34 @@ router.post(
         unit.status = "Occupied";
         await unit.save();
         assignedUnit = unit;
+
+        // Record the pre-paid deposit as a historical transaction.
+        if (shouldRecordHistoricalDeposit) {
+          try {
+            const { nextReceiptNumber } = require("../utils/receiptNumber");
+            const receiptNumber = await nextReceiptNumber(
+              req.user.organizationId,
+            );
+            await Payment.create({
+              organization: req.user.organizationId,
+              receiptNumber,
+              tenant: `${firstName} ${lastName}`.trim(),
+              tenantId: tenant._id,
+              property: unit?.property || "",
+              unit: unit?.name || "",
+              amount: effectiveDeposit,
+              type: "Deposit",
+              status: "Paid",
+              method: "Other",
+              date: new Date(),
+              reference: "Pre-existing deposit",
+              note: "Recorded at tenant onboarding",
+            });
+          } catch (e) {
+            console.error("Could not record historical deposit:", e.message);
+            // Non-fatal — tenant was created. Let the client know.
+          }
+        }
       }
 
       const safe = tenant.toObject();
@@ -217,11 +251,9 @@ router.put(
               desiredUnit.tenantId &&
               String(desiredUnit.tenantId) !== String(tenant._id)
             ) {
-              return res
-                .status(409)
-                .json({
-                  message: `Unit ${desiredUnit.name} is already occupied.`,
-                });
+              return res.status(409).json({
+                message: `Unit ${desiredUnit.name} is already occupied.`,
+              });
             }
             desiredUnit.tenantId = tenant._id;
             desiredUnit.tenant =

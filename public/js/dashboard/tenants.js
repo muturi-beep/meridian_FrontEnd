@@ -198,6 +198,17 @@ async function openTenantModalForProperty(propertyId) {
           <input type="number" name="deposit" min="0" placeholder="Defaults to half of rent"/>
         </div>
       </div>
+      <div class="field" style="flex-direction:row;align-items:center;gap:10px;margin-top:4px">
+        <input
+          type="checkbox"
+          name="depositAlreadyPaid"
+          id="depositAlreadyPaid"
+          style="width:18px !important;height:18px !important;min-width:18px;max-width:18px;margin:0;flex-shrink:0;cursor:pointer;appearance:auto !important;-webkit-appearance:checkbox !important;opacity:1 !important;visibility:visible !important;display:inline-block !important"
+        />
+        <label for="depositAlreadyPaid" style="margin:0;text-transform:none;font-size:13px;letter-spacing:0;cursor:pointer;user-select:none">
+          Deposit already paid <span style="color:var(--t2);font-weight:400">(for existing tenants — records as a historical transaction)</span>
+        </label>
+      </div>
       <div class="field">
         <label>Temporary Password * (min 8 chars - tenant can change later)</label>
         <input type="text" name="password" required minlength="8" value="Welcome${Math.floor(1000 + Math.random() * 9000)}"/>
@@ -246,6 +257,8 @@ async function openTenantModalForProperty(propertyId) {
       rent: Number(form.querySelector('[name="rent"]')?.value) || undefined,
       deposit:
         Number(form.querySelector('[name="deposit"]')?.value) || undefined,
+      depositAlreadyPaid:
+        form.querySelector('[name="depositAlreadyPaid"]')?.checked === true,
     };
     if (
       !payload.firstName ||

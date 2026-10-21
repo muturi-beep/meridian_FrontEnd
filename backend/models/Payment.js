@@ -26,6 +26,7 @@ const paymentSchema = new mongoose.Schema({
   date: { type: Date, default: Date.now },
   reference: { type: String, default: "" },
   createdAt: { type: Date, default: Date.now },
+  note: { type: String, default: "" },
 });
 
 module.exports = mongoose.model("Payment", paymentSchema);
