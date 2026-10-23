@@ -611,7 +611,7 @@ async function openPaymentModal(payment = null, preset = null) {
       </div>
       <div class="field"><label>Type</label>
         <select name="type" onchange="updatePaymentPreview()">
-          ${["Rent", "Deposit", "Service Charge", "Other"].map((t) => `<option ${payment?.type === t ? "selected" : ""}>${t}</option>`).join("")}
+          ${["Rent", "Deposit", "Water", "Garbage", "Service Charge", "Other"].map((t) => `<option ${payment?.type === t ? "selected" : ""}>${t}</option>`).join("")}
         </select>
       </div>
     </div>
@@ -891,7 +891,16 @@ function openMpesaPaymentModal() {
         <option value="Deposit" ${defaultType === "Deposit" ? "selected" : ""}>
           Deposit${depositBalance <= 0 ? " (fully paid)" : " - " + fmtMoney(depositBalance) + " owed"}
         </option>
+        <option value="Water">Water</option>
+        <option value="Garbage">Garbage</option>
+        <option value="Service Charge">Service Charge</option>
+        <option value="Other">Other</option>
       </select>
+    </div>
+
+    <div class="field" id="otherDescriptionField" style="display:none">
+      <label>Description of "Other" charge</label>
+      <input type="text" name="otherDescription" placeholder="e.g. Parking fee, Security deposit refund" />
     </div>
 
     <div class="field">
@@ -917,13 +926,22 @@ function openMpesaPaymentModal() {
     const phone = form.querySelector('[name="phone"]').value.trim();
     const amount = Number(form.querySelector('[name="amount"]').value);
     const paymentType = form.querySelector('[name="paymentType"]').value;
+    const otherDesc =
+      form.querySelector('[name="otherDescription"]')?.value.trim() || "";
 
     if (!phone) throw new Error("Please enter your M-Pesa phone number.");
     if (!amount || amount <= 0) throw new Error("Please enter a valid amount.");
+    if (paymentType === "Other" && !otherDesc)
+      throw new Error('Please describe the "Other" charge.');
 
     await api("/api/mpesa/stkpush", {
       method: "POST",
-      body: JSON.stringify({ phone, amount, paymentType }),
+      body: JSON.stringify({
+        phone,
+        amount,
+        paymentType,
+        otherDescription: paymentType === "Other" ? otherDesc : undefined,
+      }),
     });
 
     toast("Check your phone for the M-Pesa prompt...", "info");
@@ -941,7 +959,17 @@ function openMpesaPaymentModal() {
 // Auto-fill amount when Payment For changes
 function setMpesaAmount(sel, rentBal, depositBal) {
   const amt = document.querySelector('#modalForm [name="amount"]');
+  const otherField = document.getElementById("otherDescriptionField");
+
+  // Show/hide the "Other" description field
+  if (otherField) {
+    otherField.style.display = sel.value === "Other" ? "" : "none";
+  }
+
+  // Auto-fill amount ONLY for Rent and Deposit (they're the tracked obligations)
   if (!amt) return;
-  const val = sel.value === "Rent" ? rentBal : depositBal;
-  if (val > 0) amt.value = val;
+  if (sel.value === "Rent") amt.value = rentBal > 0 ? rentBal : "";
+  else if (sel.value === "Deposit")
+    amt.value = depositBal > 0 ? depositBal : "";
+  else amt.value = ""; // Water, Garbage, Service Charge, Other → user enters amount manually
 }

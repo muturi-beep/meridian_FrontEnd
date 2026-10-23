@@ -31,12 +31,32 @@ router.post(
           .status(400)
           .json({ message: "Amount must be greater than zero." });
 
-      // Validate payment type — must be Rent or Deposit
+      // Validate payment type — expanded set includes one-off services
+      const ALLOWED_TYPES = [
+        "Rent",
+        "Deposit",
+        "Water",
+        "Garbage",
+        "Service Charge",
+        "Other",
+      ];
       const type = String(paymentType || "Rent").trim();
-      if (!["Rent", "Deposit"].includes(type)) {
+      if (!ALLOWED_TYPES.includes(type)) {
+        return res.status(400).json({
+          message: `Payment type must be one of: ${ALLOWED_TYPES.join(", ")}`,
+        });
+      }
+
+      const otherDescription =
+        paymentType === "Other"
+          ? String(req.body.otherDescription || "")
+              .trim()
+              .slice(0, 100)
+          : "";
+      if (paymentType === "Other" && !otherDescription) {
         return res
           .status(400)
-          .json({ message: "Payment type must be Rent or Deposit." });
+          .json({ message: 'A description is required for "Other" payments.' });
       }
 
       const me = await User.findById(req.user.id);
@@ -65,6 +85,7 @@ router.post(
         status: "Pending",
         method: "M-Pesa",
         date: new Date(),
+        note: otherDescription || undefined,
       });
       await pending.save();
 

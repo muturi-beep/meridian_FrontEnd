@@ -1,6 +1,5 @@
-// MongoDB connection — cached so serverless (Vercel) reuses one connection.
-
-const mongoose = require('mongoose');
+// backend/config/db.js
+const mongoose = require("mongoose");
 
 let cached = global._mongooseCache;
 if (!cached) {

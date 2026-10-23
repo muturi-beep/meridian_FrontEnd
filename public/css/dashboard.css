@@ -2057,3 +2057,19 @@ th.actions {
     grid-template-columns: 1fr;
   }
 }
+
+/* Ensure checkboxes are visible and clickable */
+input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  max-width: 18px;
+  flex-shrink: 0;
+  margin: 0;
+  cursor: pointer;
+  appearance: auto;
+  -webkit-appearance: checkbox;
+  opacity: 1;
+  visibility: visible;
+  accent-color: var(--copper);
+}

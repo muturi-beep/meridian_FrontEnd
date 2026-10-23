@@ -52,6 +52,21 @@ router.post(
           .status(400)
           .json({ message: "A tenant name or tenantId is required." });
 
+      const ALLOWED_TYPES = [
+        "Rent",
+        "Deposit",
+        "Water",
+        "Garbage",
+        "Service Charge",
+        "Other",
+      ];
+      const paymentType = String(req.body.type || "Rent").trim();
+      if (!ALLOWED_TYPES.includes(paymentType)) {
+        return res.status(400).json({
+          message: `Invalid payment type. Must be one of: ${ALLOWED_TYPES.join(", ")}`,
+        });
+      }
+
       const receiptNumber = await nextReceiptNumber(req.user.organizationId);
 
       const payment = new Payment({
@@ -62,7 +77,7 @@ router.post(
         property: req.body.property || "",
         unit: req.body.unit || "",
         amount: req.body.amount,
-        type: req.body.type || "Rent",
+        type: paymentType,
         status: req.body.status || "Paid",
         method: req.body.method || "M-Pesa",
         date: req.body.date || new Date(),
