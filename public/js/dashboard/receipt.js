@@ -53,23 +53,39 @@ function computeReceiptBalances(payment) {
 
   const amount = Number(payment.amount) || 0;
 
-  // Sort all paid payments oldest → newest
-  const sorted = [...ledger.payments].sort((a, b) => {
-    const da = new Date(a.date || 0).getTime() || 0;
-    const db = new Date(b.date || 0).getTime() || 0;
-    return da - db;
-  });
-
-  // Sum of amounts applied before this payment
-  let paidBefore = 0;
-  for (const p of sorted) {
-    if (String(p._id) === String(payment._id)) break;
-    paidBefore += Number(p.amount) || 0;
+  // Non-obligation payments (Water, Garbage, Service Charge, Other)
+  // do NOT affect the rent/deposit balance. Both "before" and "after"
+  // should show the same number: the current outstanding balance.
+  const type = String(payment.type || "Rent")
+    .trim()
+    .toLowerCase();
+  const NON_OBLIGATION = ["water", "garbage", "service charge", "other"];
+  if (NON_OBLIGATION.includes(type)) {
+    // Return the tenant's current live balance for both sides
+    const currentBalance = ledger.balance || 0;
+    return {
+      before: currentBalance,
+      after: currentBalance,
+      isNonObligation: true,
+    };
   }
 
-  const before = Math.max(0, ledger.totalDue - paidBefore);
-  const after = Math.max(0, before - amount);
-  return { before, after };
+  // For Rent / Deposit — compute running balance from actual obligations
+  const snap = ledger.runningBalances.get(String(payment._id));
+  if (snap) {
+    return {
+      before: snap.balanceBefore || 0,
+      after: snap.balanceAfter || 0,
+      isNonObligation: false,
+    };
+  }
+
+  // Fallback (should not usually hit)
+  return {
+    before: ledger.balance || 0,
+    after: Math.max(0, (ledger.balance || 0) - amount),
+    isNonObligation: false,
+  };
 }
 
 function buildReceiptHTML(payment) {
@@ -91,8 +107,11 @@ function buildReceiptHTML(payment) {
     : "—";
 
   const amount = Number(payment.amount) || 0;
-  const { before: balanceBefore, after: balanceAfter } =
-    computeReceiptBalances(payment);
+  const {
+    before: balanceBefore,
+    after: balanceAfter,
+    isNonObligation,
+  } = computeReceiptBalances(payment);
   const allocations = snapshot?.allocations || [];
   const accountNowClear = ledger ? ledger.balance <= 0 : false;
 
@@ -146,7 +165,9 @@ function buildReceiptHTML(payment) {
   }
 
   let footMessage;
-  if (balanceAfter > 0) {
+  if (isNonObligation) {
+    footMessage = `This ${payment.type || "extra charge"} payment has been received in full.<br>It does not affect your rent or deposit balance.`;
+  } else if (balanceAfter > 0) {
     if (accountNowClear) {
       footMessage = `This receipt was issued with <strong>${fmtMoney(balanceAfter)}</strong> outstanding.<br>The account has since been <strong style="color:#1a9e6a">fully settled</strong>.`;
     } else {
@@ -189,22 +210,38 @@ function buildReceiptHTML(payment) {
           <div class="v">${fmtMoney(amount)}</div>
         </div>
 
-        <div class="receipt-balance">
-          <div class="col">
-            <div class="lbl">Balance Before</div>
-            <div class="val ${balanceBefore > 0 ? "warn" : "ok"}">${fmtMoney(balanceBefore)}</div>
-          </div>
-          <div class="arrow">→</div>
-          <div class="col">
-            <div class="lbl">Balance After</div>
-            <div class="val ${balanceAfter > 0 ? "warn" : "ok"}">${fmtMoney(balanceAfter)}</div>
             ${
-              balanceAfter > 0 && accountNowClear
-                ? `<div style="font-size:10px;color:#1a9e6a;font-weight:700;margin-top:6px">✓ Since cleared</div>`
-                : ""
-            }
-          </div>
+              isNonObligation
+                ? `
+      <div style="background:#f7f8fa;border-radius:10px;padding:16px;text-align:center;margin-bottom:18px">
+        <div style="font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:#999;font-weight:700;margin-bottom:6px">Extra Charge — Separate from Rent/Deposit</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:#1a1a1a">
+          Balance: ${fmtMoney(balanceBefore)} ${balanceBefore <= 0 ? "(Paid in full)" : "(Rent/Deposit owing)"}
         </div>
+        <div style="font-size:11px;color:#777;margin-top:6px">
+          This ${esc(payment.type || "charge")} payment does not affect your rent or deposit balance.
+        </div>
+      </div>
+    `
+                : `
+      <div class="receipt-balance">
+        <div class="col">
+          <div class="lbl">Balance Before</div>
+          <div class="val ${balanceBefore > 0 ? "warn" : "ok"}">${fmtMoney(balanceBefore)}</div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="col">
+          <div class="lbl">Balance After</div>
+          <div class="val ${balanceAfter > 0 ? "warn" : "ok"}">${fmtMoney(balanceAfter)}</div>
+          ${
+            balanceAfter > 0 && accountNowClear
+              ? `<div style="font-size:10px;color:#1a9e6a;font-weight:700;margin-top:6px">✓ Since cleared</div>`
+              : ""
+          }
+        </div>
+      </div>
+    `
+            }
 
         ${allocRows}
         ${summaryBlock}
@@ -258,8 +295,11 @@ function downloadReceiptPDF(payment) {
     : "—";
 
   const amount = Number(payment.amount) || 0;
-  const { before: balanceBefore, after: balanceAfter } =
-    computeReceiptBalances(payment);
+  const {
+    before: balanceBefore,
+    after: balanceAfter,
+    isNonObligation,
+  } = computeReceiptBalances(payment);
   const accountNowClear = ledger ? ledger.balance <= 0 : false;
 
   // Status label
@@ -350,48 +390,72 @@ function downloadReceiptPDF(payment) {
   y += 84;
 
   // Balance before → after
-  const halfW = (W - 80) / 2 - 10;
-  doc.setFillColor(247, 248, 250);
-  doc.roundedRect(40, y, halfW, 56, 6, 6, "F");
-  doc.roundedRect(40 + halfW + 20, y, halfW, 56, 6, 6, "F");
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8.5);
-  doc.setTextColor(150, 150, 150);
-  doc.text("BALANCE BEFORE", 40 + halfW / 2, y + 18, { align: "center" });
-  doc.text("BALANCE AFTER", 40 + halfW + 20 + halfW / 2, y + 18, {
-    align: "center",
-  });
-
-  doc.setFont("times", "bold");
-  doc.setFontSize(16);
-  doc.setTextColor(
-    balanceBefore > 0 ? 199 : 26,
-    balanceBefore > 0 ? 126 : 158,
-    balanceBefore > 0 ? 20 : 106,
-  );
-  doc.text(fmtMoney(balanceBefore), 40 + halfW / 2, y + 42, {
-    align: "center",
-  });
-
-  doc.setTextColor(
-    balanceAfter > 0 ? 199 : 26,
-    balanceAfter > 0 ? 126 : 158,
-    balanceAfter > 0 ? 20 : 106,
-  );
-  doc.text(fmtMoney(balanceAfter), 40 + halfW + 20 + halfW / 2, y + 42, {
-    align: "center",
-  });
-
-  if (balanceAfter > 0 && accountNowClear) {
+  // Balance section (or "Extra Charge" note for non-obligation payments)
+  if (isNonObligation) {
+    // Non-obligation: just note it doesn't affect balance
+    doc.setFillColor(247, 248, 250);
+    doc.roundedRect(40, y, W - 80, 56, 6, 6, "F");
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
-    doc.setTextColor(26, 158, 106);
-    doc.text("✓ SINCE CLEARED", 40 + halfW + 20 + halfW / 2, y + 56, {
+    doc.setFontSize(8.5);
+    doc.setTextColor(150, 150, 150);
+    doc.text("EXTRA CHARGE - SEPARATE FROM RENT/DEPOSIT", W / 2, y + 18, {
       align: "center",
     });
+    doc.setFont("times", "bold");
+    doc.setFontSize(16);
+    doc.setTextColor(
+      balanceBefore > 0 ? 199 : 26,
+      balanceBefore > 0 ? 126 : 158,
+      balanceBefore > 0 ? 20 : 106,
+    );
+    doc.text(`Balance: ${fmtMoney(balanceBefore)}`, W / 2, y + 42, {
+      align: "center",
+    });
+    y += 72;
+  } else {
+    const halfW = (W - 80) / 2 - 10;
+    doc.setFillColor(247, 248, 250);
+    doc.roundedRect(40, y, halfW, 56, 6, 6, "F");
+    doc.roundedRect(40 + halfW + 20, y, halfW, 56, 6, 6, "F");
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(150, 150, 150);
+    doc.text("BALANCE BEFORE", 40 + halfW / 2, y + 18, { align: "center" });
+    doc.text("BALANCE AFTER", 40 + halfW + 20 + halfW / 2, y + 18, {
+      align: "center",
+    });
+
+    doc.setFont("times", "bold");
+    doc.setFontSize(16);
+    doc.setTextColor(
+      balanceBefore > 0 ? 199 : 26,
+      balanceBefore > 0 ? 126 : 158,
+      balanceBefore > 0 ? 20 : 106,
+    );
+    doc.text(fmtMoney(balanceBefore), 40 + halfW / 2, y + 42, {
+      align: "center",
+    });
+
+    doc.setTextColor(
+      balanceAfter > 0 ? 199 : 26,
+      balanceAfter > 0 ? 126 : 158,
+      balanceAfter > 0 ? 20 : 106,
+    );
+    doc.text(fmtMoney(balanceAfter), 40 + halfW + 20 + halfW / 2, y + 42, {
+      align: "center",
+    });
+
+    if (balanceAfter > 0 && accountNowClear) {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(8);
+      doc.setTextColor(26, 158, 106);
+      doc.text("✓ SINCE CLEARED", 40 + halfW + 20 + halfW / 2, y + 56, {
+        align: "center",
+      });
+    }
+    y += 80;
   }
-  y += 80;
 
   // Allocation table
   if (snapshot?.allocations?.length) {
