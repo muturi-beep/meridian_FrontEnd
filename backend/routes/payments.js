@@ -60,7 +60,9 @@ router.post(
         "Service Charge",
         "Other",
       ];
-      const paymentType = String(req.body.type || "Rent").trim();
+      const paymentType = String(
+        req.body.type || req.body.paymentType || "Rent",
+      ).trim();
       if (!ALLOWED_TYPES.includes(paymentType)) {
         return res.status(400).json({
           message: `Invalid payment type. Must be one of: ${ALLOWED_TYPES.join(", ")}`,
