@@ -324,18 +324,25 @@ function renderManagerPayments() {
             .toLowerCase(),
     );
     let balanceNote = "";
-    if (tenant) {
+    const isExtraCharge = [
+      "water",
+      "garbage",
+      "service charge",
+      "other",
+    ].includes(String(p.type || "").toLowerCase());
+
+    if (tenant && !isExtraCharge) {
       const ledger = buildTenantLedger(tenant, all);
       const snap = ledger.runningBalances.get(String(p._id));
       const accountNowClear = ledger.balance <= 0;
       if (snap && snap.balanceAfter > 0) {
         if (accountNowClear) {
-          balanceNote = `<div style="font-size:10.5px;color:var(--green);margin-top:3px">Was ${fmtMoney(snap.balanceAfter)} - since cleared</div>`;
+          balanceNote = `<div style="font-size:10.5px;color:var(--green);margin-top:3px">Was ${fmtMoney(snap.balanceAfter)} · ✓ since cleared</div>`;
         } else {
           balanceNote = `<div style="font-size:10.5px;color:var(--amber);margin-top:3px">Bal. after: ${fmtMoney(snap.balanceAfter)}</div>`;
         }
       } else if (snap && snap.balanceAfter === 0) {
-        balanceNote = `<div style="font-size:10.5px;color:var(--green);margin-top:3px">Settled up</div>`;
+        balanceNote = `<div style="font-size:10.5px;color:var(--green);margin-top:3px">✓ Settled up</div>`;
       }
     }
     return `<tr>

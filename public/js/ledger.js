@@ -41,9 +41,23 @@ function buildTenantLedger(tenant, allPayments) {
     .map((p, i) => ({ p, i }))
     .filter((x) => String(x.p.status || "").toLowerCase() === "paid")
     .sort((a, b) => {
-      const da = new Date(a.p.date || 0).getTime() || 0;
-      const db = new Date(b.p.date || 0).getTime() || 0;
-      return da - db || a.i - b.i;
+      // 1. THE BULLETPROOF WAY: Sort by Receipt Number (e.g. RCP-2026-0009 comes before RCP-2026-0013)
+      const ra = a.p.receiptNumber || "";
+      const rb = b.p.receiptNumber || "";
+      if (ra && rb && ra !== rb) {
+        return ra.localeCompare(rb);
+      }
+
+      // 2. Fallback: Sort by the date entered
+      const da = new Date(a.p.date || a.p.createdAt || 0).getTime() || 0;
+      const db = new Date(b.p.date || b.p.createdAt || 0).getTime() || 0;
+      if (da !== db) return da - db;
+
+      // 3. Fallback: Sort by exact creation time
+      return (
+        new Date(a.p.createdAt || 0).getTime() -
+        new Date(b.p.createdAt || 0).getTime()
+      );
     })
     .map((x) => x.p);
 
